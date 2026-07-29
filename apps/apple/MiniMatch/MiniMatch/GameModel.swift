@@ -18,9 +18,12 @@ final class GameModel {
     private(set) var myLockedPick: UInt64?
     private(set) var result: ResultPresentation?
     private(set) var isWorking = false
+    private(set) var isReconnecting = false
     private(set) var errorMessage = ""
     var isShowingError = false
+    private(set) var multiplayerIsRestricted = false
     var pickText = "2"
+    private var lastPresentedRound: UInt32?
 
     init(client: any GameClient) {
         self.client = client
@@ -40,28 +43,44 @@ final class GameModel {
     }
 
     @discardableResult
-    func createTable(name: String, displayName: String) async -> Bool {
+    func createTable(name: String, displayName: String, avatarID: String = "spark") async -> Bool {
+        guard !multiplayerIsRestricted else {
+            showError(String(localized: "Multiplayer is unavailable because of Screen Time settings."))
+            return false
+        }
         guard let name = nonempty(name), let displayName = nonempty(displayName) else {
             showError(String(localized: "Enter a table name and your name."))
             return false
         }
         return await loadSession {
-            try await client.createTable(name: name, displayName: displayName)
+            try await client.createTable(name: name, displayName: displayName, avatarID: avatarID)
         }
     }
 
     @discardableResult
-    func joinTable(code: String, displayName: String) async -> Bool {
+    func joinTable(code: String, displayName: String, avatarID: String = "spark") async -> Bool {
+        guard !multiplayerIsRestricted else {
+            showError(String(localized: "Multiplayer is unavailable because of Screen Time settings."))
+            return false
+        }
         guard let code = nonempty(code), let displayName = nonempty(displayName) else {
             showError(String(localized: "Enter a table code and your name."))
             return false
         }
         return await loadSession {
-            try await client.joinTable(code: code.uppercased(), displayName: displayName)
+            try await client.joinTable(
+                code: code.uppercased(),
+                displayName: displayName,
+                avatarID: avatarID
+            )
         }
     }
 
     func lockPick() async {
+        guard !multiplayerIsRestricted else {
+            showError(String(localized: "Multiplayer is unavailable because of Screen Time settings."))
+            return
+        }
         guard let table,
               let currentPlayerID,
               let roundNumber = table.currentRound?.number,
@@ -78,13 +97,17 @@ final class GameModel {
                 roundNumber: roundNumber,
                 pick: pick
             )
-            self.table = updated
+            guard self.table?.id == table.id else { return }
+            apply(updated)
             myLockedPick = pick
-            presentResult(from: updated, for: roundNumber)
         }
     }
 
     func revealRound() async {
+        guard !multiplayerIsRestricted else {
+            showError(String(localized: "Multiplayer is unavailable because of Screen Time settings."))
+            return
+        }
         guard let table,
               let currentPlayerID,
               let roundNumber = table.currentRound?.number
@@ -99,14 +122,43 @@ final class GameModel {
                 hostPlayerID: currentPlayerID,
                 roundNumber: roundNumber
             )
-            self.table = updated
-            presentResult(from: updated, for: roundNumber)
+            apply(updated)
+        }
+    }
+
+    func observeTable() async {
+        while !Task.isCancelled {
+            await refreshTable()
+            do {
+                try await Task.sleep(for: .seconds(1))
+            } catch {
+                return
+            }
+        }
+    }
+
+    func refreshTable() async {
+        guard let table else { return }
+        do {
+            apply(try await client.getTable(id: table.id))
+            isReconnecting = false
+        } catch is CancellationError {
+            return
+        } catch {
+            isReconnecting = true
+        }
+    }
+
+    func setMultiplayerRestricted(_ restricted: Bool) async {
+        multiplayerIsRestricted = restricted
+        if restricted, screen != .home {
+            await leaveTable()
         }
     }
 
     func nextRound() {
         guard table?.state == .active else {
-            leaveTable()
+            resetSession()
             return
         }
         result = nil
@@ -115,11 +167,29 @@ final class GameModel {
         screen = .lobby
     }
 
-    func leaveTable() {
+    func leaveTable() async {
+        guard let table, let currentPlayerID else {
+            resetSession()
+            return
+        }
+        if table.state == .finished {
+            resetSession()
+            return
+        }
+        await perform {
+            try await client.leaveTable(tableID: table.id, playerID: currentPlayerID)
+            guard self.table?.id == table.id else { return }
+            resetSession()
+        }
+    }
+
+    private func resetSession() {
         table = nil
         currentPlayerID = nil
         myLockedPick = nil
         result = nil
+        lastPresentedRound = nil
+        isReconnecting = false
         pickText = "2"
         screen = .home
     }
@@ -133,6 +203,7 @@ final class GameModel {
             currentPlayerID = session.playerID
             myLockedPick = nil
             result = nil
+            lastPresentedRound = session.table.lastResult?.roundNumber
             pickText = "2"
             screen = .lobby
             return true
@@ -143,12 +214,15 @@ final class GameModel {
     }
 
     private func perform(_ operation: () async throws -> Void) async {
+        let sessionID = table?.id
         isWorking = true
         defer { isWorking = false }
         do {
             try await operation()
         } catch {
-            showError(error.localizedDescription)
+            if table?.id == sessionID {
+                showError(error.localizedDescription)
+            }
         }
     }
 
@@ -167,6 +241,20 @@ final class GameModel {
             return
         }
         result = ResultPresentation(table: table, result: lastResult)
+        lastPresentedRound = roundNumber
         screen = .result
+    }
+
+    private func apply(_ updated: GameTable) {
+        guard updated.id == table?.id, updated.stateVersion >= (table?.stateVersion ?? 0) else {
+            return
+        }
+        table = updated
+        guard let roundNumber = updated.lastResult?.roundNumber,
+              roundNumber != lastPresentedRound
+        else {
+            return
+        }
+        presentResult(from: updated, for: roundNumber)
     }
 }

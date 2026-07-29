@@ -35,7 +35,14 @@ func (s *Service) CreateTable(ctx context.Context, request *connect.Request[mini
 		if err != nil {
 			return nil, rpcError(err)
 		}
-		table, err := game.NewTable(tableID, request.Msg.GetName(), strings.ToUpper(joinCode), actor, request.Msg.GetHostDisplayName())
+		table, err := game.NewTable(
+			tableID,
+			request.Msg.GetName(),
+			strings.ToUpper(joinCode),
+			actor,
+			request.Msg.GetHostDisplayName(),
+			request.Msg.GetHostAvatar(),
+		)
 		if err != nil {
 			return nil, rpcError(err)
 		}
@@ -63,7 +70,7 @@ func (s *Service) JoinTable(ctx context.Context, request *connect.Request[minima
 		return nil, rpcError(err)
 	}
 	table, err = s.tables.Update(ctx, table.ID, func(table *game.Table) error {
-		return table.Join(actor, request.Msg.GetDisplayName())
+		return table.Join(actor, request.Msg.GetDisplayName(), request.Msg.GetAvatar())
 	})
 	if err != nil {
 		return nil, rpcError(err)
@@ -72,6 +79,23 @@ func (s *Service) JoinTable(ctx context.Context, request *connect.Request[minima
 		Table:    toProto(table),
 		PlayerId: actor,
 	}), nil
+}
+
+func (s *Service) LeaveTable(ctx context.Context, request *connect.Request[minimatchv1.LeaveTableRequest]) (*connect.Response[minimatchv1.LeaveTableResponse], error) {
+	actor, err := actorID(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if request.Msg.GetPlayerId() != "" && request.Msg.GetPlayerId() != actor {
+		return nil, connect.NewError(connect.CodePermissionDenied, errors.New("player ID does not match authenticated user"))
+	}
+	table, err := s.tables.Update(ctx, request.Msg.GetTableId(), func(table *game.Table) error {
+		return table.Leave(actor)
+	})
+	if err != nil {
+		return nil, rpcError(err)
+	}
+	return connect.NewResponse(&minimatchv1.LeaveTableResponse{Table: toProto(table)}), nil
 }
 
 func (s *Service) LockPick(ctx context.Context, request *connect.Request[minimatchv1.LockPickRequest]) (*connect.Response[minimatchv1.LockPickResponse], error) {
@@ -166,6 +190,7 @@ func toProto(table *game.Table) *minimatchv1.Table {
 		response.Players = append(response.Players, &minimatchv1.Player{
 			Id:          player.ID,
 			DisplayName: player.Name,
+			Avatar:      player.Avatar,
 			Wins:        player.Score,
 			Locked:      player.Locked,
 		})

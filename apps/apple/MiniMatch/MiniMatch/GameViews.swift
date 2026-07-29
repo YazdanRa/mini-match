@@ -1,24 +1,29 @@
 import AuthenticationServices
 import SwiftUI
+import UIKit
 
 enum MiniMatchColors {
-    static let background = Color(red: 0.99, green: 0.97, blue: 0.92)
-    static let surface = Color.white.opacity(0.78)
+    static let background = Color(uiColor: .systemGroupedBackground)
+    static let surface = Color(uiColor: .secondarySystemGroupedBackground)
+    static let ink = Color.primary
     static let navy = Color(red: 0.0, green: 0.15, blue: 0.36)
     static let blue = Color(red: 0.04, green: 0.29, blue: 0.76)
-    static let coral = Color(red: 0.97, green: 0.31, blue: 0.27)
-    static let coralText = Color(red: 0.68, green: 0.16, blue: 0.13)
+    static let blueText = Color(uiColor: .systemBlue)
+    static let coral = Color(red: 0.71, green: 0.18, blue: 0.16)
+    static let coralBrand = Color(uiColor: .systemRed)
+    static let coralText = Color(uiColor: .systemRed)
 }
 
 private struct PrimaryButtonStyle: ButtonStyle {
     let color: Color
+    @Environment(\.isEnabled) private var isEnabled
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.headline)
             .foregroundStyle(.white)
             .frame(maxWidth: .infinity, minHeight: 56)
-            .background(color.opacity(configuration.isPressed ? 0.78 : 1))
+            .background(color.opacity(!isEnabled ? 0.45 : configuration.isPressed ? 0.78 : 1))
             .clipShape(.rect(cornerRadius: 18))
             .scaleEffect(configuration.isPressed ? 0.98 : 1)
     }
@@ -30,11 +35,13 @@ private struct BrandHeader: View {
     var body: some View {
         VStack(spacing: compact ? -6 : -10) {
             Text("Mini")
-                .foregroundStyle(MiniMatchColors.coral)
+                .foregroundStyle(MiniMatchColors.coralBrand)
             Text("Match")
-                .foregroundStyle(MiniMatchColors.blue)
+                .foregroundStyle(MiniMatchColors.blueText)
         }
-        .font(.system(size: compact ? 38 : 58, weight: .black, design: .rounded))
+        .font(compact ? .title : .largeTitle)
+        .fontWeight(.black)
+        .fontDesign(.rounded)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("Mini Match")
     }
@@ -42,29 +49,33 @@ private struct BrandHeader: View {
 
 struct HomeView: View {
     let model: GameModel
+    let multiplayerIsUnavailable: Bool
+    let multiplayerIsRestricted: Bool
+    @Environment(\.colorScheme) private var colorScheme
     @State private var entryMode: EntryMode?
     @State private var appleSignIn = AppleSignInModel()
 
     var body: some View {
-        VStack(spacing: 0) {
-            Spacer()
+        ScrollView {
+            VStack(spacing: 28) {
+                BrandHeader()
 
-            BrandHeader()
+                Text("Small game. Big fun.")
+                    .font(.title3.bold())
+                    .foregroundStyle(MiniMatchColors.ink)
 
-            Text("Small game. Big fun.")
-                .font(.title3.bold())
-                .foregroundStyle(MiniMatchColors.navy)
-                .padding(.top, 22)
+                Text("Pick a non-negative whole number. Lowest number picked by only one player wins.")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
 
-            Spacer()
-
-            VStack(spacing: 18) {
                 Button {
                     entryMode = .create
                 } label: {
                     Label("Create a table", systemImage: "person.3.fill")
                 }
                 .buttonStyle(PrimaryButtonStyle(color: MiniMatchColors.blue))
+                .disabled(multiplayerIsUnavailable)
 
                 Button {
                     entryMode = .join
@@ -72,12 +83,25 @@ struct HomeView: View {
                     Label("Join a table", systemImage: "person.2.fill")
                 }
                 .buttonStyle(PrimaryButtonStyle(color: MiniMatchColors.coral))
+                .disabled(multiplayerIsUnavailable)
+
+                if multiplayerIsRestricted {
+                    Label(
+                        "Multiplayer is unavailable because of Screen Time settings.",
+                        systemImage: "lock.fill"
+                    )
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+                } else if multiplayerIsUnavailable {
+                    ProgressView("Checking Game Center…")
+                }
 
                 if appleSignIn.isSignedIn {
                     VStack(spacing: 10) {
                         Label("Signed in with Apple", systemImage: "checkmark.circle.fill")
                             .font(.subheadline.bold())
-                            .foregroundStyle(MiniMatchColors.navy)
+                            .foregroundStyle(MiniMatchColors.ink)
                             .accessibilityLabel("Signed in with Apple")
 
                         if appleSignIn.isAwaitingDeletionAuthorization {
@@ -91,18 +115,21 @@ struct HomeView: View {
                                 onRequest: appleSignIn.prepareDeletion,
                                 onCompletion: appleSignIn.completeDeletion
                             )
-                            .signInWithAppleButtonStyle(.black)
+                            .signInWithAppleButtonStyle(
+                                colorScheme == .dark ? .whiteOutline : .black
+                            )
                             .frame(height: 52)
                             .clipShape(.rect(cornerRadius: 14))
 
                             Button("Cancel deletion", role: .cancel) {
                                 appleSignIn.cancelDeletionAuthorization()
                             }
+                            .frame(minHeight: 44)
                         } else {
                             Button("Delete account", role: .destructive) {
                                 appleSignIn.isConfirmingDeletion = true
                             }
-                            .font(.caption)
+                            .frame(minHeight: 44)
                         }
                     }
                 } else {
@@ -111,24 +138,30 @@ struct HomeView: View {
                         onRequest: appleSignIn.prepare,
                         onCompletion: appleSignIn.complete
                     )
-                    .signInWithAppleButtonStyle(.black)
+                    .signInWithAppleButtonStyle(
+                        colorScheme == .dark ? .whiteOutline : .black
+                    )
                     .frame(height: 52)
                     .clipShape(.rect(cornerRadius: 14))
                     .disabled(appleSignIn.isWorking)
 
-                    Text("Sign in to keep this player identity with your Apple account.")
+                    Text("Sign in to secure this player account with your Apple account.")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                         .multilineTextAlignment(.center)
                 }
             }
-
-            Spacer()
+            .frame(maxWidth: 480)
+            .padding(.horizontal, 28)
+            .padding(.vertical, 32)
+            .frame(maxWidth: .infinity)
         }
-        .padding(.horizontal, 28)
-        .padding(.vertical, 24)
         .sheet(item: $entryMode) { mode in
-            TableEntrySheet(mode: mode, model: model)
+            TableEntrySheet(
+                mode: mode,
+                model: model,
+                multiplayerIsRestricted: multiplayerIsRestricted
+            )
         }
         .alert("Apple sign-in failed", isPresented: $appleSignIn.isShowingError) {
             Button("OK") {}
@@ -164,12 +197,15 @@ private enum EntryMode: String, Identifiable {
 private struct TableEntrySheet: View {
     let mode: EntryMode
     let model: GameModel
+    let multiplayerIsRestricted: Bool
 
     @Environment(\.dismiss) private var dismiss
     @State private var tableName = "Friday Mini Match"
     @State private var tableCode = ""
     @State private var displayName = ""
+    @State private var avatarID = PlayerAvatar.spark.rawValue
     @State private var errorMessage: String?
+    @AccessibilityFocusState private var errorIsFocused: Bool
 
     var body: some View {
         NavigationStack {
@@ -187,27 +223,53 @@ private struct TableEntrySheet: View {
                     .textContentType(.name)
                     .submitLabel(.go)
 
+                Picker("Avatar", selection: $avatarID) {
+                    ForEach(PlayerAvatar.allCases) { avatar in
+                        Text("\(avatar.glyph) \(avatar.rawValue.capitalized)")
+                            .tag(avatar.rawValue)
+                    }
+                }
+
                 if let errorMessage {
                     Text(errorMessage)
                         .foregroundStyle(MiniMatchColors.coralText)
+                        .accessibilityFocused($errorIsFocused)
                 }
 
-                Button(mode == .create ? "Create table" : "Join table") {
+                Button {
                     Task {
                         let succeeded = if mode == .create {
-                            await model.createTable(name: tableName, displayName: displayName)
+                            await model.createTable(
+                                name: tableName,
+                                displayName: displayName,
+                                avatarID: avatarID
+                            )
                         } else {
-                            await model.joinTable(code: tableCode, displayName: displayName)
+                            await model.joinTable(
+                                code: tableCode,
+                                displayName: displayName,
+                                avatarID: avatarID
+                            )
                         }
                         if succeeded {
                             dismiss()
                         } else {
                             errorMessage = model.errorMessage
                             model.isShowingError = false
+                            errorIsFocused = true
                         }
                     }
+                } label: {
+                    if model.isWorking {
+                        HStack {
+                            ProgressView()
+                            Text(mode == .create ? "Creating…" : "Joining…")
+                        }
+                    } else {
+                        Text(mode == .create ? "Create table" : "Join table")
+                    }
                 }
-                .disabled(model.isWorking)
+                .disabled(model.isWorking || multiplayerIsRestricted)
             }
             .scrollContentBackground(.hidden)
             .background(MiniMatchColors.background)
@@ -218,9 +280,11 @@ private struct TableEntrySheet: View {
                     Button("Cancel") {
                         dismiss()
                     }
+                    .disabled(model.isWorking)
                 }
             }
         }
+        .interactiveDismissDisabled(model.isWorking)
         .presentationDetents([.medium])
         .presentationBackground(MiniMatchColors.background)
     }
@@ -228,14 +292,26 @@ private struct TableEntrySheet: View {
 
 struct LobbyView: View {
     let model: GameModel
+    let canShareInvites: Bool
+    @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
         ScrollView {
             VStack(spacing: 26) {
                 HStack {
-                    Button("Leave", systemImage: "chevron.left") {
-                        model.leaveTable()
+                    Button {
+                        Task {
+                            await model.leaveTable()
+                        }
+                    } label: {
+                        if model.isWorking {
+                            ProgressView()
+                        } else {
+                            Label("Leave", systemImage: "chevron.left")
+                        }
                     }
+                    .frame(minHeight: 44)
+                    .disabled(model.isWorking)
                     Spacer()
                     BrandHeader(compact: true)
                     Spacer()
@@ -250,21 +326,39 @@ struct LobbyView: View {
                         Text("Round \(table.currentRound?.number ?? 1)")
                             .foregroundStyle(.secondary)
                     }
-                    .foregroundStyle(MiniMatchColors.navy)
+                    .foregroundStyle(MiniMatchColors.ink)
 
                     PlayersSection(table: table, currentPlayerID: model.currentPlayerID)
+
+                    if model.isReconnecting {
+                        Label("Reconnecting to the table…", systemImage: "wifi.exclamationmark")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                    }
+
                     PickSection(model: model)
 
                     if model.isHost {
                         HostActionSection(model: model)
                     }
 
-                    InviteSection(table: table)
+                    InviteSection(table: table, canShare: canShareInvites)
                 }
             }
             .padding(20)
         }
         .scrollDismissesKeyboard(.interactively)
+        .task(id: scenePhase) {
+            guard scenePhase == .active else { return }
+            await model.observeTable()
+        }
+        .onChange(of: model.table?.eventSequence) {
+            guard let table = model.table else { return }
+            UIAccessibility.post(
+                notification: .announcement,
+                argument: "\(table.players.count) players. \(table.players.filter(\.isLocked).count) locked in."
+            )
+        }
     }
 }
 
@@ -279,7 +373,7 @@ private struct PlayersSection: View {
                     .font(.headline)
                 Spacer()
                 Text("\(table.players.filter(\.isLocked).count) locked")
-                    .foregroundStyle(MiniMatchColors.blue)
+                    .foregroundStyle(MiniMatchColors.blueText)
             }
 
             ScrollView(.horizontal) {
@@ -293,44 +387,47 @@ private struct PlayersSection: View {
                                           : MiniMatchColors.coral.opacity(0.84))
                                     .frame(width: 62, height: 62)
                                     .overlay {
-                                        Text(initials(for: player.displayName))
+                                        Text(player.avatarGlyph)
                                             .font(.title2.bold())
-                                            .foregroundStyle(.white)
+                                            .accessibilityHidden(true)
                                     }
 
                                 Image(systemName: player.isLocked ? "checkmark.circle.fill" : "ellipsis.circle.fill")
-                                    .foregroundStyle(player.isLocked ? MiniMatchColors.blue : .secondary)
+                                    .foregroundStyle(player.isLocked ? MiniMatchColors.blueText : .secondary)
                                     .background(Circle().fill(MiniMatchColors.background))
                             }
 
                             Text(player.displayName)
                                 .font(.subheadline.bold())
-                                .lineLimit(1)
+                                .lineLimit(2)
+                                .multilineTextAlignment(.center)
+
+                            if player.id == currentPlayerID {
+                                Text("You")
+                                    .font(.caption2.bold())
+                                    .padding(.horizontal, 7)
+                                    .padding(.vertical, 2)
+                                    .foregroundStyle(.white)
+                                    .background(MiniMatchColors.blue, in: Capsule())
+                            }
+
                             Text(player.id == table.hostPlayerID ? "Host" : player.isLocked ? "Locked" : "Joined")
                                 .font(.caption)
                                 .foregroundStyle(player.id == table.hostPlayerID ? MiniMatchColors.coralText : .secondary)
                         }
-                        .frame(width: 74)
+                        .frame(width: 88)
                         .accessibilityElement(children: .ignore)
                         .accessibilityLabel(
-                            "\(player.displayName), \(player.id == table.hostPlayerID ? "host, " : "")\(player.isLocked ? "locked" : "not locked")"
+                            "\(player.displayName), \(PlayerAvatar(rawValue: player.avatarID)?.label ?? "Spark") avatar, \(player.id == currentPlayerID ? "you, " : "")\(player.id == table.hostPlayerID ? "host, " : "")\(player.isLocked ? "locked" : "not locked")"
                         )
                     }
                 }
             }
             .scrollIndicators(.hidden)
         }
-        .foregroundStyle(MiniMatchColors.navy)
+        .foregroundStyle(MiniMatchColors.ink)
     }
 
-    private func initials(for name: String) -> String {
-        name.split(separator: " ")
-            .prefix(2)
-            .compactMap(\.first)
-            .map(String.init)
-            .joined()
-            .uppercased()
-    }
 }
 
 private struct PickSection: View {
@@ -340,10 +437,15 @@ private struct PickSection: View {
         VStack(spacing: 14) {
             Text("Enter your number")
                 .font(.title2.bold())
-                .foregroundStyle(MiniMatchColors.navy)
+                .foregroundStyle(MiniMatchColors.ink)
+
+            Text("Lowest number picked by only one player wins.")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
 
             TextField("0", text: $model.pickText)
-                .font(.system(size: 64, weight: .bold, design: .rounded))
+                .font(.largeTitle.bold().monospacedDigit())
                 .multilineTextAlignment(.center)
                 .keyboardType(.numberPad)
                 .padding(.vertical, 12)
@@ -351,15 +453,15 @@ private struct PickSection: View {
                 .clipShape(.rect(cornerRadius: 18))
                 .overlay {
                     RoundedRectangle(cornerRadius: 18)
-                        .stroke(MiniMatchColors.blue, lineWidth: 3)
+                        .stroke(MiniMatchColors.blueText, lineWidth: 3)
                 }
-                .disabled(model.currentPlayerIsLocked)
+                .disabled(model.currentPlayerIsLocked || model.multiplayerIsRestricted)
                 .accessibilityLabel("Your number")
 
             if model.currentPlayerIsLocked {
                 Label("You’re locked in!", systemImage: "checkmark.circle.fill")
                     .font(.headline)
-                    .foregroundStyle(MiniMatchColors.blue)
+                    .foregroundStyle(MiniMatchColors.blueText)
                 Text("Your number stays private until reveal.")
                     .foregroundStyle(.secondary)
             } else {
@@ -368,10 +470,15 @@ private struct PickSection: View {
                         await model.lockPick()
                     }
                 } label: {
-                    Label("Lock my number", systemImage: "lock.fill")
+                    if model.isWorking {
+                        ProgressView("Locking…")
+                            .tint(.white)
+                    } else {
+                        Label("Lock my number", systemImage: "lock.fill")
+                    }
                 }
                 .buttonStyle(PrimaryButtonStyle(color: MiniMatchColors.blue))
-                .disabled(model.isWorking)
+                .disabled(model.isWorking || model.multiplayerIsRestricted)
             }
         }
     }
@@ -386,39 +493,48 @@ private struct HostActionSection: View {
                 await model.revealRound()
             }
         } label: {
-            Label(
-                model.canReveal ? "Reveal round" : "Everyone must lock first",
-                systemImage: model.canReveal ? "sparkles" : "lock.fill"
-            )
+            if model.isWorking {
+                ProgressView("Revealing…")
+                    .tint(.white)
+            } else {
+                Label(
+                    model.canReveal ? "Reveal round" : "Everyone must lock first",
+                    systemImage: model.canReveal ? "sparkles" : "lock.fill"
+                )
+            }
         }
         .buttonStyle(PrimaryButtonStyle(
             color: model.canReveal ? MiniMatchColors.coral : Color.secondary.opacity(0.35)
         ))
-        .disabled(!model.canReveal || model.isWorking)
+        .disabled(!model.canReveal || model.isWorking || model.multiplayerIsRestricted)
         .accessibilityHint("Available only to the host after every player locks a number")
     }
 }
 
 private struct InviteSection: View {
     let table: GameTable
+    let canShare: Bool
 
     var body: some View {
         VStack(spacing: 16) {
             Text("Invite friends")
                 .font(.headline)
-                .foregroundStyle(MiniMatchColors.navy)
+                .foregroundStyle(MiniMatchColors.ink)
 
             HStack(spacing: 12) {
                 Label(table.joinCode, systemImage: "qrcode")
                     .frame(maxWidth: .infinity)
 
-                ShareLink(item: "Join \(table.name) with code \(table.joinCode)") {
-                    Label("Share", systemImage: "square.and.arrow.up")
-                        .frame(maxWidth: .infinity)
+                if canShare {
+                    ShareLink(item: "Join \(table.name) with code \(table.joinCode)") {
+                        Label("Share", systemImage: "square.and.arrow.up")
+                            .frame(maxWidth: .infinity)
+                            .frame(minHeight: 44)
+                    }
                 }
             }
             .font(.headline)
-            .foregroundStyle(MiniMatchColors.blue)
+            .foregroundStyle(MiniMatchColors.blueText)
             .padding()
             .background(MiniMatchColors.surface)
             .clipShape(.rect(cornerRadius: 18))
@@ -428,14 +544,17 @@ private struct InviteSection: View {
 
 struct ResultView: View {
     let model: GameModel
+    @AccessibilityFocusState private var winnerIsFocused: Bool
+    @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
         ScrollView {
             if let table = model.table, let result = model.result {
                 VStack(spacing: 14) {
                     Text("Mini Match")
-                        .font(.system(size: 36, weight: .black, design: .rounded))
-                        .foregroundStyle(MiniMatchColors.navy)
+                        .font(.largeTitle.weight(.black))
+                        .fontDesign(.rounded)
+                        .foregroundStyle(MiniMatchColors.ink)
 
                     Text("Pick a number. Lowest unique number wins.")
                         .font(.caption)
@@ -443,12 +562,13 @@ struct ResultView: View {
                         .foregroundStyle(.secondary)
 
                     WinnerCard(result: result)
+                        .accessibilityFocused($winnerIsFocused)
                     ScoreSection(table: table)
 
                     VStack(alignment: .leading, spacing: 12) {
                         Text("This round")
                             .font(.headline)
-                            .foregroundStyle(MiniMatchColors.navy)
+                            .foregroundStyle(MiniMatchColors.ink)
 
                         VStack(spacing: 0) {
                             ForEach(result.rows) { row in
@@ -473,7 +593,14 @@ struct ResultView: View {
                     .buttonStyle(PrimaryButtonStyle(color: MiniMatchColors.blue))
                 }
                 .padding(16)
+                .task {
+                    winnerIsFocused = true
+                }
             }
+        }
+        .task(id: scenePhase) {
+            guard scenePhase == .active else { return }
+            await model.observeTable()
         }
     }
 }
@@ -484,12 +611,13 @@ private struct WinnerCard: View {
     var body: some View {
         VStack(spacing: 14) {
             Image(systemName: result.winnerName == nil ? "equal.circle.fill" : "trophy.fill")
-                .font(.system(size: 44))
+                .font(.largeTitle)
                 .foregroundStyle(result.winnerName == nil ? .white : Color.yellow)
                 .accessibilityHidden(true)
 
             Text(result.winnerName.map { "\($0) wins!" } ?? "No winner")
-                .font(.system(size: 36, weight: .black, design: .rounded))
+                .font(.largeTitle.weight(.black))
+                .fontDesign(.rounded)
 
             if let winningPick = result.winningPick {
                 ViewThatFits(in: .horizontal) {
@@ -511,7 +639,9 @@ private struct WinnerCard: View {
         .padding(.vertical, 18)
         .background(MiniMatchColors.blue)
         .clipShape(.rect(cornerRadius: 24))
-        .accessibilityElement(children: .combine)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(accessibilitySummary)
+        .accessibilityAddTraits(.isHeader)
     }
 
     private func pick(_ value: UInt64) -> some View {
@@ -524,6 +654,13 @@ private struct WinnerCard: View {
             .background(.white.opacity(0.15))
             .clipShape(Capsule())
     }
+
+    private var accessibilitySummary: String {
+        if let winnerName = result.winnerName, let winningPick = result.winningPick {
+            return "\(winnerName) wins with \(winningPick)"
+        }
+        return "No winner. Every number was duplicated."
+    }
 }
 
 private struct ScoreSection: View {
@@ -531,6 +668,10 @@ private struct ScoreSection: View {
 
     var body: some View {
         VStack(spacing: 12) {
+            Text("Score")
+                .font(.headline)
+                .foregroundStyle(MiniMatchColors.ink)
+
             ScrollView(.horizontal) {
                 HStack(spacing: 22) {
                     ForEach(table.players) { player in
@@ -540,10 +681,19 @@ private struct ScoreSection: View {
                             Text(player.wins.formatted())
                                 .font(.title.bold())
                                 .foregroundStyle(
-                                    player.id == table.winnerPlayerID ? MiniMatchColors.coral : MiniMatchColors.blue
+                                    player.id == table.winnerPlayerID ? MiniMatchColors.coralText : MiniMatchColors.blueText
                                 )
+                            if player.id == table.winnerPlayerID {
+                                Label("Game winner", systemImage: "trophy.fill")
+                                    .font(.caption.bold())
+                                    .foregroundStyle(MiniMatchColors.coralText)
+                            }
                         }
                         .frame(minWidth: 68)
+                        .accessibilityElement(children: .ignore)
+                        .accessibilityLabel(
+                            "\(player.displayName), \(player.wins) wins\(player.id == table.winnerPlayerID ? ", game winner" : "")"
+                        )
                     }
                 }
                 .padding(.horizontal)
@@ -583,7 +733,8 @@ private struct ResultRow: View {
         }
         .padding(12)
         .background(row.status == .winner ? MiniMatchColors.blue.opacity(0.08) : .clear)
-        .accessibilityElement(children: .combine)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("\(row.displayName), selected \(row.pick), \(statusText)")
     }
 
     private var identity: some View {
@@ -601,7 +752,7 @@ private struct ResultRow: View {
             .font(.title.bold())
             .lineLimit(1)
             .minimumScaleFactor(0.6)
-            .foregroundStyle(row.status == .duplicate ? MiniMatchColors.coral : MiniMatchColors.blue)
+            .foregroundStyle(row.status == .duplicate ? MiniMatchColors.coralText : MiniMatchColors.blueText)
     }
 
     private var status: some View {
@@ -610,7 +761,7 @@ private struct ResultRow: View {
             systemImage: row.status == .duplicate ? "xmark.circle.fill" : "checkmark.circle.fill"
         )
         .font(.subheadline)
-        .foregroundStyle(row.status == .duplicate ? MiniMatchColors.coralText : MiniMatchColors.blue)
+        .foregroundStyle(row.status == .duplicate ? MiniMatchColors.coralText : MiniMatchColors.blueText)
     }
 
     private var statusText: String {

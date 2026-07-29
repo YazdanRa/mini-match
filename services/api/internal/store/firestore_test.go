@@ -9,11 +9,14 @@ import (
 )
 
 func TestFirestoreDocumentsKeepPicksPrivateAndPreserveUint64(t *testing.T) {
-	table, err := game.NewTable("table", "Friday", "ABC123", "maya", "Maya")
+	table, err := game.NewTable("table", "Friday", "ABC123", "maya", "Maya", "fox")
 	if err != nil {
 		t.Fatal(err)
 	}
 	if err := table.LockPick("maya", math.MaxUint64, 1); err != nil {
+		t.Fatal(err)
+	}
+	if err := table.Join("liam", "Liam", "owl"); err != nil {
 		t.Fatal(err)
 	}
 	table.Version = math.MaxUint64
@@ -33,7 +36,17 @@ func TestFirestoreDocumentsKeepPicksPrivateAndPreserveUint64(t *testing.T) {
 	if decoded.Players[0].Pick != math.MaxUint64 || decoded.Version != math.MaxUint64 || decoded.EventSequence != math.MaxUint64 {
 		t.Fatal("private document did not round-trip uint64 values")
 	}
+	if decoded.Players[0].Name != "Maya" || decoded.Players[0].Avatar != "fox" ||
+		decoded.Players[1].Name != "Liam" || decoded.Players[1].Avatar != "owl" {
+		t.Fatal("player profiles did not round-trip through the private Firestore document")
+	}
 	public := publicDocument(table)
+	if private.Players[0].Name != "Maya" || private.Players[0].Avatar != "fox" ||
+		private.Players[1].Name != "Liam" || private.Players[1].Avatar != "owl" ||
+		public.Players[0].Name != "Maya" || public.Players[0].Avatar != "fox" ||
+		public.Players[1].Name != "Liam" || public.Players[1].Avatar != "owl" {
+		t.Fatal("player profile was not preserved in Firestore projections")
+	}
 	if _, exposed := reflect.TypeOf(public.Players[0]).FieldByName("Pick"); exposed {
 		t.Fatal("safe player document exposes a private pick")
 	}
@@ -41,6 +54,9 @@ func TestFirestoreDocumentsKeepPicksPrivateAndPreserveUint64(t *testing.T) {
 		t.Fatal("safe document published a result before reveal")
 	}
 
+	if err := table.LockPick("liam", 1, 1); err != nil {
+		t.Fatal(err)
+	}
 	if err := table.StartRound("maya", 1); err != nil {
 		t.Fatal(err)
 	}

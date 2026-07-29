@@ -10,6 +10,11 @@ import (
 
 const WinningScore = 5
 
+const (
+	maxPlayerNameLength = 40
+	maxTableNameLength  = 80
+)
+
 var (
 	ErrAlreadyExists = errors.New("already exists")
 	ErrAlreadyLocked = errors.New("pick already locked")
@@ -44,6 +49,7 @@ type Table struct {
 type Player struct {
 	ID     string
 	Name   string
+	Avatar string
 	Score  uint32
 	Locked bool
 	Pick   uint64
@@ -65,25 +71,39 @@ type Selection struct {
 	Pick     uint64
 }
 
-func NewTable(id, name, joinCode, hostID, hostName string) (*Table, error) {
-	if blank(id) || blank(name) || blank(joinCode) || blank(hostID) || blank(hostName) {
+func NewTable(id, name, joinCode, hostID, hostName, hostAvatar string) (*Table, error) {
+	name, err := normalizedText(name, maxTableNameLength)
+	if err != nil {
+		return nil, err
+	}
+	hostName, err = normalizedText(hostName, maxPlayerNameLength)
+	if err != nil || blank(id) || blank(joinCode) || blank(hostID) {
 		return nil, ErrInvalid
+	}
+	avatar, err := normalizedAvatar(hostAvatar)
+	if err != nil {
+		return nil, err
 	}
 	return &Table{
 		ID:            id,
-		Name:          strings.TrimSpace(name),
+		Name:          name,
 		JoinCode:      joinCode,
 		HostID:        hostID,
-		Players:       []*Player{{ID: hostID, Name: strings.TrimSpace(hostName)}},
+		Players:       []*Player{{ID: hostID, Name: hostName, Avatar: avatar}},
 		CurrentRound:  Round{Number: 1, Phase: RoundOpen},
 		Version:       1,
 		EventSequence: 1,
 	}, nil
 }
 
-func (t *Table) Join(playerID, name string) error {
-	if blank(playerID) || blank(name) {
+func (t *Table) Join(playerID, name, avatarID string) error {
+	name, err := normalizedText(name, maxPlayerNameLength)
+	if err != nil || blank(playerID) {
 		return ErrInvalid
+	}
+	avatar, err := normalizedAvatar(avatarID)
+	if err != nil {
+		return err
 	}
 	if t.WinnerID != "" {
 		return ErrFinished
@@ -91,12 +111,50 @@ func (t *Table) Join(playerID, name string) error {
 	if t.player(playerID) != nil {
 		return ErrAlreadyExists
 	}
-	t.Players = append(t.Players, &Player{ID: playerID, Name: strings.TrimSpace(name)})
+	t.Players = append(t.Players, &Player{ID: playerID, Name: name, Avatar: avatar})
+	if len(t.Players) == 1 {
+		t.HostID = playerID
+		t.CurrentRound = Round{Number: 1, Phase: RoundOpen}
+		t.LastResult = nil
+		t.WinnerID = ""
+	}
 	if t.CurrentRound.Phase == RoundReady {
 		t.CurrentRound.Phase = RoundOpen
 	}
 	t.changed()
 	return nil
+}
+
+func (t *Table) Leave(playerID string) error {
+	if t.WinnerID != "" {
+		return ErrFinished
+	}
+	for index, player := range t.Players {
+		if player.ID != playerID {
+			continue
+		}
+		t.Players = append(t.Players[:index], t.Players[index+1:]...)
+		if playerID == t.HostID {
+			t.HostID = ""
+			if len(t.Players) != 0 {
+				t.HostID = t.Players[0].ID
+			}
+		}
+		t.CurrentRound.Phase = RoundReady
+		for _, remaining := range t.Players {
+			if !remaining.Locked {
+				t.CurrentRound.Phase = RoundOpen
+				break
+			}
+		}
+		if len(t.Players) == 0 {
+			t.CurrentRound = Round{Number: 1, Phase: RoundOpen}
+			t.LastResult = nil
+		}
+		t.changed()
+		return nil
+	}
+	return ErrNotFound
 }
 
 func (t *Table) LockPick(playerID string, pick uint64, roundNumber uint32) error {
@@ -207,6 +265,27 @@ func (t *Table) changed() {
 
 func blank(value string) bool {
 	return strings.TrimSpace(value) == ""
+}
+
+func normalizedText(value string, maxLength int) (string, error) {
+	value = strings.TrimSpace(value)
+	if value == "" || len(value) > maxLength {
+		return "", ErrInvalid
+	}
+	return value, nil
+}
+
+func normalizedAvatar(value string) (string, error) {
+	value = strings.TrimSpace(value)
+	if value == "" {
+		return "spark", nil
+	}
+	switch value {
+	case "spark", "fox", "owl", "cat", "dog", "frog":
+		return value, nil
+	default:
+		return "", ErrInvalid
+	}
 }
 
 type Repository interface {

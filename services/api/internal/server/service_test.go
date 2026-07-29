@@ -65,6 +65,7 @@ func TestConnectAndGRPCKeepPicksPrivateUntilReveal(t *testing.T) {
 	created, err := connectClient.CreateTable(ctx, authenticated(&minimatchv1.CreateTableRequest{
 		Name:            "Friday",
 		HostDisplayName: "Maya",
+		HostAvatar:      "fox",
 	}, "host-token"))
 	if err != nil {
 		t.Fatal(err)
@@ -75,11 +76,32 @@ func TestConnectAndGRPCKeepPicksPrivateUntilReveal(t *testing.T) {
 	joined, err := grpcClient.JoinTable(ctx, authenticated(&minimatchv1.JoinTableRequest{
 		JoinCode:    created.Msg.Table.JoinCode,
 		DisplayName: "Liam",
+		Avatar:      "owl",
 	}, "player-token"))
 	if err != nil {
 		t.Fatal(err)
 	}
 	tableID := created.Msg.Table.Id
+	if _, err := connectClient.LeaveTable(ctx, authenticated(&minimatchv1.LeaveTableRequest{
+		TableId:  tableID,
+		PlayerId: joined.Msg.PlayerId,
+	}, "host-token")); connect.CodeOf(err) != connect.CodePermissionDenied {
+		t.Fatalf("spoofed leave code = %v, want permission denied", connect.CodeOf(err))
+	}
+	if _, err := grpcClient.LeaveTable(ctx, authenticated(&minimatchv1.LeaveTableRequest{
+		TableId:  tableID,
+		PlayerId: joined.Msg.PlayerId,
+	}, "player-token")); err != nil {
+		t.Fatal(err)
+	}
+	joined, err = grpcClient.JoinTable(ctx, authenticated(&minimatchv1.JoinTableRequest{
+		JoinCode:    created.Msg.Table.JoinCode,
+		DisplayName: "Liam",
+		Avatar:      "owl",
+	}, "player-token"))
+	if err != nil {
+		t.Fatal(err)
+	}
 	if _, err := connectClient.LockPick(ctx, authenticated(&minimatchv1.LockPickRequest{
 		TableId:     tableID,
 		PlayerId:    joined.Msg.PlayerId,
@@ -108,6 +130,11 @@ func TestConnectAndGRPCKeepPicksPrivateUntilReveal(t *testing.T) {
 	))
 	if err != nil {
 		t.Fatal(err)
+	}
+	if got := beforeReveal.Msg.Table.Players; len(got) != 2 ||
+		got[0].GetDisplayName() != "Maya" || got[0].GetAvatar() != "fox" ||
+		got[1].GetDisplayName() != "Liam" || got[1].GetAvatar() != "owl" {
+		t.Fatalf("profiles = %#v, want Firestore-ready names and avatars", got)
 	}
 	if beforeReveal.Msg.Table.LastResult != nil {
 		t.Fatal("GetTable exposed selections before reveal")

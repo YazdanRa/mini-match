@@ -13,6 +13,7 @@
 		3E7A29BE63894BB1A3D9C631 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 95B8263978044D02A158AE30 /* GoogleService-Info.plist */; };
 		518A769C5EC08C1E05344660 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDED65F93ED79B532488F42F /* ContentView.swift */; };
 		63B2A8E1435343C4A3AB0CF0 /* GameModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = C395C0D8211F4A7BBA1F0065 /* GameModels.swift */; };
+		6A8C86D601CF4D9698A48128 /* GameCenterModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A514B6D54DE4489B68C8EB4 /* GameCenterModel.swift */; };
 		85A3BC430C8A4DF5B0295B08 /* GameViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E721952B13D470FA5594B6D /* GameViews.swift */; };
 		A40B26B0B6694A4988335295 /* GameClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3447AB36E0634BEDA51A6AEF /* GameClient.swift */; };
 		B8DB8FBADF4702F86057C478 /* MiniMatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BAA5639A2A8BF42643E6AF3 /* MiniMatchApp.swift */; };
@@ -34,6 +35,7 @@
 		0E721952B13D470FA5594B6D /* GameViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameViews.swift; sourceTree = "<group>"; };
 		3447AB36E0634BEDA51A6AEF /* GameClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameClient.swift; sourceTree = "<group>"; };
 		3F9086B3E6EAA8CD569C38C8 /* MiniMatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MiniMatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		5A514B6D54DE4489B68C8EB4 /* GameCenterModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameCenterModel.swift; sourceTree = "<group>"; };
 		559CA31BB186C9DA301F98E5 /* MiniMatchTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MiniMatchTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		6BAA5639A2A8BF42643E6AF3 /* MiniMatchApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MiniMatchApp.swift; sourceTree = "<group>"; };
 		83296CFF50320284730F0D51 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -64,6 +66,7 @@
 				E5988938016346E98E3996BC /* AppleSignInModel.swift */,
 				83296CFF50320284730F0D51 /* Assets.xcassets */,
 				EDED65F93ED79B532488F42F /* ContentView.swift */,
+				5A514B6D54DE4489B68C8EB4 /* GameCenterModel.swift */,
 				3447AB36E0634BEDA51A6AEF /* GameClient.swift */,
 				C8A4EB400AA14E00A31C19EC /* GameModel.swift */,
 				C395C0D8211F4A7BBA1F0065 /* GameModels.swift */,
@@ -154,6 +157,9 @@
 					8AE1524BCC81943FB9CBA1B6 = {
 						ProvisioningStyle = Automatic;
 						SystemCapabilities = {
+							com.apple.GameCenter = {
+								enabled = 1;
+							};
 							com.apple.SignInWithApple = {
 								enabled = 1;
 							};
@@ -202,6 +208,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				518A769C5EC08C1E05344660 /* ContentView.swift in Sources */,
+				6A8C86D601CF4D9698A48128 /* GameCenterModel.swift in Sources */,
 				1E0DF12FEFC34F8790E06E50 /* AppleSignInModel.swift in Sources */,
 				A40B26B0B6694A4988335295 /* GameClient.swift in Sources */,
 				EE5CC43F3F21467F9D07A4E8 /* GameModel.swift in Sources */,

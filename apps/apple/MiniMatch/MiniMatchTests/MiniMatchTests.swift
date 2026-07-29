@@ -70,7 +70,10 @@ struct MiniMatchTests {
           "name": "Friday Mini Match",
           "joinCode": "7X2G9K",
           "hostPlayerId": "maya",
-          "players": [{"id": "maya", "displayName": "Maya"}],
+          "players": [
+            {"id": "maya", "displayName": "Maya"},
+            {"id": "liam", "displayName": "Liam", "avatar": "frog"}
+          ],
           "state": "TABLE_STATE_ACTIVE",
           "currentRound": {
             "number": 1,
@@ -87,7 +90,20 @@ struct MiniMatchTests {
         let table = try JSONDecoder().decode(TableDTO.self, from: Data(json.utf8)).model()
 
         #expect(table.players == [
-            GamePlayer(id: "maya", displayName: "Maya", wins: 0, isLocked: false),
+            GamePlayer(
+                id: "maya",
+                displayName: "Maya",
+                avatarID: "spark",
+                wins: 0,
+                isLocked: false
+            ),
+            GamePlayer(
+                id: "liam",
+                displayName: "Liam",
+                avatarID: "frog",
+                wins: 0,
+                isLocked: false
+            ),
         ])
         #expect(table.stateVersion == 0)
         #expect(table.eventSequence == 0)
@@ -108,5 +124,81 @@ struct MiniMatchTests {
         #expect(model.screen == .result)
         #expect(model.result?.winnerName == "Liam")
         #expect(model.result?.winningPick == 5)
+    }
+
+    @Test
+    @MainActor
+    func tableRefreshConvergesRemoteStateOnce() async throws {
+        let client = PreviewGameClient()
+        let model = GameModel(client: client)
+
+        #expect(await model.createTable(
+            name: "Friday Mini Match",
+            displayName: "Maya",
+            avatarID: "fox"
+        ))
+        let table = try #require(model.table)
+        _ = try await client.lockPick(
+            tableID: table.id,
+            playerID: try #require(model.currentPlayerID),
+            roundNumber: 1,
+            pick: 2
+        )
+
+        await model.refreshTable()
+        #expect(model.canReveal)
+        #expect(model.table?.players.first?.avatarID == "fox")
+
+        _ = try await client.revealRound(
+            tableID: table.id,
+            hostPlayerID: try #require(model.currentPlayerID),
+            roundNumber: 1
+        )
+        await model.refreshTable()
+        #expect(model.screen == .result)
+
+        model.nextRound()
+        await model.refreshTable()
+        #expect(model.screen == .lobby)
+    }
+
+    @Test
+    @MainActor
+    func screenTimeRestrictionBlocksMultiplayerActions() async {
+        let model = GameModel(client: PreviewGameClient())
+        await model.setMultiplayerRestricted(true)
+
+        #expect(await model.createTable(name: "Friday", displayName: "Maya") == false)
+        #expect(model.screen == .home)
+        #expect(model.errorMessage.contains("Screen Time"))
+    }
+
+    @Test
+    @MainActor
+    func screenTimeRestrictionLeavesAnActiveTable() async {
+        let model = GameModel(client: PreviewGameClient())
+
+        #expect(await model.createTable(name: "Friday", displayName: "Maya"))
+        await model.setMultiplayerRestricted(true)
+
+        #expect(model.screen == .home)
+        #expect(model.table == nil)
+    }
+
+    @Test
+    @MainActor
+    func leavingRemovesThePlayerBeforeReturningHome() async {
+        let client = PreviewGameClient()
+        let model = GameModel(client: client)
+
+        #expect(await model.createTable(name: "Friday", displayName: "Maya"))
+        let tableID = try! #require(model.table?.id)
+        await model.leaveTable()
+
+        #expect(model.screen == .home)
+        #expect(model.table == nil)
+        let table = try? await client.getTable(id: tableID)
+        #expect(table?.players.contains { $0.id == "local-player" } == false)
+        #expect(table?.hostPlayerID == "zoe")
     }
 }

@@ -112,6 +112,7 @@ type tableDocument struct {
 type playerDocument struct {
 	ID     string `firestore:"id"`
 	Name   string `firestore:"display_name"`
+	Avatar string `firestore:"avatar,omitempty"`
 	Score  int64  `firestore:"wins"`
 	Locked bool   `firestore:"locked"`
 	Pick   string `firestore:"pick"`
@@ -152,6 +153,7 @@ type safeTableDocument struct {
 type safePlayerDocument struct {
 	ID     string `firestore:"id"`
 	Name   string `firestore:"display_name"`
+	Avatar string `firestore:"avatar,omitempty"`
 	Score  int64  `firestore:"wins"`
 	Locked bool   `firestore:"locked"`
 }
@@ -172,6 +174,7 @@ func privateDocument(table *game.Table) tableDocument {
 		document.Players = append(document.Players, playerDocument{
 			ID:     player.ID,
 			Name:   player.Name,
+			Avatar: player.Avatar,
 			Score:  int64(player.Score),
 			Locked: player.Locked,
 			Pick:   strconv.FormatUint(player.Pick, 10),
@@ -206,6 +209,7 @@ func publicDocument(table *game.Table) safeTableDocument {
 		document.Players = append(document.Players, safePlayerDocument{
 			ID:     player.ID,
 			Name:   player.Name,
+			Avatar: player.Avatar,
 			Score:  int64(player.Score),
 			Locked: player.Locked,
 		})
@@ -287,6 +291,7 @@ func decodeDocument(id string, document tableDocument) (*game.Table, error) {
 		table.Players = append(table.Players, &game.Player{
 			ID:     player.ID,
 			Name:   player.Name,
+			Avatar: player.Avatar,
 			Score:  score,
 			Locked: player.Locked,
 			Pick:   pick,

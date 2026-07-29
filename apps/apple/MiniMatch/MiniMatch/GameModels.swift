@@ -1,5 +1,31 @@
 import Foundation
 
+enum PlayerAvatar: String, CaseIterable, Identifiable, Sendable {
+    case spark
+    case fox
+    case owl
+    case cat
+    case dog
+    case frog
+
+    var id: Self { self }
+
+    var glyph: String {
+        switch self {
+        case .spark: "✨"
+        case .fox: "🦊"
+        case .owl: "🦉"
+        case .cat: "🐱"
+        case .dog: "🐶"
+        case .frog: "🐸"
+        }
+    }
+
+    var label: String {
+        rawValue.capitalized
+    }
+}
+
 struct GameSession: Equatable, Sendable {
     let table: GameTable
     let playerID: String
@@ -32,8 +58,13 @@ struct GameTable: Equatable, Sendable {
 struct GamePlayer: Identifiable, Equatable, Sendable {
     let id: String
     let displayName: String
+    let avatarID: String
     var wins: UInt32
     var isLocked: Bool
+
+    var avatarGlyph: String {
+        PlayerAvatar(rawValue: avatarID)?.glyph ?? PlayerAvatar.spark.glyph
+    }
 }
 
 struct GameRound: Equatable, Sendable {

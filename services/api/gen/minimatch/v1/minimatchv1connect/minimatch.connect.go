@@ -39,6 +39,9 @@ const (
 	// MiniMatchServiceJoinTableProcedure is the fully-qualified name of the MiniMatchService's
 	// JoinTable RPC.
 	MiniMatchServiceJoinTableProcedure = "/minimatch.v1.MiniMatchService/JoinTable"
+	// MiniMatchServiceLeaveTableProcedure is the fully-qualified name of the MiniMatchService's
+	// LeaveTable RPC.
+	MiniMatchServiceLeaveTableProcedure = "/minimatch.v1.MiniMatchService/LeaveTable"
 	// MiniMatchServiceLockPickProcedure is the fully-qualified name of the MiniMatchService's LockPick
 	// RPC.
 	MiniMatchServiceLockPickProcedure = "/minimatch.v1.MiniMatchService/LockPick"
@@ -54,6 +57,7 @@ const (
 type MiniMatchServiceClient interface {
 	CreateTable(context.Context, *connect.Request[v1.CreateTableRequest]) (*connect.Response[v1.CreateTableResponse], error)
 	JoinTable(context.Context, *connect.Request[v1.JoinTableRequest]) (*connect.Response[v1.JoinTableResponse], error)
+	LeaveTable(context.Context, *connect.Request[v1.LeaveTableRequest]) (*connect.Response[v1.LeaveTableResponse], error)
 	LockPick(context.Context, *connect.Request[v1.LockPickRequest]) (*connect.Response[v1.LockPickResponse], error)
 	// Reveals the named round and opens the next unless the match is won.
 	StartRound(context.Context, *connect.Request[v1.StartRoundRequest]) (*connect.Response[v1.StartRoundResponse], error)
@@ -83,6 +87,12 @@ func NewMiniMatchServiceClient(httpClient connect.HTTPClient, baseURL string, op
 			connect.WithSchema(miniMatchServiceMethods.ByName("JoinTable")),
 			connect.WithClientOptions(opts...),
 		),
+		leaveTable: connect.NewClient[v1.LeaveTableRequest, v1.LeaveTableResponse](
+			httpClient,
+			baseURL+MiniMatchServiceLeaveTableProcedure,
+			connect.WithSchema(miniMatchServiceMethods.ByName("LeaveTable")),
+			connect.WithClientOptions(opts...),
+		),
 		lockPick: connect.NewClient[v1.LockPickRequest, v1.LockPickResponse](
 			httpClient,
 			baseURL+MiniMatchServiceLockPickProcedure,
@@ -108,6 +118,7 @@ func NewMiniMatchServiceClient(httpClient connect.HTTPClient, baseURL string, op
 type miniMatchServiceClient struct {
 	createTable *connect.Client[v1.CreateTableRequest, v1.CreateTableResponse]
 	joinTable   *connect.Client[v1.JoinTableRequest, v1.JoinTableResponse]
+	leaveTable  *connect.Client[v1.LeaveTableRequest, v1.LeaveTableResponse]
 	lockPick    *connect.Client[v1.LockPickRequest, v1.LockPickResponse]
 	startRound  *connect.Client[v1.StartRoundRequest, v1.StartRoundResponse]
 	getTable    *connect.Client[v1.GetTableRequest, v1.GetTableResponse]
@@ -121,6 +132,11 @@ func (c *miniMatchServiceClient) CreateTable(ctx context.Context, req *connect.R
 // JoinTable calls minimatch.v1.MiniMatchService.JoinTable.
 func (c *miniMatchServiceClient) JoinTable(ctx context.Context, req *connect.Request[v1.JoinTableRequest]) (*connect.Response[v1.JoinTableResponse], error) {
 	return c.joinTable.CallUnary(ctx, req)
+}
+
+// LeaveTable calls minimatch.v1.MiniMatchService.LeaveTable.
+func (c *miniMatchServiceClient) LeaveTable(ctx context.Context, req *connect.Request[v1.LeaveTableRequest]) (*connect.Response[v1.LeaveTableResponse], error) {
+	return c.leaveTable.CallUnary(ctx, req)
 }
 
 // LockPick calls minimatch.v1.MiniMatchService.LockPick.
@@ -142,6 +158,7 @@ func (c *miniMatchServiceClient) GetTable(ctx context.Context, req *connect.Requ
 type MiniMatchServiceHandler interface {
 	CreateTable(context.Context, *connect.Request[v1.CreateTableRequest]) (*connect.Response[v1.CreateTableResponse], error)
 	JoinTable(context.Context, *connect.Request[v1.JoinTableRequest]) (*connect.Response[v1.JoinTableResponse], error)
+	LeaveTable(context.Context, *connect.Request[v1.LeaveTableRequest]) (*connect.Response[v1.LeaveTableResponse], error)
 	LockPick(context.Context, *connect.Request[v1.LockPickRequest]) (*connect.Response[v1.LockPickResponse], error)
 	// Reveals the named round and opens the next unless the match is won.
 	StartRound(context.Context, *connect.Request[v1.StartRoundRequest]) (*connect.Response[v1.StartRoundResponse], error)
@@ -165,6 +182,12 @@ func NewMiniMatchServiceHandler(svc MiniMatchServiceHandler, opts ...connect.Han
 		MiniMatchServiceJoinTableProcedure,
 		svc.JoinTable,
 		connect.WithSchema(miniMatchServiceMethods.ByName("JoinTable")),
+		connect.WithHandlerOptions(opts...),
+	)
+	miniMatchServiceLeaveTableHandler := connect.NewUnaryHandler(
+		MiniMatchServiceLeaveTableProcedure,
+		svc.LeaveTable,
+		connect.WithSchema(miniMatchServiceMethods.ByName("LeaveTable")),
 		connect.WithHandlerOptions(opts...),
 	)
 	miniMatchServiceLockPickHandler := connect.NewUnaryHandler(
@@ -191,6 +214,8 @@ func NewMiniMatchServiceHandler(svc MiniMatchServiceHandler, opts ...connect.Han
 			miniMatchServiceCreateTableHandler.ServeHTTP(w, r)
 		case MiniMatchServiceJoinTableProcedure:
 			miniMatchServiceJoinTableHandler.ServeHTTP(w, r)
+		case MiniMatchServiceLeaveTableProcedure:
+			miniMatchServiceLeaveTableHandler.ServeHTTP(w, r)
 		case MiniMatchServiceLockPickProcedure:
 			miniMatchServiceLockPickHandler.ServeHTTP(w, r)
 		case MiniMatchServiceStartRoundProcedure:
@@ -212,6 +237,10 @@ func (UnimplementedMiniMatchServiceHandler) CreateTable(context.Context, *connec
 
 func (UnimplementedMiniMatchServiceHandler) JoinTable(context.Context, *connect.Request[v1.JoinTableRequest]) (*connect.Response[v1.JoinTableResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("minimatch.v1.MiniMatchService.JoinTable is not implemented"))
+}
+
+func (UnimplementedMiniMatchServiceHandler) LeaveTable(context.Context, *connect.Request[v1.LeaveTableRequest]) (*connect.Response[v1.LeaveTableResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("minimatch.v1.MiniMatchService.LeaveTable is not implemented"))
 }
 
 func (UnimplementedMiniMatchServiceHandler) LockPick(context.Context, *connect.Request[v1.LockPickRequest]) (*connect.Response[v1.LockPickResponse], error) {

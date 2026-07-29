@@ -3,16 +3,20 @@ package game
 import (
 	"context"
 	"errors"
+	"strings"
 	"testing"
 )
 
 func TestTableRules(t *testing.T) {
-	table, err := NewTable("table", "Friday", "ABC123", "maya", "Maya")
+	table, err := NewTable("table", "Friday", "ABC123", "maya", "Maya", "fox")
 	if err != nil {
 		t.Fatal(err)
 	}
+	if table.Players[0].Name != "Maya" || table.Players[0].Avatar != "fox" {
+		t.Fatal("host profile was not normalized")
+	}
 	for id, name := range map[string]string{"zoe": "Zoe", "liam": "Liam"} {
-		if err := table.Join(id, name); err != nil {
+		if err := table.Join(id, name, "owl"); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -84,11 +88,47 @@ func TestTableRules(t *testing.T) {
 	}
 }
 
+func TestProfileInputBounds(t *testing.T) {
+	if _, err := NewTable(
+		"table",
+		strings.Repeat("t", maxTableNameLength),
+		"ABC123",
+		"maya",
+		strings.Repeat("n", maxPlayerNameLength),
+		"",
+	); err != nil {
+		t.Fatalf("boundary profile rejected: %v", err)
+	}
+	if _, err := NewTable(
+		"table",
+		strings.Repeat("t", maxTableNameLength+1),
+		"ABC123",
+		"maya",
+		"Maya",
+		"fox",
+	); !errors.Is(err, ErrInvalid) {
+		t.Fatalf("oversized table name error = %v, want ErrInvalid", err)
+	}
+	if _, err := NewTable(
+		"table",
+		"Friday",
+		"ABC123",
+		"maya",
+		strings.Repeat("n", maxPlayerNameLength+1),
+		"fox",
+	); !errors.Is(err, ErrInvalid) {
+		t.Fatalf("oversized display name error = %v, want ErrInvalid", err)
+	}
+	if _, err := NewTable("table", "Friday", "ABC123", "maya", "Maya", "unknown"); !errors.Is(err, ErrInvalid) {
+		t.Fatalf("unknown avatar error = %v, want ErrInvalid", err)
+	}
+}
+
 func TestNoUniquePickHasNoWinner(t *testing.T) {
-	table, _ := NewTable("table", "Friday", "ABC123", "maya", "Maya")
-	_ = table.Join("zoe", "Zoe")
-	_ = table.Join("liam", "Liam")
-	_ = table.Join("noah", "Noah")
+	table, _ := NewTable("table", "Friday", "ABC123", "maya", "Maya", "")
+	_ = table.Join("zoe", "Zoe", "")
+	_ = table.Join("liam", "Liam", "")
+	_ = table.Join("noah", "Noah", "")
 	for id, pick := range map[string]uint64{"maya": 2, "zoe": 2, "liam": 5, "noah": 5} {
 		if err := table.LockPick(id, pick, 1); err != nil {
 			t.Fatal(err)
@@ -102,10 +142,39 @@ func TestNoUniquePickHasNoWinner(t *testing.T) {
 	}
 }
 
+func TestLeaveRemovesPlayerAndPromotesHost(t *testing.T) {
+	table, _ := NewTable("table", "Friday", "ABC123", "maya", "Maya", "fox")
+	_ = table.Join("zoe", "Zoe", "owl")
+	_ = table.Join("liam", "Liam", "frog")
+	_ = table.LockPick("zoe", 2, 1)
+	_ = table.LockPick("liam", 5, 1)
+
+	if err := table.Leave("maya"); err != nil {
+		t.Fatal(err)
+	}
+	if table.HostID != "zoe" || len(table.Players) != 2 || table.CurrentRound.Phase != RoundReady {
+		t.Fatalf("leave result = host %q, %d players, phase %v", table.HostID, len(table.Players), table.CurrentRound.Phase)
+	}
+	if err := table.StartRound("zoe", 1); err != nil {
+		t.Fatalf("promoted host could not reveal: %v", err)
+	}
+
+	empty, _ := NewTable("empty", "Friday", "EMPTY", "maya", "Maya", "fox")
+	if err := empty.Leave("maya"); err != nil {
+		t.Fatal(err)
+	}
+	if err := empty.Join("noah", "Noah", "cat"); err != nil {
+		t.Fatal(err)
+	}
+	if empty.HostID != "noah" || empty.CurrentRound.Number != 1 {
+		t.Fatal("first player to rejoin an empty table did not become host")
+	}
+}
+
 func TestMemoryRepositoryUpdateIsAtomic(t *testing.T) {
 	ctx := context.Background()
 	repository := NewMemoryRepository()
-	table, _ := NewTable("table", "Friday", "ABC123", "maya", "Maya")
+	table, _ := NewTable("table", "Friday", "ABC123", "maya", "Maya", "")
 	if err := repository.Create(ctx, table); err != nil {
 		t.Fatal(err)
 	}

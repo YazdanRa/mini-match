@@ -2,8 +2,9 @@ import Foundation
 import FirebaseAuth
 
 protocol GameClient: Sendable {
-    func createTable(name: String, displayName: String) async throws -> GameSession
-    func joinTable(code: String, displayName: String) async throws -> GameSession
+    func createTable(name: String, displayName: String, avatarID: String) async throws -> GameSession
+    func joinTable(code: String, displayName: String, avatarID: String) async throws -> GameSession
+    func leaveTable(tableID: String, playerID: String) async throws
     func lockPick(
         tableID: String,
         playerID: String,
@@ -41,20 +42,31 @@ struct ConnectGameClient: GameClient {
         self.session = session
     }
 
-    func createTable(name: String, displayName: String) async throws -> GameSession {
+    func createTable(name: String, displayName: String, avatarID: String) async throws -> GameSession {
         let response: SessionResponse = try await call(
             "CreateTable",
-            body: CreateTableRequest(name: name, hostDisplayName: displayName)
+            body: CreateTableRequest(
+                name: name,
+                hostDisplayName: displayName,
+                hostAvatar: avatarID
+            )
         )
         return GameSession(table: try response.table.model(), playerID: response.playerId)
     }
 
-    func joinTable(code: String, displayName: String) async throws -> GameSession {
+    func joinTable(code: String, displayName: String, avatarID: String) async throws -> GameSession {
         let response: SessionResponse = try await call(
             "JoinTable",
-            body: JoinTableRequest(joinCode: code, displayName: displayName)
+            body: JoinTableRequest(joinCode: code, displayName: displayName, avatar: avatarID)
         )
         return GameSession(table: try response.table.model(), playerID: response.playerId)
+    }
+
+    func leaveTable(tableID: String, playerID: String) async throws {
+        let _: TableResponse = try await call(
+            "LeaveTable",
+            body: LeaveTableRequest(tableId: tableID, playerId: playerID)
+        )
     }
 
     func lockPick(
@@ -133,23 +145,52 @@ actor PreviewGameClient: GameClient {
     private var currentPlayerID = "local-player"
     private var localPick: UInt64?
 
-    func createTable(name: String, displayName: String) async throws -> GameSession {
+    func createTable(name: String, displayName: String, avatarID: String) async throws -> GameSession {
         currentPlayerID = "local-player"
-        let created = sampleTable(name: name, hostID: currentPlayerID, hostName: displayName)
+        let created = sampleTable(
+            name: name,
+            hostID: currentPlayerID,
+            hostName: displayName,
+            hostAvatarID: avatarID
+        )
         table = created
         return GameSession(table: created, playerID: currentPlayerID)
     }
 
-    func joinTable(code: String, displayName: String) async throws -> GameSession {
+    func joinTable(code: String, displayName: String, avatarID: String) async throws -> GameSession {
         currentPlayerID = "local-player"
-        var joined = sampleTable(name: "Friday Mini Match", hostID: "casey", hostName: "Casey")
+        var joined = sampleTable(
+            name: "Friday Mini Match",
+            hostID: "casey",
+            hostName: "Casey",
+            hostAvatarID: "fox"
+        )
         joined = withPlayer(
-            GamePlayer(id: currentPlayerID, displayName: displayName, wins: 0, isLocked: false),
+            GamePlayer(
+                id: currentPlayerID,
+                displayName: displayName,
+                avatarID: avatarID,
+                wins: 0,
+                isLocked: false
+            ),
             addedTo: joined
         )
         joined = withJoinCode(code, in: joined)
         table = joined
         return GameSession(table: joined, playerID: currentPlayerID)
+    }
+
+    func leaveTable(tableID: String, playerID: String) async throws {
+        guard var table, table.id == tableID else {
+            throw GameClientError.server(String(localized: "Table not found."))
+        }
+        table.players.removeAll { $0.id == playerID }
+        if table.hostPlayerID == playerID, let nextHost = table.players.first {
+            table = withHost(nextHost.id, in: table)
+        }
+        table.stateVersion += 1
+        table.eventSequence += 1
+        self.table = table
     }
 
     func lockPick(
@@ -238,16 +279,27 @@ actor PreviewGameClient: GameClient {
         return table
     }
 
-    private func sampleTable(name: String, hostID: String, hostName: String) -> GameTable {
+    private func sampleTable(
+        name: String,
+        hostID: String,
+        hostName: String,
+        hostAvatarID: String
+    ) -> GameTable {
         GameTable(
             id: "preview-table",
             name: name,
             joinCode: "7X2G9K",
             hostPlayerID: hostID,
             players: [
-                GamePlayer(id: hostID, displayName: hostName, wins: 0, isLocked: false),
-                GamePlayer(id: "zoe", displayName: "Zoe", wins: 0, isLocked: false),
-                GamePlayer(id: "liam", displayName: "Liam", wins: 0, isLocked: false),
+                GamePlayer(
+                    id: hostID,
+                    displayName: hostName,
+                    avatarID: hostAvatarID,
+                    wins: 0,
+                    isLocked: false
+                ),
+                GamePlayer(id: "zoe", displayName: "Zoe", avatarID: "owl", wins: 0, isLocked: false),
+                GamePlayer(id: "liam", displayName: "Liam", avatarID: "frog", wins: 0, isLocked: false),
             ],
             state: .active,
             currentRound: GameRound(number: 1, phase: .acceptingPicks),
@@ -281,6 +333,23 @@ actor PreviewGameClient: GameClient {
             winnerPlayerID: table.winnerPlayerID
         )
     }
+
+    private func withHost(_ hostID: String, in table: GameTable) -> GameTable {
+        GameTable(
+            id: table.id,
+            name: table.name,
+            joinCode: table.joinCode,
+            hostPlayerID: hostID,
+            players: table.players,
+            state: table.state,
+            currentRound: table.currentRound,
+            lastResult: table.lastResult,
+            winsToFinish: table.winsToFinish,
+            stateVersion: table.stateVersion,
+            eventSequence: table.eventSequence,
+            winnerPlayerID: table.winnerPlayerID
+        )
+    }
 }
 
 enum GameClientFactory {
@@ -300,11 +369,13 @@ enum GameClientFactory {
 private struct CreateTableRequest: Encodable {
     let name: String
     let hostDisplayName: String
+    let hostAvatar: String
 }
 
 private struct JoinTableRequest: Encodable {
     let joinCode: String
     let displayName: String
+    let avatar: String
 }
 
 private struct LockPickRequest: Encodable {
@@ -312,6 +383,11 @@ private struct LockPickRequest: Encodable {
     let playerId: String
     let pick: PickDTO
     let roundNumber: UInt32
+}
+
+private struct LeaveTableRequest: Encodable {
+    let tableId: String
+    let playerId: String
 }
 
 private struct StartRoundRequest: Encodable {
@@ -387,11 +463,18 @@ struct TableDTO: Decodable {
 struct PlayerDTO: Decodable {
     let id: String
     let displayName: String
+    let avatar: String?
     let wins: UInt32?
     let locked: Bool?
 
     var model: GamePlayer {
-        GamePlayer(id: id, displayName: displayName, wins: wins ?? 0, isLocked: locked ?? false)
+        GamePlayer(
+            id: id,
+            displayName: displayName,
+            avatarID: avatar ?? PlayerAvatar.spark.rawValue,
+            wins: wins ?? 0,
+            isLocked: locked ?? false
+        )
     }
 }
 

@@ -10,6 +10,7 @@ option swift_prefix = "MM";
 service MiniMatchService {
   rpc CreateTable(CreateTableRequest) returns (CreateTableResponse);
   rpc JoinTable(JoinTableRequest) returns (JoinTableResponse);
+  rpc LeaveTable(LeaveTableRequest) returns (LeaveTableResponse);
   rpc LockPick(LockPickRequest) returns (LockPickResponse);
   // Reveals the named round and opens the next unless the match is won.
   rpc StartRound(StartRoundRequest) returns (StartRoundResponse);
@@ -19,6 +20,7 @@ service MiniMatchService {
 message CreateTableRequest {
   string name = 1;
   string host_display_name = 2;
+  string host_avatar = 3;
 }
 
 message CreateTableResponse {
@@ -29,11 +31,21 @@ message CreateTableResponse {
 message JoinTableRequest {
   string join_code = 1;
   string display_name = 2;
+  string avatar = 3;
 }
 
 message JoinTableResponse {
   Table table = 1;
   string player_id = 2;
+}
+
+message LeaveTableRequest {
+  string table_id = 1;
+  string player_id = 2;
+}
+
+message LeaveTableResponse {
+  Table table = 1;
 }
 
 message LockPickRequest {
@@ -88,6 +100,7 @@ message Player {
   string display_name = 2;
   uint32 wins = 3;
   bool locked = 4;
+  string avatar = 5;
 }
 
 message Round {
