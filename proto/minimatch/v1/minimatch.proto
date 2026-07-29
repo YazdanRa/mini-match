@@ -1,0 +1,124 @@
+syntax = "proto3";
+
+package minimatch.v1;
+
+option go_package = "github.com/YazdanRa/mini-match/services/api/gen/minimatch/v1;minimatchv1";
+option java_multiple_files = true;
+option java_package = "app.minimatch.api.v1";
+option swift_prefix = "MM";
+
+service MiniMatchService {
+  rpc CreateTable(CreateTableRequest) returns (CreateTableResponse);
+  rpc JoinTable(JoinTableRequest) returns (JoinTableResponse);
+  rpc LockPick(LockPickRequest) returns (LockPickResponse);
+  // Reveals the named round and opens the next unless the match is won.
+  rpc StartRound(StartRoundRequest) returns (StartRoundResponse);
+  rpc GetTable(GetTableRequest) returns (GetTableResponse);
+}
+
+message CreateTableRequest {
+  string name = 1;
+  string host_display_name = 2;
+}
+
+message CreateTableResponse {
+  Table table = 1;
+  string player_id = 2;
+}
+
+message JoinTableRequest {
+  string join_code = 1;
+  string display_name = 2;
+}
+
+message JoinTableResponse {
+  Table table = 1;
+  string player_id = 2;
+}
+
+message LockPickRequest {
+  string table_id = 1;
+  string player_id = 2;
+  Pick pick = 3;
+  uint32 round_number = 4;
+}
+
+message LockPickResponse {
+  Table table = 1;
+}
+
+message StartRoundRequest {
+  string table_id = 1;
+  string host_player_id = 2;
+  uint32 round_number = 3;
+}
+
+message StartRoundResponse {
+  Table table = 1;
+}
+
+message GetTableRequest {
+  string table_id = 1;
+}
+
+message GetTableResponse {
+  Table table = 1;
+}
+
+message Table {
+  string id = 1;
+  string name = 2;
+  string join_code = 3;
+  string host_player_id = 4;
+  repeated Player players = 5;
+  TableState state = 6;
+  Round current_round = 7;
+  // Present only after reveal; unrevealed picks never appear in Table.
+  RoundResult last_result = 8;
+  uint32 wins_to_finish = 9;
+  // Monotonic revision for ordering safe table snapshots.
+  uint64 state_version = 10;
+  // Monotonic cursor of the latest safe event projected to Firestore.
+  uint64 event_sequence = 11;
+  optional string winner_player_id = 12;
+}
+
+message Player {
+  string id = 1;
+  string display_name = 2;
+  uint32 wins = 3;
+  bool locked = 4;
+}
+
+message Round {
+  uint32 number = 1;
+  RoundPhase phase = 2;
+}
+
+message RoundResult {
+  uint32 round_number = 1;
+  repeated Selection selections = 2;
+  optional string winner_player_id = 3;
+}
+
+message Selection {
+  string player_id = 1;
+  Pick pick = 2;
+}
+
+// uint64 rejects negative picks at the transport boundary.
+message Pick {
+  uint64 value = 1;
+}
+
+enum TableState {
+  TABLE_STATE_UNSPECIFIED = 0;
+  TABLE_STATE_ACTIVE = 1;
+  TABLE_STATE_FINISHED = 2;
+}
+
+enum RoundPhase {
+  ROUND_PHASE_UNSPECIFIED = 0;
+  ROUND_PHASE_ACCEPTING_PICKS = 1;
+  ROUND_PHASE_READY_TO_REVEAL = 2;
+}
