@@ -41,7 +41,7 @@ GOOGLE_CLOUD_PROJECT=mini-match-20260729 \
 
 Open `apps/apple/MiniMatch/MiniMatch.xcodeproj` in Xcode to build the iPhone app. Generated Go source lives in the repository; regenerate it only when the protobuf contract changes. Swift/Kotlin/TypeScript generation waits until those clients consume the API.
 
-The Apple target uses bundle identifier `com.yazdanra.minimatch`, configures Firebase from its committed non-secret `GoogleService-Info.plist`, and sends Connect JSON commands to the production Cloud Run origin. It signs players in anonymously on first use and lets them link that identity to Sign in with Apple. Firebase's Apple provider is enabled for the same bundle ID; the client uses a secure nonce, checks credential revocation, requests no unused profile scopes, and supports reauthenticated token revocation and account deletion. The safe Firestore live listener remains the next client integration.
+The Apple target uses bundle identifier `com.yazdanra.minimatch`, configures Firebase from a local `GoogleService-Info.plist` excluded from source control, and sends Connect JSON commands to the production Cloud Run origin. It signs players in anonymously on first use and lets them link that identity to Sign in with Apple. Firebase's Apple provider is enabled for the same bundle ID; the client uses a secure nonce, checks credential revocation, requests no unused profile scopes, and supports reauthenticated token revocation and account deletion. The safe Firestore live listener remains the next client integration.
 
 ## Deployment outline
 
