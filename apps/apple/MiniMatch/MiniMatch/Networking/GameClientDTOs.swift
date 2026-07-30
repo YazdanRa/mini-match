@@ -1,0 +1,190 @@
+import Foundation
+
+struct CreateTableRequest: Encodable {
+    let name: String
+    let hostDisplayName: String
+    let hostAvatar: String
+    let gameCenterIdentity: GameCenterIdentityDTO?
+}
+
+struct JoinTableRequest: Encodable {
+    let joinCode: String
+    let displayName: String
+    let avatar: String
+    let gameCenterIdentity: GameCenterIdentityDTO?
+}
+
+struct GameCenterIdentityDTO: Encodable, Sendable {
+    let teamPlayerId: String
+    let publicKeyUrl: String
+    let signature: Data
+    let salt: Data
+    let timestamp: String
+}
+
+struct LockPickRequest: Encodable {
+    let tableId: String
+    let playerId: String
+    let pick: PickDTO
+    let roundNumber: UInt32
+}
+
+struct LeaveTableRequest: Encodable {
+    let tableId: String
+    let playerId: String
+}
+
+struct StartRoundRequest: Encodable {
+    let tableId: String
+    let hostPlayerId: String
+    let roundNumber: UInt32
+}
+
+struct GetTableRequest: Encodable {
+    let tableId: String
+}
+
+struct EmptyRequest: Encodable {}
+
+struct EmptyResponse: Decodable {}
+
+struct SessionResponse: Decodable {
+    let table: TableDTO
+    let playerId: String
+}
+
+struct TableResponse: Decodable {
+    let table: TableDTO
+}
+
+struct ErrorResponse: Decodable {
+    let message: String
+}
+
+struct TableDTO: Decodable {
+    let id: String
+    let name: String
+    let joinCode: String
+    let hostPlayerId: String
+    let players: [PlayerDTO]
+    let state: String?
+    let currentRound: RoundDTO?
+    let lastResult: ResultDTO?
+    let winsToFinish: UInt32
+    let stateVersion: String?
+    let eventSequence: String?
+    let winnerPlayerId: String?
+    let winnerLifetimeWins: String?
+
+    func model() throws -> GameTable {
+        let tableState: GameTable.State
+        switch state {
+        case "TABLE_STATE_ACTIVE":
+            tableState = .active
+        case "TABLE_STATE_FINISHED":
+            tableState = .finished
+        default:
+            throw GameClientError.invalidResponse
+        }
+
+        guard let stateVersion = UInt64(stateVersion ?? "0"),
+              let eventSequence = UInt64(eventSequence ?? "0")
+        else {
+            throw GameClientError.invalidResponse
+        }
+        let lifetimeWins: UInt64?
+        if let winnerLifetimeWins {
+            guard let value = UInt64(winnerLifetimeWins) else {
+                throw GameClientError.invalidResponse
+            }
+            lifetimeWins = value
+        } else {
+            lifetimeWins = nil
+        }
+        return GameTable(
+            id: id,
+            name: name,
+            joinCode: joinCode,
+            hostPlayerID: hostPlayerId,
+            players: players.map(\.model),
+            state: tableState,
+            currentRound: try currentRound?.model(),
+            lastResult: try lastResult?.model(),
+            winsToFinish: winsToFinish,
+            stateVersion: stateVersion,
+            eventSequence: eventSequence,
+            winnerPlayerID: winnerPlayerId,
+            winnerLifetimeWins: lifetimeWins
+        )
+    }
+}
+
+struct PlayerDTO: Decodable {
+    let id: String
+    let displayName: String
+    let avatar: String?
+    let wins: UInt32?
+    let locked: Bool?
+
+    var model: GamePlayer {
+        GamePlayer(
+            id: id,
+            displayName: displayName,
+            avatarID: avatar ?? PlayerAvatar.spark.rawValue,
+            wins: wins ?? 0,
+            isLocked: locked ?? false
+        )
+    }
+}
+
+struct RoundDTO: Decodable {
+    let number: UInt32
+    let phase: String?
+
+    func model() throws -> GameRound {
+        let roundPhase: GameRound.Phase
+        switch phase {
+        case "ROUND_PHASE_ACCEPTING_PICKS":
+            roundPhase = .acceptingPicks
+        case "ROUND_PHASE_READY_TO_REVEAL":
+            roundPhase = .readyToReveal
+        default:
+            throw GameClientError.invalidResponse
+        }
+        return GameRound(number: number, phase: roundPhase)
+    }
+}
+
+struct ResultDTO: Decodable {
+    let roundNumber: UInt32
+    let selections: [SelectionDTO]
+    let winnerPlayerId: String?
+
+    func model() throws -> GameRoundResult {
+        GameRoundResult(
+            roundNumber: roundNumber,
+            selections: try selections.map { try $0.model() },
+            winnerPlayerID: winnerPlayerId
+        )
+    }
+}
+
+struct SelectionDTO: Decodable {
+    let playerId: String
+    let pick: PickDTO
+
+    func model() throws -> GameSelection {
+        guard let value = UInt64(pick.value ?? "0") else {
+            throw GameClientError.invalidResponse
+        }
+        return GameSelection(playerID: playerId, pick: value)
+    }
+}
+
+struct PickDTO: Codable {
+    let value: String?
+
+    init(value: String) {
+        self.value = value
+    }
+}

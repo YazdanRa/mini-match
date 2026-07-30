@@ -2,21 +2,7 @@ import Foundation
 import Testing
 @testable import MiniMatch
 
-struct MiniMatchTests {
-    @Test
-    func appleSignInNonceIsSecurelyShaped() throws {
-        let nonce = try AppleSignInModel.randomNonce()
-
-        #expect(nonce.count == 32)
-        #expect(nonce.allSatisfy {
-            "0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._".contains($0)
-        })
-        #expect(
-            AppleSignInModel.sha256("abc")
-                == "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
-        )
-    }
-
+struct GameModelTests {
     @Test
     @MainActor
     func hostCanRevealOnlyAfterLocking() async throws {
@@ -60,82 +46,6 @@ struct MiniMatchTests {
 
         model.nextRound()
         #expect(model.screen == .home)
-    }
-
-    @Test
-    func protoJSONDefaultsDecode() throws {
-        let json = """
-        {
-          "id": "table-1",
-          "name": "Friday Mini Match",
-          "joinCode": "7X2G9K",
-          "hostPlayerId": "maya",
-          "players": [
-            {"id": "maya", "displayName": "Maya"},
-            {"id": "liam", "displayName": "Liam", "avatar": "frog"}
-          ],
-          "state": "TABLE_STATE_ACTIVE",
-          "currentRound": {
-            "number": 1,
-            "phase": "ROUND_PHASE_ACCEPTING_PICKS"
-          },
-          "lastResult": {
-            "roundNumber": 1,
-            "selections": [{"playerId": "maya", "pick": {}}]
-          },
-          "winsToFinish": 5,
-          "winnerLifetimeWins": "12"
-        }
-        """
-
-        let table = try JSONDecoder().decode(TableDTO.self, from: Data(json.utf8)).model()
-
-        #expect(table.players == [
-            GamePlayer(
-                id: "maya",
-                displayName: "Maya",
-                avatarID: "spark",
-                wins: 0,
-                isLocked: false
-            ),
-            GamePlayer(
-                id: "liam",
-                displayName: "Liam",
-                avatarID: "frog",
-                wins: 0,
-                isLocked: false
-            ),
-        ])
-        #expect(table.stateVersion == 0)
-        #expect(table.eventSequence == 0)
-        #expect(table.lastResult?.selections.first?.pick == 0)
-        #expect(table.winnerLifetimeWins == 12)
-    }
-
-    @Test
-    func completedMatchWinIsReportedOnlyForItsWinner() {
-        let table = GameTable(
-            id: "table-1",
-            name: "Friday Mini Match",
-            joinCode: "7X2G9K",
-            hostPlayerID: "maya",
-            players: [],
-            state: .finished,
-            currentRound: nil,
-            lastResult: nil,
-            winsToFinish: 5,
-            stateVersion: 10,
-            eventSequence: 10,
-            winnerPlayerID: "maya",
-            winnerLifetimeWins: 7
-        )
-
-        #expect(table.completedMatchWin(for: "maya") == CompletedMatchWin(
-            matchID: "table-1",
-            lifetimeWins: 7
-        ))
-        #expect(table.completedMatchWin(for: "liam") == nil)
-        #expect(table.completedMatchWin(for: nil) == nil)
     }
 
     @Test

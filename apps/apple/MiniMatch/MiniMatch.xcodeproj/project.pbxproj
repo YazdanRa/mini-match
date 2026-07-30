@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		15B7A7188DB6DE5A974DC2AA /* MiniMatchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0F78E9FD70CBEED716DF118 /* MiniMatchTests.swift */; };
 		1E0DF12FEFC34F8790E06E50 /* AppleSignInModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5988938016346E98E3996BC /* AppleSignInModel.swift */; };
 		28BAAFDB33A96F2F20C69D6E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 83296CFF50320284730F0D51 /* Assets.xcassets */; };
 		3E7A29BE63894BB1A3D9C631 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 95B8263978044D02A158AE30 /* GoogleService-Info.plist */; };
@@ -15,11 +14,36 @@
 		63B2A8E1435343C4A3AB0CF0 /* GameModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = C395C0D8211F4A7BBA1F0065 /* GameModels.swift */; };
 		6A8C86D601CF4D9698A48128 /* GameCenterModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A514B6D54DE4489B68C8EB4 /* GameCenterModel.swift */; };
 		7B4940F317DC4A22A42C3D3D /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 1C9872C6908E4474AB19E42F /* PrivacyInfo.xcprivacy */; };
-		85A3BC430C8A4DF5B0295B08 /* GameViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E721952B13D470FA5594B6D /* GameViews.swift */; };
 		A40B26B0B6694A4988335295 /* GameClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3447AB36E0634BEDA51A6AEF /* GameClient.swift */; };
 		B8DB8FBADF4702F86057C478 /* MiniMatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BAA5639A2A8BF42643E6AF3 /* MiniMatchApp.swift */; };
 		D0E416549451497B8A9A1272 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = F380CD1A9FEF4AA9A86B8B45 /* FirebaseAuth */; };
 		EE5CC43F3F21467F9D07A4E8 /* GameModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8A4EB400AA14E00A31C19EC /* GameModel.swift */; };
+		000000000000000000002001 /* DeletionAuthorizationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000001001 /* DeletionAuthorizationView.swift */; };
+		000000000000000000002002 /* ProfileAvatar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000001002 /* ProfileAvatar.swift */; };
+		000000000000000000002003 /* ProfileMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000001003 /* ProfileMenu.swift */; };
+		000000000000000000002004 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000001004 /* HomeView.swift */; };
+		000000000000000000002005 /* TableEntrySheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000001005 /* TableEntrySheet.swift */; };
+		000000000000000000002006 /* HostActionSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000001006 /* HostActionSection.swift */; };
+		000000000000000000002007 /* InviteSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000001007 /* InviteSection.swift */; };
+		000000000000000000002008 /* LobbyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000001008 /* LobbyView.swift */; };
+		000000000000000000002009 /* PickSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000001009 /* PickSection.swift */; };
+		00000000000000000000200A /* PlayersSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00000000000000000000100A /* PlayersSection.swift */; };
+		00000000000000000000200B /* ResultRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00000000000000000000100B /* ResultRow.swift */; };
+		00000000000000000000200C /* ResultView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00000000000000000000100C /* ResultView.swift */; };
+		00000000000000000000200D /* ScoreSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00000000000000000000100D /* ScoreSection.swift */; };
+		00000000000000000000200E /* WinnerCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00000000000000000000100E /* WinnerCard.swift */; };
+		00000000000000000000200F /* ConnectGameClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00000000000000000000100F /* ConnectGameClient.swift */; };
+		000000000000000000002010 /* GameClientDTOs.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000001010 /* GameClientDTOs.swift */; };
+		000000000000000000002011 /* GameClientFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000001011 /* GameClientFactory.swift */; };
+		000000000000000000002012 /* PreviewGameClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000001012 /* PreviewGameClient.swift */; };
+		000000000000000000002013 /* BrandHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000001013 /* BrandHeader.swift */; };
+		000000000000000000002014 /* MiniMatchColors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000001014 /* MiniMatchColors.swift */; };
+		000000000000000000002015 /* PrimaryButtonStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000001015 /* PrimaryButtonStyle.swift */; };
+		000000000000000000002016 /* AppleSignInModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000001016 /* AppleSignInModelTests.swift */; };
+		000000000000000000002017 /* GameModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000001017 /* GameModelTests.swift */; };
+		000000000000000000002018 /* GameTableTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000001018 /* GameTableTests.swift */; };
+		000000000000000000002019 /* GameClientDTOTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000001019 /* GameClientDTOTests.swift */; };
+		00000000000000000000201A /* GameCenterAuthenticationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00000000000000000000101A /* GameCenterAuthenticationView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -33,7 +57,6 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		0E721952B13D470FA5594B6D /* GameViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameViews.swift; sourceTree = "<group>"; };
 		1C9872C6908E4474AB19E42F /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		3447AB36E0634BEDA51A6AEF /* GameClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameClient.swift; sourceTree = "<group>"; };
 		3F9086B3E6EAA8CD569C38C8 /* MiniMatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MiniMatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -44,10 +67,35 @@
 		95B8263978044D02A158AE30 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		C395C0D8211F4A7BBA1F0065 /* GameModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameModels.swift; sourceTree = "<group>"; };
 		C8A4EB400AA14E00A31C19EC /* GameModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameModel.swift; sourceTree = "<group>"; };
-		D0F78E9FD70CBEED716DF118 /* MiniMatchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MiniMatchTests.swift; sourceTree = "<group>"; };
 		E5988938016346E98E3996BC /* AppleSignInModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleSignInModel.swift; sourceTree = "<group>"; };
 		EDED65F93ED79B532488F42F /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		F292770B1D1C4E6EB44A5F6C /* MiniMatch.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MiniMatch.entitlements; sourceTree = "<group>"; };
+		000000000000000000001001 /* DeletionAuthorizationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeletionAuthorizationView.swift; sourceTree = "<group>"; };
+		000000000000000000001002 /* ProfileAvatar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileAvatar.swift; sourceTree = "<group>"; };
+		000000000000000000001003 /* ProfileMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileMenu.swift; sourceTree = "<group>"; };
+		000000000000000000001004 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		000000000000000000001005 /* TableEntrySheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TableEntrySheet.swift; sourceTree = "<group>"; };
+		000000000000000000001006 /* HostActionSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HostActionSection.swift; sourceTree = "<group>"; };
+		000000000000000000001007 /* InviteSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InviteSection.swift; sourceTree = "<group>"; };
+		000000000000000000001008 /* LobbyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LobbyView.swift; sourceTree = "<group>"; };
+		000000000000000000001009 /* PickSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PickSection.swift; sourceTree = "<group>"; };
+		00000000000000000000100A /* PlayersSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayersSection.swift; sourceTree = "<group>"; };
+		00000000000000000000100B /* ResultRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResultRow.swift; sourceTree = "<group>"; };
+		00000000000000000000100C /* ResultView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResultView.swift; sourceTree = "<group>"; };
+		00000000000000000000100D /* ScoreSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScoreSection.swift; sourceTree = "<group>"; };
+		00000000000000000000100E /* WinnerCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WinnerCard.swift; sourceTree = "<group>"; };
+		00000000000000000000100F /* ConnectGameClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectGameClient.swift; sourceTree = "<group>"; };
+		000000000000000000001010 /* GameClientDTOs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameClientDTOs.swift; sourceTree = "<group>"; };
+		000000000000000000001011 /* GameClientFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameClientFactory.swift; sourceTree = "<group>"; };
+		000000000000000000001012 /* PreviewGameClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewGameClient.swift; sourceTree = "<group>"; };
+		000000000000000000001013 /* BrandHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrandHeader.swift; sourceTree = "<group>"; };
+		000000000000000000001014 /* MiniMatchColors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MiniMatchColors.swift; sourceTree = "<group>"; };
+		000000000000000000001015 /* PrimaryButtonStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrimaryButtonStyle.swift; sourceTree = "<group>"; };
+		000000000000000000001016 /* AppleSignInModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleSignInModelTests.swift; sourceTree = "<group>"; };
+		000000000000000000001017 /* GameModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameModelTests.swift; sourceTree = "<group>"; };
+		000000000000000000001018 /* GameTableTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameTableTests.swift; sourceTree = "<group>"; };
+		000000000000000000001019 /* GameClientDTOTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameClientDTOTests.swift; sourceTree = "<group>"; };
+		00000000000000000000101A /* GameCenterAuthenticationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameCenterAuthenticationView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -65,20 +113,161 @@
 		02CD513A8AA6696657A2D72F /* MiniMatch */ = {
 			isa = PBXGroup;
 			children = (
-				E5988938016346E98E3996BC /* AppleSignInModel.swift */,
-				83296CFF50320284730F0D51 /* Assets.xcassets */,
-				EDED65F93ED79B532488F42F /* ContentView.swift */,
-				5A514B6D54DE4489B68C8EB4 /* GameCenterModel.swift */,
-				3447AB36E0634BEDA51A6AEF /* GameClient.swift */,
-				C8A4EB400AA14E00A31C19EC /* GameModel.swift */,
-				C395C0D8211F4A7BBA1F0065 /* GameModels.swift */,
-				0E721952B13D470FA5594B6D /* GameViews.swift */,
-				95B8263978044D02A158AE30 /* GoogleService-Info.plist */,
-				F292770B1D1C4E6EB44A5F6C /* MiniMatch.entitlements */,
-				6BAA5639A2A8BF42643E6AF3 /* MiniMatchApp.swift */,
-				1C9872C6908E4474AB19E42F /* PrivacyInfo.xcprivacy */,
+				000000000000000000003001 /* App */,
+				000000000000000000003002 /* Features */,
+				000000000000000000003007 /* Integrations */,
+				00000000000000000000300A /* Models */,
+				00000000000000000000300B /* Networking */,
+				000000000000000000003012 /* Resources */,
+				00000000000000000000300C /* Shared */,
 			);
 			path = MiniMatch;
+			sourceTree = "<group>";
+		};
+		000000000000000000003001 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				EDED65F93ED79B532488F42F /* ContentView.swift */,
+				6BAA5639A2A8BF42643E6AF3 /* MiniMatchApp.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		000000000000000000003002 /* Features */ = {
+			isa = PBXGroup;
+			children = (
+				000000000000000000003003 /* Account */,
+				000000000000000000003004 /* Home */,
+				000000000000000000003005 /* Lobby */,
+				000000000000000000003006 /* Results */,
+			);
+			path = Features;
+			sourceTree = "<group>";
+		};
+		000000000000000000003003 /* Account */ = {
+			isa = PBXGroup;
+			children = (
+				000000000000000000001001 /* DeletionAuthorizationView.swift */,
+				000000000000000000001002 /* ProfileAvatar.swift */,
+				000000000000000000001003 /* ProfileMenu.swift */,
+			);
+			path = Account;
+			sourceTree = "<group>";
+		};
+		000000000000000000003004 /* Home */ = {
+			isa = PBXGroup;
+			children = (
+				000000000000000000001004 /* HomeView.swift */,
+				000000000000000000001005 /* TableEntrySheet.swift */,
+			);
+			path = Home;
+			sourceTree = "<group>";
+		};
+		000000000000000000003005 /* Lobby */ = {
+			isa = PBXGroup;
+			children = (
+				000000000000000000001006 /* HostActionSection.swift */,
+				000000000000000000001007 /* InviteSection.swift */,
+				000000000000000000001008 /* LobbyView.swift */,
+				000000000000000000001009 /* PickSection.swift */,
+				00000000000000000000100A /* PlayersSection.swift */,
+			);
+			path = Lobby;
+			sourceTree = "<group>";
+		};
+		000000000000000000003006 /* Results */ = {
+			isa = PBXGroup;
+			children = (
+				00000000000000000000100B /* ResultRow.swift */,
+				00000000000000000000100C /* ResultView.swift */,
+				00000000000000000000100D /* ScoreSection.swift */,
+				00000000000000000000100E /* WinnerCard.swift */,
+			);
+			path = Results;
+			sourceTree = "<group>";
+		};
+		000000000000000000003007 /* Integrations */ = {
+			isa = PBXGroup;
+			children = (
+				000000000000000000003008 /* AppleSignIn */,
+				000000000000000000003009 /* GameCenter */,
+			);
+			path = Integrations;
+			sourceTree = "<group>";
+		};
+		000000000000000000003008 /* AppleSignIn */ = {
+			isa = PBXGroup;
+			children = (
+				E5988938016346E98E3996BC /* AppleSignInModel.swift */,
+			);
+			path = AppleSignIn;
+			sourceTree = "<group>";
+		};
+		000000000000000000003009 /* GameCenter */ = {
+			isa = PBXGroup;
+			children = (
+				00000000000000000000101A /* GameCenterAuthenticationView.swift */,
+				5A514B6D54DE4489B68C8EB4 /* GameCenterModel.swift */,
+			);
+			path = GameCenter;
+			sourceTree = "<group>";
+		};
+		00000000000000000000300A /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				C8A4EB400AA14E00A31C19EC /* GameModel.swift */,
+				C395C0D8211F4A7BBA1F0065 /* GameModels.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		00000000000000000000300B /* Networking */ = {
+			isa = PBXGroup;
+			children = (
+				00000000000000000000100F /* ConnectGameClient.swift */,
+				3447AB36E0634BEDA51A6AEF /* GameClient.swift */,
+				000000000000000000001010 /* GameClientDTOs.swift */,
+				000000000000000000001011 /* GameClientFactory.swift */,
+				000000000000000000001012 /* PreviewGameClient.swift */,
+			);
+			path = Networking;
+			sourceTree = "<group>";
+		};
+		000000000000000000003012 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				83296CFF50320284730F0D51 /* Assets.xcassets */,
+				95B8263978044D02A158AE30 /* GoogleService-Info.plist */,
+				F292770B1D1C4E6EB44A5F6C /* MiniMatch.entitlements */,
+				1C9872C6908E4474AB19E42F /* PrivacyInfo.xcprivacy */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		00000000000000000000300C /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				00000000000000000000300D /* Brand */,
+				00000000000000000000300E /* DesignSystem */,
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
+		00000000000000000000300D /* Brand */ = {
+			isa = PBXGroup;
+			children = (
+				000000000000000000001013 /* BrandHeader.swift */,
+			);
+			path = Brand;
+			sourceTree = "<group>";
+		};
+		00000000000000000000300E /* DesignSystem */ = {
+			isa = PBXGroup;
+			children = (
+				000000000000000000001014 /* MiniMatchColors.swift */,
+				000000000000000000001015 /* PrimaryButtonStyle.swift */,
+			);
+			path = DesignSystem;
 			sourceTree = "<group>";
 		};
 		05C95AD6E2DB9F3DE9BFF203 = {
@@ -102,9 +291,36 @@
 		EEB89468A18893558A1C9F35 /* MiniMatchTests */ = {
 			isa = PBXGroup;
 			children = (
-				D0F78E9FD70CBEED716DF118 /* MiniMatchTests.swift */,
+				00000000000000000000300F /* Integrations */,
+				000000000000000000003010 /* Models */,
+				000000000000000000003011 /* Networking */,
 			);
 			path = MiniMatchTests;
+			sourceTree = "<group>";
+		};
+		00000000000000000000300F /* Integrations */ = {
+			isa = PBXGroup;
+			children = (
+				000000000000000000001016 /* AppleSignInModelTests.swift */,
+			);
+			path = Integrations;
+			sourceTree = "<group>";
+		};
+		000000000000000000003010 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				000000000000000000001017 /* GameModelTests.swift */,
+				000000000000000000001018 /* GameTableTests.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		000000000000000000003011 /* Networking */ = {
+			isa = PBXGroup;
+			children = (
+				000000000000000000001019 /* GameClientDTOTests.swift */,
+			);
+			path = Networking;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -212,13 +428,34 @@
 			buildActionMask = 2147483647;
 			files = (
 				518A769C5EC08C1E05344660 /* ContentView.swift in Sources */,
-				6A8C86D601CF4D9698A48128 /* GameCenterModel.swift in Sources */,
+				B8DB8FBADF4702F86057C478 /* MiniMatchApp.swift in Sources */,
+				000000000000000000002001 /* DeletionAuthorizationView.swift in Sources */,
+				000000000000000000002002 /* ProfileAvatar.swift in Sources */,
+				000000000000000000002003 /* ProfileMenu.swift in Sources */,
+				000000000000000000002004 /* HomeView.swift in Sources */,
+				000000000000000000002005 /* TableEntrySheet.swift in Sources */,
+				000000000000000000002006 /* HostActionSection.swift in Sources */,
+				000000000000000000002007 /* InviteSection.swift in Sources */,
+				000000000000000000002008 /* LobbyView.swift in Sources */,
+				000000000000000000002009 /* PickSection.swift in Sources */,
+				00000000000000000000200A /* PlayersSection.swift in Sources */,
+				00000000000000000000200B /* ResultRow.swift in Sources */,
+				00000000000000000000200C /* ResultView.swift in Sources */,
+				00000000000000000000200D /* ScoreSection.swift in Sources */,
+				00000000000000000000200E /* WinnerCard.swift in Sources */,
 				1E0DF12FEFC34F8790E06E50 /* AppleSignInModel.swift in Sources */,
-				A40B26B0B6694A4988335295 /* GameClient.swift in Sources */,
+				00000000000000000000201A /* GameCenterAuthenticationView.swift in Sources */,
+				6A8C86D601CF4D9698A48128 /* GameCenterModel.swift in Sources */,
 				EE5CC43F3F21467F9D07A4E8 /* GameModel.swift in Sources */,
 				63B2A8E1435343C4A3AB0CF0 /* GameModels.swift in Sources */,
-				85A3BC430C8A4DF5B0295B08 /* GameViews.swift in Sources */,
-				B8DB8FBADF4702F86057C478 /* MiniMatchApp.swift in Sources */,
+				00000000000000000000200F /* ConnectGameClient.swift in Sources */,
+				A40B26B0B6694A4988335295 /* GameClient.swift in Sources */,
+				000000000000000000002010 /* GameClientDTOs.swift in Sources */,
+				000000000000000000002011 /* GameClientFactory.swift in Sources */,
+				000000000000000000002012 /* PreviewGameClient.swift in Sources */,
+				000000000000000000002013 /* BrandHeader.swift in Sources */,
+				000000000000000000002014 /* MiniMatchColors.swift in Sources */,
+				000000000000000000002015 /* PrimaryButtonStyle.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -226,7 +463,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				15B7A7188DB6DE5A974DC2AA /* MiniMatchTests.swift in Sources */,
+				000000000000000000002016 /* AppleSignInModelTests.swift in Sources */,
+				000000000000000000002017 /* GameModelTests.swift in Sources */,
+				000000000000000000002018 /* GameTableTests.swift in Sources */,
+				000000000000000000002019 /* GameClientDTOTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -322,7 +562,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = MiniMatch/MiniMatch.entitlements;
+				CODE_SIGN_ENTITLEMENTS = MiniMatch/Resources/MiniMatch.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -433,7 +673,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = MiniMatch/MiniMatch.entitlements;
+				CODE_SIGN_ENTITLEMENTS = MiniMatch/Resources/MiniMatch.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;

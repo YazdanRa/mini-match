@@ -1,6 +1,5 @@
 import GameKit
 import Observation
-import SwiftUI
 import UIKit
 
 struct GameCenterAuthentication: Identifiable {
@@ -216,14 +215,4 @@ private enum GameCenterError: LocalizedError {
             "Game Center couldn’t verify this player. Try again."
         }
     }
-}
-
-struct GameCenterAuthenticationView: UIViewControllerRepresentable {
-    let viewController: UIViewController
-
-    func makeUIViewController(context: Context) -> UIViewController {
-        viewController
-    }
-
-    func updateUIViewController(_ uiViewController: UIViewController, context: Context) {}
 }
