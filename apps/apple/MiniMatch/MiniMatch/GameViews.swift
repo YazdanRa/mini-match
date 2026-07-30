@@ -222,7 +222,6 @@ struct HomeView: View {
                 mode: mode,
                 model: model,
                 gameCenter: gameCenter,
-                defaultDisplayName: gameCenter.displayName,
                 multiplayerIsRestricted: multiplayerIsRestricted
             )
         }
@@ -250,29 +249,11 @@ private struct TableEntrySheet: View {
     @Environment(\.dismiss) private var dismiss
     @State private var tableName = ""
     @State private var tableCode = ""
-    @State private var displayName: String
-    @State private var avatarID: String
+    @State private var displayName = ""
+    @State private var avatarID = PlayerAvatar.allCases.randomElement()!.rawValue
     @State private var errorMessage: String?
     @AccessibilityFocusState private var errorIsFocused: Bool
     @FocusState private var focusedField: FocusedField?
-    private let hasKnownDisplayName: Bool
-
-    init(
-        mode: EntryMode,
-        model: GameModel,
-        gameCenter: GameCenterModel,
-        defaultDisplayName: String,
-        multiplayerIsRestricted: Bool
-    ) {
-        self.mode = mode
-        self.model = model
-        self.gameCenter = gameCenter
-        self.multiplayerIsRestricted = multiplayerIsRestricted
-        let displayName = defaultDisplayName.trimmingCharacters(in: .whitespacesAndNewlines)
-        hasKnownDisplayName = !displayName.isEmpty
-        _displayName = State(initialValue: displayName)
-        _avatarID = State(initialValue: PlayerAvatar.allCases.randomElement()!.rawValue)
-    }
 
     var body: some View {
         NavigationStack {
@@ -290,7 +271,7 @@ private struct TableEntrySheet: View {
                             )
                                 .textFieldStyle(.roundedBorder)
                                 .focused($focusedField, equals: .entry)
-                                .submitLabel(hasKnownDisplayName ? .go : .next)
+                                .submitLabel(usesGameCenterProfile ? .go : .next)
                                 .onSubmit { submitEntryField() }
                         } else {
                             TextField(
@@ -302,13 +283,17 @@ private struct TableEntrySheet: View {
                                 .textInputAutocapitalization(.characters)
                                 .autocorrectionDisabled()
                                 .focused($focusedField, equals: .entry)
-                                .submitLabel(hasKnownDisplayName ? .go : .next)
+                                .submitLabel(usesGameCenterProfile ? .go : .next)
                                 .onSubmit { submitEntryField() }
                         }
                     }
 
-                    if hasKnownDisplayName {
-                        Text("Playing as \(displayName)")
+                    if usesGameCenterProfile {
+                        Text(
+                            resolvedDisplayName.isEmpty
+                                ? "Loading Game Center profile…"
+                                : "Playing as \(resolvedDisplayName)"
+                        )
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
                     } else {
@@ -365,18 +350,27 @@ private struct TableEntrySheet: View {
             }
         }
         .interactiveDismissDisabled(model.isWorking)
-        .presentationDetents([.height(hasKnownDisplayName ? 320 : 380), .large])
+        .presentationDetents([.height(usesGameCenterProfile ? 320 : 380), .large])
         .presentationDragIndicator(.visible)
+    }
+
+    private var usesGameCenterProfile: Bool {
+        gameCenter.isAuthenticated
+    }
+
+    private var resolvedDisplayName: String {
+        let name = usesGameCenterProfile ? gameCenter.displayName : displayName
+        return name.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
     private var canSubmit: Bool {
         let entry = mode == .create ? tableName : tableCode
         return !entry.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-            && !displayName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            && !resolvedDisplayName.isEmpty
     }
 
     private func submitEntryField() {
-        if hasKnownDisplayName {
+        if usesGameCenterProfile {
             submitIfPossible()
         } else {
             focusedField = .displayName
@@ -396,14 +390,14 @@ private struct TableEntrySheet: View {
                 let succeeded = if mode == .create {
                     await model.createTable(
                         name: tableName,
-                        displayName: displayName,
+                        displayName: resolvedDisplayName,
                         avatarID: avatarID,
                         gameCenterIdentity: identity
                     )
                 } else {
                     await model.joinTable(
                         code: tableCode,
-                        displayName: displayName,
+                        displayName: resolvedDisplayName,
                         avatarID: avatarID,
                         gameCenterIdentity: identity
                     )
