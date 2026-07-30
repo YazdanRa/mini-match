@@ -192,3 +192,79 @@ func TestMemoryRepositoryUpdateIsAtomic(t *testing.T) {
 		t.Fatalf("failed update changed stored table to %q", stored.Name)
 	}
 }
+
+func TestMemoryRepositoryCountsEachCompletedMatchOnce(t *testing.T) {
+	ctx := context.Background()
+	repository := NewMemoryRepository()
+	for index, id := range []string{"table-1", "table-2"} {
+		want := uint64(index + 1)
+		table, _ := NewTable(id, "Friday", []string{"ABC123", "DEF456"}[index], "maya", "Maya", "")
+		table.Players[0].GameCenterID = "game-center-maya"
+		if err := repository.Create(ctx, table); err != nil {
+			t.Fatal(err)
+		}
+		finished, err := repository.Update(ctx, id, func(next *Table) error {
+			next.WinnerID = "maya"
+			return nil
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if finished.WinnerLifetimeWins != want {
+			t.Fatalf("table %d lifetime wins = %d, want %d", index+1, finished.WinnerLifetimeWins, want)
+		}
+		repeated, err := repository.Update(ctx, id, func(*Table) error { return nil })
+		if err != nil {
+			t.Fatal(err)
+		}
+		if repeated.WinnerLifetimeWins != want {
+			t.Fatalf("repeated update lifetime wins = %d, want %d", repeated.WinnerLifetimeWins, want)
+		}
+	}
+	if err := repository.DeleteProfile(ctx, "maya"); err != nil {
+		t.Fatal(err)
+	}
+	table, _ := NewTable("table-3", "Friday", "GHI789", "maya", "Maya", "")
+	table.Players[0].GameCenterID = "game-center-maya"
+	if err := repository.Create(ctx, table); err != nil {
+		t.Fatal(err)
+	}
+	finished, err := repository.Update(ctx, table.ID, func(next *Table) error {
+		next.WinnerID = "maya"
+		return nil
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if finished.WinnerLifetimeWins != 1 {
+		t.Fatalf("lifetime wins after profile deletion = %d, want 1", finished.WinnerLifetimeWins)
+	}
+}
+
+func TestDeletePlayerProfileRemovesActiveAndAnonymizesFinishedTables(t *testing.T) {
+	active, _ := NewTable("active", "Friday", "ACTIVE", "maya", "Maya", "fox")
+	if err := active.DeletePlayerProfile("maya", "deleted:active"); err != nil {
+		t.Fatal(err)
+	}
+	if active.HasPlayer("maya") {
+		t.Fatal("active profile was not removed")
+	}
+
+	finished, _ := NewTable("finished", "Friday", "FINISH", "maya", "Maya", "fox")
+	finished.WinnerID = "maya"
+	finished.LastResult = &Result{
+		WinnerID:   "maya",
+		Selections: []Selection{{PlayerID: "maya", Pick: 2}},
+	}
+	if err := finished.DeletePlayerProfile("maya", "deleted:finished"); err != nil {
+		t.Fatal(err)
+	}
+	if player := finished.player("deleted:finished"); player == nil ||
+		player.Name != "Deleted Player" ||
+		player.GameCenterID != "" ||
+		finished.WinnerID != "deleted:finished" ||
+		finished.LastResult.WinnerID != "deleted:finished" ||
+		finished.LastResult.Selections[0].PlayerID != "deleted:finished" {
+		t.Fatal("finished profile references were not anonymized")
+	}
+}

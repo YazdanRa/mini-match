@@ -29,7 +29,7 @@ private struct PrimaryButtonStyle: ButtonStyle {
     }
 }
 
-private struct BrandHeader: View {
+struct BrandHeader: View {
     var compact = false
 
     var body: some View {
@@ -47,13 +47,109 @@ private struct BrandHeader: View {
     }
 }
 
+struct ProfileMenu: View {
+    let gameCenter: GameCenterModel
+    let appleSignIn: AppleSignInModel
+    let canManageAccount: Bool
+
+    var body: some View {
+        Menu {
+            Text(gameCenter.displayName)
+            Button("Leaderboard", systemImage: "trophy.fill") {
+                gameCenter.showLeaderboard()
+            }
+            Button("Game Center profile", systemImage: "person.crop.circle") {
+                gameCenter.showProfile()
+            }
+            Button("Settings", systemImage: "gearshape") {
+                UIApplication.shared.open(URL(string: UIApplication.openSettingsURLString)!)
+            }
+            Button("Log out of Mini Match", systemImage: "rectangle.portrait.and.arrow.right") {
+                appleSignIn.signOut()
+            }
+            .disabled(!canManageAccount)
+            Button("Delete profile", systemImage: "trash", role: .destructive) {
+                appleSignIn.isConfirmingDeletion = true
+            }
+            .disabled(!canManageAccount)
+            if !canManageAccount {
+                Text("Return home to manage this profile.")
+            }
+        } label: {
+            ProfileAvatar(image: gameCenter.avatarImage, size: 36)
+        }
+        .accessibilityLabel(
+            gameCenter.displayName.isEmpty ? "Game Center profile" : "Profile for \(gameCenter.displayName)"
+        )
+        .accessibilityHint("Opens account and game options")
+    }
+}
+
+struct DeletionAuthorizationView: View {
+    let appleSignIn: AppleSignInModel
+    @Environment(\.colorScheme) private var colorScheme
+
+    var body: some View {
+        NavigationStack {
+            VStack(spacing: 20) {
+                Text("Confirm with Apple to revoke access and delete your Mini Match account.")
+                    .multilineTextAlignment(.center)
+
+                SignInWithAppleButton(
+                    .continue,
+                    onRequest: appleSignIn.prepareDeletion,
+                    onCompletion: appleSignIn.completeDeletion
+                )
+                .signInWithAppleButtonStyle(colorScheme == .dark ? .whiteOutline : .black)
+                .frame(height: 52)
+                .clipShape(.rect(cornerRadius: 14))
+                .disabled(appleSignIn.isWorking)
+            }
+            .padding(28)
+            .navigationTitle("Delete profile")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") {
+                        appleSignIn.cancelDeletionAuthorization()
+                    }
+                }
+            }
+        }
+        .presentationDetents([.medium])
+    }
+}
+
+private struct ProfileAvatar: View {
+    let image: UIImage?
+    let size: CGFloat
+
+    var body: some View {
+        Group {
+            if let image {
+                Image(uiImage: image)
+                    .resizable()
+                    .scaledToFill()
+            } else {
+                Image(systemName: "person.crop.circle.fill")
+                    .resizable()
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .frame(width: size, height: size)
+        .clipShape(Circle())
+        .accessibilityHidden(true)
+    }
+}
+
 struct HomeView: View {
     let model: GameModel
+    let gameCenter: GameCenterModel
+    let appleSignIn: AppleSignInModel
     let multiplayerIsUnavailable: Bool
     let multiplayerIsRestricted: Bool
     @Environment(\.colorScheme) private var colorScheme
     @State private var entryMode: EntryMode?
-    @State private var appleSignIn = AppleSignInModel()
 
     var body: some View {
         ScrollView {
@@ -97,42 +193,7 @@ struct HomeView: View {
                     ProgressView("Checking Game Center…")
                 }
 
-                if appleSignIn.isSignedIn {
-                    VStack(spacing: 10) {
-                        Label("Signed in with Apple", systemImage: "checkmark.circle.fill")
-                            .font(.subheadline.bold())
-                            .foregroundStyle(MiniMatchColors.ink)
-                            .accessibilityLabel("Signed in with Apple")
-
-                        if appleSignIn.isAwaitingDeletionAuthorization {
-                            Text("Confirm with Apple to revoke access and delete your account.")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                                .multilineTextAlignment(.center)
-
-                            SignInWithAppleButton(
-                                .continue,
-                                onRequest: appleSignIn.prepareDeletion,
-                                onCompletion: appleSignIn.completeDeletion
-                            )
-                            .signInWithAppleButtonStyle(
-                                colorScheme == .dark ? .whiteOutline : .black
-                            )
-                            .frame(height: 52)
-                            .clipShape(.rect(cornerRadius: 14))
-
-                            Button("Cancel deletion", role: .cancel) {
-                                appleSignIn.cancelDeletionAuthorization()
-                            }
-                            .frame(minHeight: 44)
-                        } else {
-                            Button("Delete account", role: .destructive) {
-                                appleSignIn.isConfirmingDeletion = true
-                            }
-                            .frame(minHeight: 44)
-                        }
-                    }
-                } else {
+                if !appleSignIn.isSignedIn {
                     SignInWithAppleButton(
                         .continue,
                         onRequest: appleSignIn.prepare,
@@ -160,29 +221,11 @@ struct HomeView: View {
             TableEntrySheet(
                 mode: mode,
                 model: model,
+                gameCenter: gameCenter,
+                defaultDisplayName: gameCenter.displayName,
+                profileImage: gameCenter.avatarImage,
                 multiplayerIsRestricted: multiplayerIsRestricted
             )
-        }
-        .alert("Apple sign-in failed", isPresented: $appleSignIn.isShowingError) {
-            Button("OK") {}
-        } message: {
-            Text(appleSignIn.errorMessage)
-        }
-        .alert("Delete your account?", isPresented: $appleSignIn.isConfirmingDeletion) {
-            Button("Delete", role: .destructive) {
-                appleSignIn.requestDeletionAuthorization()
-            }
-            Button("Cancel", role: .cancel) {}
-        } message: {
-            Text("You’ll confirm with Apple before Mini Match revokes access and deletes the Firebase account.")
-        }
-        .task {
-            await appleSignIn.refreshCredentialState()
-            for await _ in NotificationCenter.default.notifications(
-                named: ASAuthorizationAppleIDProvider.credentialRevokedNotification
-            ) {
-                await appleSignIn.refreshCredentialState()
-            }
         }
     }
 }
@@ -197,19 +240,49 @@ private enum EntryMode: String, Identifiable {
 private struct TableEntrySheet: View {
     let mode: EntryMode
     let model: GameModel
+    let gameCenter: GameCenterModel
+    let profileImage: UIImage?
     let multiplayerIsRestricted: Bool
 
     @Environment(\.dismiss) private var dismiss
     @State private var tableName = "Friday Mini Match"
     @State private var tableCode = ""
-    @State private var displayName = ""
-    @State private var avatarID = PlayerAvatar.spark.rawValue
+    @State private var displayName: String
+    @State private var avatarID: String
     @State private var errorMessage: String?
     @AccessibilityFocusState private var errorIsFocused: Bool
+
+    init(
+        mode: EntryMode,
+        model: GameModel,
+        gameCenter: GameCenterModel,
+        defaultDisplayName: String,
+        profileImage: UIImage?,
+        multiplayerIsRestricted: Bool
+    ) {
+        self.mode = mode
+        self.model = model
+        self.gameCenter = gameCenter
+        self.profileImage = profileImage
+        self.multiplayerIsRestricted = multiplayerIsRestricted
+        _displayName = State(initialValue: defaultDisplayName)
+        _avatarID = State(initialValue: PlayerAvatar.allCases.randomElement()!.rawValue)
+    }
 
     var body: some View {
         NavigationStack {
             Form {
+                if let profileImage {
+                    HStack(spacing: 12) {
+                        ProfileAvatar(image: profileImage, size: 44)
+                        Text(displayName)
+                            .font(.headline)
+                            .lineLimit(1)
+                    }
+                    .accessibilityElement(children: .combine)
+                    .accessibilityLabel("Game Center profile, \(displayName)")
+                }
+
                 if mode == .create {
                     TextField("Table name", text: $tableName)
                         .textContentType(.organizationName)
@@ -223,13 +296,6 @@ private struct TableEntrySheet: View {
                     .textContentType(.name)
                     .submitLabel(.go)
 
-                Picker("Avatar", selection: $avatarID) {
-                    ForEach(PlayerAvatar.allCases) { avatar in
-                        Text("\(avatar.glyph) \(avatar.rawValue.capitalized)")
-                            .tag(avatar.rawValue)
-                    }
-                }
-
                 if let errorMessage {
                     Text(errorMessage)
                         .foregroundStyle(MiniMatchColors.coralText)
@@ -238,24 +304,32 @@ private struct TableEntrySheet: View {
 
                 Button {
                     Task {
-                        let succeeded = if mode == .create {
-                            await model.createTable(
-                                name: tableName,
-                                displayName: displayName,
-                                avatarID: avatarID
-                            )
-                        } else {
-                            await model.joinTable(
-                                code: tableCode,
-                                displayName: displayName,
-                                avatarID: avatarID
-                            )
-                        }
-                        if succeeded {
-                            dismiss()
-                        } else {
-                            errorMessage = model.errorMessage
-                            model.isShowingError = false
+                        do {
+                            let identity = try await gameCenter.identityVerification()
+                            let succeeded = if mode == .create {
+                                await model.createTable(
+                                    name: tableName,
+                                    displayName: displayName,
+                                    avatarID: avatarID,
+                                    gameCenterIdentity: identity
+                                )
+                            } else {
+                                await model.joinTable(
+                                    code: tableCode,
+                                    displayName: displayName,
+                                    avatarID: avatarID,
+                                    gameCenterIdentity: identity
+                                )
+                            }
+                            if succeeded {
+                                dismiss()
+                            } else {
+                                errorMessage = model.errorMessage
+                                model.isShowingError = false
+                                errorIsFocused = true
+                            }
+                        } catch {
+                            errorMessage = error.localizedDescription
                             errorIsFocused = true
                         }
                     }
@@ -292,32 +366,13 @@ private struct TableEntrySheet: View {
 
 struct LobbyView: View {
     let model: GameModel
+    let profileImage: UIImage?
     let canShareInvites: Bool
     @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
         ScrollView {
             VStack(spacing: 26) {
-                HStack {
-                    Button {
-                        Task {
-                            await model.leaveTable()
-                        }
-                    } label: {
-                        if model.isWorking {
-                            ProgressView()
-                        } else {
-                            Label("Leave", systemImage: "chevron.left")
-                        }
-                    }
-                    .frame(minHeight: 44)
-                    .disabled(model.isWorking)
-                    Spacer()
-                    BrandHeader(compact: true)
-                    Spacer()
-                    Color.clear.frame(width: 58)
-                }
-
                 if let table = model.table {
                     VStack(spacing: 6) {
                         Text(table.name)
@@ -328,7 +383,11 @@ struct LobbyView: View {
                     }
                     .foregroundStyle(MiniMatchColors.ink)
 
-                    PlayersSection(table: table, currentPlayerID: model.currentPlayerID)
+                    PlayersSection(
+                        table: table,
+                        currentPlayerID: model.currentPlayerID,
+                        profileImage: profileImage
+                    )
 
                     if model.isReconnecting {
                         Label("Reconnecting to the table…", systemImage: "wifi.exclamationmark")
@@ -365,6 +424,7 @@ struct LobbyView: View {
 private struct PlayersSection: View {
     let table: GameTable
     let currentPlayerID: String?
+    let profileImage: UIImage?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
@@ -387,9 +447,13 @@ private struct PlayersSection: View {
                                           : MiniMatchColors.coral.opacity(0.84))
                                     .frame(width: 62, height: 62)
                                     .overlay {
-                                        Text(player.avatarGlyph)
-                                            .font(.title2.bold())
-                                            .accessibilityHidden(true)
+                                        if player.id == currentPlayerID, let profileImage {
+                                            ProfileAvatar(image: profileImage, size: 56)
+                                        } else {
+                                            Text(player.avatarGlyph)
+                                                .font(.title2.bold())
+                                                .accessibilityHidden(true)
+                                        }
                                     }
 
                                 Image(systemName: player.isLocked ? "checkmark.circle.fill" : "ellipsis.circle.fill")

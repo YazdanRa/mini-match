@@ -21,6 +21,8 @@ func TestFirestoreDocumentsKeepPicksPrivateAndPreserveUint64(t *testing.T) {
 	}
 	table.Version = math.MaxUint64
 	table.EventSequence = math.MaxUint64
+	table.WinnerLifetimeWins = math.MaxUint64
+	table.Players[0].GameCenterID = "game-center-maya"
 
 	private := privateDocument(table)
 	if got := private.Players[0].Pick; got != "18446744073709551615" {
@@ -33,14 +35,21 @@ func TestFirestoreDocumentsKeepPicksPrivateAndPreserveUint64(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if decoded.Players[0].Pick != math.MaxUint64 || decoded.Version != math.MaxUint64 || decoded.EventSequence != math.MaxUint64 {
+	if decoded.Players[0].Pick != math.MaxUint64 ||
+		decoded.Version != math.MaxUint64 ||
+		decoded.EventSequence != math.MaxUint64 ||
+		decoded.WinnerLifetimeWins != math.MaxUint64 {
 		t.Fatal("private document did not round-trip uint64 values")
 	}
 	if decoded.Players[0].Name != "Maya" || decoded.Players[0].Avatar != "fox" ||
+		decoded.Players[0].GameCenterID != "game-center-maya" ||
 		decoded.Players[1].Name != "Liam" || decoded.Players[1].Avatar != "owl" {
 		t.Fatal("player profiles did not round-trip through the private Firestore document")
 	}
 	public := publicDocument(table)
+	if public.WinnerLifetimeWins != "18446744073709551615" {
+		t.Fatal("public document truncated winner lifetime wins")
+	}
 	if private.Players[0].Name != "Maya" || private.Players[0].Avatar != "fox" ||
 		private.Players[1].Name != "Liam" || private.Players[1].Avatar != "owl" ||
 		public.Players[0].Name != "Maya" || public.Players[0].Avatar != "fox" ||

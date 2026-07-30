@@ -2,8 +2,18 @@ import Foundation
 import FirebaseAuth
 
 protocol GameClient: Sendable {
-    func createTable(name: String, displayName: String, avatarID: String) async throws -> GameSession
-    func joinTable(code: String, displayName: String, avatarID: String) async throws -> GameSession
+    func createTable(
+        name: String,
+        displayName: String,
+        avatarID: String,
+        gameCenterIdentity: GameCenterIdentityDTO?
+    ) async throws -> GameSession
+    func joinTable(
+        code: String,
+        displayName: String,
+        avatarID: String,
+        gameCenterIdentity: GameCenterIdentityDTO?
+    ) async throws -> GameSession
     func leaveTable(tableID: String, playerID: String) async throws
     func lockPick(
         tableID: String,
@@ -17,6 +27,7 @@ protocol GameClient: Sendable {
         roundNumber: UInt32
     ) async throws -> GameTable
     func getTable(id: String) async throws -> GameTable
+    func deleteProfile() async throws
 }
 
 enum GameClientError: Error, LocalizedError, Sendable {
@@ -42,22 +53,38 @@ struct ConnectGameClient: GameClient {
         self.session = session
     }
 
-    func createTable(name: String, displayName: String, avatarID: String) async throws -> GameSession {
+    func createTable(
+        name: String,
+        displayName: String,
+        avatarID: String,
+        gameCenterIdentity: GameCenterIdentityDTO?
+    ) async throws -> GameSession {
         let response: SessionResponse = try await call(
             "CreateTable",
             body: CreateTableRequest(
                 name: name,
                 hostDisplayName: displayName,
-                hostAvatar: avatarID
+                hostAvatar: avatarID,
+                gameCenterIdentity: gameCenterIdentity
             )
         )
         return GameSession(table: try response.table.model(), playerID: response.playerId)
     }
 
-    func joinTable(code: String, displayName: String, avatarID: String) async throws -> GameSession {
+    func joinTable(
+        code: String,
+        displayName: String,
+        avatarID: String,
+        gameCenterIdentity: GameCenterIdentityDTO?
+    ) async throws -> GameSession {
         let response: SessionResponse = try await call(
             "JoinTable",
-            body: JoinTableRequest(joinCode: code, displayName: displayName, avatar: avatarID)
+            body: JoinTableRequest(
+                joinCode: code,
+                displayName: displayName,
+                avatar: avatarID,
+                gameCenterIdentity: gameCenterIdentity
+            )
         )
         return GameSession(table: try response.table.model(), playerID: response.playerId)
     }
@@ -108,6 +135,10 @@ struct ConnectGameClient: GameClient {
         return try response.table.model()
     }
 
+    func deleteProfile() async throws {
+        let _: EmptyResponse = try await call("DeleteProfile", body: EmptyRequest())
+    }
+
     private func call<Request: Encodable, Response: Decodable>(
         _ method: String,
         body: Request
@@ -145,7 +176,12 @@ actor PreviewGameClient: GameClient {
     private var currentPlayerID = "local-player"
     private var localPick: UInt64?
 
-    func createTable(name: String, displayName: String, avatarID: String) async throws -> GameSession {
+    func createTable(
+        name: String,
+        displayName: String,
+        avatarID: String,
+        gameCenterIdentity _: GameCenterIdentityDTO?
+    ) async throws -> GameSession {
         currentPlayerID = "local-player"
         let created = sampleTable(
             name: name,
@@ -157,7 +193,12 @@ actor PreviewGameClient: GameClient {
         return GameSession(table: created, playerID: currentPlayerID)
     }
 
-    func joinTable(code: String, displayName: String, avatarID: String) async throws -> GameSession {
+    func joinTable(
+        code: String,
+        displayName: String,
+        avatarID: String,
+        gameCenterIdentity _: GameCenterIdentityDTO?
+    ) async throws -> GameSession {
         currentPlayerID = "local-player"
         var joined = sampleTable(
             name: "Friday Mini Match",
@@ -263,6 +304,7 @@ actor PreviewGameClient: GameClient {
             table.state = .finished
             table.currentRound = nil
             table.winnerPlayerID = winnerID
+            table.winnerLifetimeWins = 1
         } else {
             table.currentRound = GameRound(number: roundNumber + 1, phase: .acceptingPicks)
         }
@@ -278,6 +320,8 @@ actor PreviewGameClient: GameClient {
         }
         return table
     }
+
+    func deleteProfile() async throws {}
 
     private func sampleTable(
         name: String,
@@ -330,7 +374,8 @@ actor PreviewGameClient: GameClient {
             winsToFinish: table.winsToFinish,
             stateVersion: table.stateVersion,
             eventSequence: table.eventSequence,
-            winnerPlayerID: table.winnerPlayerID
+            winnerPlayerID: table.winnerPlayerID,
+            winnerLifetimeWins: table.winnerLifetimeWins
         )
     }
 
@@ -347,7 +392,8 @@ actor PreviewGameClient: GameClient {
             winsToFinish: table.winsToFinish,
             stateVersion: table.stateVersion,
             eventSequence: table.eventSequence,
-            winnerPlayerID: table.winnerPlayerID
+            winnerPlayerID: table.winnerPlayerID,
+            winnerLifetimeWins: table.winnerLifetimeWins
         )
     }
 }
@@ -370,12 +416,22 @@ private struct CreateTableRequest: Encodable {
     let name: String
     let hostDisplayName: String
     let hostAvatar: String
+    let gameCenterIdentity: GameCenterIdentityDTO?
 }
 
 private struct JoinTableRequest: Encodable {
     let joinCode: String
     let displayName: String
     let avatar: String
+    let gameCenterIdentity: GameCenterIdentityDTO?
+}
+
+struct GameCenterIdentityDTO: Encodable, Sendable {
+    let teamPlayerId: String
+    let publicKeyUrl: String
+    let signature: Data
+    let salt: Data
+    let timestamp: String
 }
 
 private struct LockPickRequest: Encodable {
@@ -399,6 +455,10 @@ private struct StartRoundRequest: Encodable {
 private struct GetTableRequest: Encodable {
     let tableId: String
 }
+
+private struct EmptyRequest: Encodable {}
+
+private struct EmptyResponse: Decodable {}
 
 private struct SessionResponse: Decodable {
     let table: TableDTO
@@ -426,6 +486,7 @@ struct TableDTO: Decodable {
     let stateVersion: String?
     let eventSequence: String?
     let winnerPlayerId: String?
+    let winnerLifetimeWins: String?
 
     func model() throws -> GameTable {
         let tableState: GameTable.State
@@ -443,6 +504,15 @@ struct TableDTO: Decodable {
         else {
             throw GameClientError.invalidResponse
         }
+        let lifetimeWins: UInt64?
+        if let winnerLifetimeWins {
+            guard let value = UInt64(winnerLifetimeWins) else {
+                throw GameClientError.invalidResponse
+            }
+            lifetimeWins = value
+        } else {
+            lifetimeWins = nil
+        }
         return GameTable(
             id: id,
             name: name,
@@ -455,7 +525,8 @@ struct TableDTO: Decodable {
             winsToFinish: winsToFinish,
             stateVersion: stateVersion,
             eventSequence: eventSequence,
-            winnerPlayerID: winnerPlayerId
+            winnerPlayerID: winnerPlayerId,
+            winnerLifetimeWins: lifetimeWins
         )
     }
 }

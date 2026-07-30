@@ -42,8 +42,17 @@ final class GameModel {
         isHost && table?.allPlayersLocked == true
     }
 
+    var completedMatchWin: CompletedMatchWin? {
+        table?.completedMatchWin(for: currentPlayerID)
+    }
+
     @discardableResult
-    func createTable(name: String, displayName: String, avatarID: String = "spark") async -> Bool {
+    func createTable(
+        name: String,
+        displayName: String,
+        avatarID: String = "spark",
+        gameCenterIdentity: GameCenterIdentityDTO? = nil
+    ) async -> Bool {
         guard !multiplayerIsRestricted else {
             showError(String(localized: "Multiplayer is unavailable because of Screen Time settings."))
             return false
@@ -53,12 +62,22 @@ final class GameModel {
             return false
         }
         return await loadSession {
-            try await client.createTable(name: name, displayName: displayName, avatarID: avatarID)
+            try await client.createTable(
+                name: name,
+                displayName: displayName,
+                avatarID: avatarID,
+                gameCenterIdentity: gameCenterIdentity
+            )
         }
     }
 
     @discardableResult
-    func joinTable(code: String, displayName: String, avatarID: String = "spark") async -> Bool {
+    func joinTable(
+        code: String,
+        displayName: String,
+        avatarID: String = "spark",
+        gameCenterIdentity: GameCenterIdentityDTO? = nil
+    ) async -> Bool {
         guard !multiplayerIsRestricted else {
             showError(String(localized: "Multiplayer is unavailable because of Screen Time settings."))
             return false
@@ -71,7 +90,8 @@ final class GameModel {
             try await client.joinTable(
                 code: code.uppercased(),
                 displayName: displayName,
-                avatarID: avatarID
+                avatarID: avatarID,
+                gameCenterIdentity: gameCenterIdentity
             )
         }
     }
@@ -181,6 +201,10 @@ final class GameModel {
             guard self.table?.id == table.id else { return }
             resetSession()
         }
+    }
+
+    func discardSession() {
+        resetSession()
     }
 
     private func resetSession() {

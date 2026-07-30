@@ -26,6 +26,10 @@ func (s *Service) CreateTable(ctx context.Context, request *connect.Request[mini
 	if err != nil {
 		return nil, err
 	}
+	gameCenterID, err := verifyGameCenterIdentity(ctx, request.Msg.GetGameCenterIdentity())
+	if err != nil {
+		return nil, connect.NewError(connect.CodeUnauthenticated, err)
+	}
 	for range 3 {
 		tableID, err := token(16)
 		if err != nil {
@@ -44,6 +48,9 @@ func (s *Service) CreateTable(ctx context.Context, request *connect.Request[mini
 			request.Msg.GetHostAvatar(),
 		)
 		if err != nil {
+			return nil, rpcError(err)
+		}
+		if err := table.SetGameCenterID(actor, gameCenterID); err != nil {
 			return nil, rpcError(err)
 		}
 		if err := s.tables.Create(ctx, table); err != nil {
@@ -65,12 +72,19 @@ func (s *Service) JoinTable(ctx context.Context, request *connect.Request[minima
 	if err != nil {
 		return nil, err
 	}
+	gameCenterID, err := verifyGameCenterIdentity(ctx, request.Msg.GetGameCenterIdentity())
+	if err != nil {
+		return nil, connect.NewError(connect.CodeUnauthenticated, err)
+	}
 	table, err := s.tables.GetByJoinCode(ctx, strings.ToUpper(strings.TrimSpace(request.Msg.GetJoinCode())))
 	if err != nil {
 		return nil, rpcError(err)
 	}
 	table, err = s.tables.Update(ctx, table.ID, func(table *game.Table) error {
-		return table.Join(actor, request.Msg.GetDisplayName(), request.Msg.GetAvatar())
+		if err := table.Join(actor, request.Msg.GetDisplayName(), request.Msg.GetAvatar()); err != nil {
+			return err
+		}
+		return table.SetGameCenterID(actor, gameCenterID)
 	})
 	if err != nil {
 		return nil, rpcError(err)
@@ -150,6 +164,20 @@ func (s *Service) GetTable(ctx context.Context, request *connect.Request[minimat
 	return connect.NewResponse(&minimatchv1.GetTableResponse{Table: toProto(table)}), nil
 }
 
+func (s *Service) DeleteProfile(
+	ctx context.Context,
+	_ *connect.Request[minimatchv1.DeleteProfileRequest],
+) (*connect.Response[minimatchv1.DeleteProfileResponse], error) {
+	actor, err := actorID(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if err := s.tables.DeleteProfile(ctx, actor); err != nil {
+		return nil, rpcError(err)
+	}
+	return connect.NewResponse(&minimatchv1.DeleteProfileResponse{}), nil
+}
+
 func actorID(ctx context.Context) (string, error) {
 	actor, ok := authn.ActorID(ctx)
 	if !ok {
@@ -185,6 +213,10 @@ func toProto(table *game.Table) *minimatchv1.Table {
 		EventSequence:  table.EventSequence,
 		WinnerPlayerId: winnerID,
 		Players:        make([]*minimatchv1.Player, 0, len(table.Players)),
+	}
+	if table.WinnerLifetimeWins > 0 {
+		wins := table.WinnerLifetimeWins
+		response.WinnerLifetimeWins = &wins
 	}
 	for _, player := range table.Players {
 		response.Players = append(response.Players, &minimatchv1.Player{

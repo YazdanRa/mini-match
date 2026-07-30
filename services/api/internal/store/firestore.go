@@ -2,6 +2,7 @@ package store
 
 import (
 	"context"
+	"crypto/sha256"
 	"fmt"
 	"math"
 	"strconv"
@@ -16,6 +17,7 @@ const (
 	privateTables = "tables"
 	publicTables  = "table_views"
 	joinCodes     = "join_codes"
+	playerStats   = "player_stats"
 )
 
 type FirestoreRepository struct {
@@ -75,8 +77,40 @@ func (r *FirestoreRepository) Update(ctx context.Context, id string, update func
 		if err != nil {
 			return err
 		}
+		wasFinished := table.WinnerID != ""
 		if err := update(table); err != nil {
 			return err
+		}
+		if !wasFinished && table.WinnerID != "" {
+			var gameCenterID string
+			for _, player := range table.Players {
+				if player.ID == table.WinnerID {
+					gameCenterID = player.GameCenterID
+					break
+				}
+			}
+			if gameCenterID != "" {
+				stats := r.client.Collection(playerStats).Doc(statsDocumentID(gameCenterID))
+				wins := int64(0)
+				snapshot, err := tx.Get(stats)
+				if err == nil {
+					var document playerStatsDocument
+					if err := snapshot.DataTo(&document); err != nil {
+						return fmt.Errorf("decode player stats: %w", err)
+					}
+					wins = document.Wins
+				} else if status.Code(err) != codes.NotFound {
+					return err
+				}
+				if wins < 0 || wins == math.MaxInt64 {
+					return fmt.Errorf("player wins are out of range")
+				}
+				wins++
+				table.WinnerLifetimeWins = uint64(wins)
+				if err := tx.Set(stats, playerStatsDocument{Wins: wins}); err != nil {
+					return err
+				}
+			}
 		}
 		if err := tx.Set(private, privateDocument(table)); err != nil {
 			return err
@@ -93,29 +127,99 @@ func (r *FirestoreRepository) Update(ctx context.Context, id string, update func
 	return updated, nil
 }
 
+func (r *FirestoreRepository) DeleteProfile(ctx context.Context, playerID string) error {
+	snapshots, err := r.client.Collection(publicTables).
+		Where("player_ids", "array-contains", playerID).
+		Documents(ctx).
+		GetAll()
+	if err != nil {
+		return translateError(err)
+	}
+	err = r.client.RunTransaction(ctx, func(_ context.Context, tx *firestore.Transaction) error {
+		tables := make([]*game.Table, 0, len(snapshots))
+		gameCenterIDs := make(map[string]struct{})
+		for _, public := range snapshots {
+			private := r.client.Collection(privateTables).Doc(public.Ref.ID)
+			snapshot, err := tx.Get(private)
+			if err != nil {
+				return err
+			}
+			table, err := decodeTable(public.Ref.ID, snapshot)
+			if err != nil {
+				return err
+			}
+			tables = append(tables, table)
+			for _, player := range table.Players {
+				if player.ID == playerID && player.GameCenterID != "" {
+					gameCenterIDs[player.GameCenterID] = struct{}{}
+				}
+			}
+		}
+		for gameCenterID := range gameCenterIDs {
+			stats := r.client.Collection(playerStats).Doc(statsDocumentID(gameCenterID))
+			if _, err := tx.Get(stats); err != nil && status.Code(err) != codes.NotFound {
+				return err
+			}
+		}
+		for _, table := range tables {
+			replacementID := "deleted:" + statsDocumentID(playerID+"\x00"+table.ID)
+			if err := table.DeletePlayerProfile(playerID, replacementID); err != nil {
+				return err
+			}
+			if err := tx.Set(
+				r.client.Collection(privateTables).Doc(table.ID),
+				privateDocument(table),
+			); err != nil {
+				return err
+			}
+			if err := tx.Set(
+				r.client.Collection(publicTables).Doc(table.ID),
+				publicDocument(table),
+			); err != nil {
+				return err
+			}
+		}
+		for gameCenterID := range gameCenterIDs {
+			if err := tx.Delete(
+				r.client.Collection(playerStats).Doc(statsDocumentID(gameCenterID)),
+			); err != nil {
+				return err
+			}
+		}
+		return nil
+	})
+	return translateError(err)
+}
+
 type joinCodeDocument struct {
 	TableID string `firestore:"table_id"`
 }
 
+type playerStatsDocument struct {
+	Wins int64 `firestore:"wins"`
+}
+
 type tableDocument struct {
-	Name          string           `firestore:"name"`
-	JoinCode      string           `firestore:"join_code"`
-	HostID        string           `firestore:"host_player_id"`
-	Players       []playerDocument `firestore:"players"`
-	CurrentRound  roundDocument    `firestore:"current_round"`
-	LastResult    *resultDocument  `firestore:"last_result,omitempty"`
-	WinnerID      string           `firestore:"winner_player_id,omitempty"`
-	Version       string           `firestore:"state_version"`
-	EventSequence string           `firestore:"event_sequence"`
+	Name               string           `firestore:"name"`
+	JoinCode           string           `firestore:"join_code"`
+	HostID             string           `firestore:"host_player_id"`
+	Players            []playerDocument `firestore:"players"`
+	CurrentRound       roundDocument    `firestore:"current_round"`
+	LastResult         *resultDocument  `firestore:"last_result,omitempty"`
+	WinnerID           string           `firestore:"winner_player_id,omitempty"`
+	WinnerLifetimeWins string           `firestore:"winner_lifetime_wins,omitempty"`
+	Version            string           `firestore:"state_version"`
+	EventSequence      string           `firestore:"event_sequence"`
 }
 
 type playerDocument struct {
-	ID     string `firestore:"id"`
-	Name   string `firestore:"display_name"`
-	Avatar string `firestore:"avatar,omitempty"`
-	Score  int64  `firestore:"wins"`
-	Locked bool   `firestore:"locked"`
-	Pick   string `firestore:"pick"`
+	ID           string `firestore:"id"`
+	GameCenterID string `firestore:"game_center_id,omitempty"`
+	Name         string `firestore:"display_name"`
+	Avatar       string `firestore:"avatar,omitempty"`
+	Score        int64  `firestore:"wins"`
+	Locked       bool   `firestore:"locked"`
+	Pick         string `firestore:"pick"`
 }
 
 type roundDocument struct {
@@ -135,19 +239,20 @@ type selectionDocument struct {
 }
 
 type safeTableDocument struct {
-	ID             string               `firestore:"id"`
-	Name           string               `firestore:"name"`
-	JoinCode       string               `firestore:"join_code"`
-	HostID         string               `firestore:"host_player_id"`
-	PlayerIDs      []string             `firestore:"player_ids"`
-	Players        []safePlayerDocument `firestore:"players"`
-	State          string               `firestore:"state"`
-	CurrentRound   *roundDocument       `firestore:"current_round,omitempty"`
-	LastResult     *resultDocument      `firestore:"last_result,omitempty"`
-	WinsToFinish   int64                `firestore:"wins_to_finish"`
-	Version        string               `firestore:"state_version"`
-	EventSequence  string               `firestore:"event_sequence"`
-	WinnerPlayerID string               `firestore:"winner_player_id,omitempty"`
+	ID                 string               `firestore:"id"`
+	Name               string               `firestore:"name"`
+	JoinCode           string               `firestore:"join_code"`
+	HostID             string               `firestore:"host_player_id"`
+	PlayerIDs          []string             `firestore:"player_ids"`
+	Players            []safePlayerDocument `firestore:"players"`
+	State              string               `firestore:"state"`
+	CurrentRound       *roundDocument       `firestore:"current_round,omitempty"`
+	LastResult         *resultDocument      `firestore:"last_result,omitempty"`
+	WinsToFinish       int64                `firestore:"wins_to_finish"`
+	Version            string               `firestore:"state_version"`
+	EventSequence      string               `firestore:"event_sequence"`
+	WinnerPlayerID     string               `firestore:"winner_player_id,omitempty"`
+	WinnerLifetimeWins string               `firestore:"winner_lifetime_wins,omitempty"`
 }
 
 type safePlayerDocument struct {
@@ -160,24 +265,26 @@ type safePlayerDocument struct {
 
 func privateDocument(table *game.Table) tableDocument {
 	document := tableDocument{
-		Name:          table.Name,
-		JoinCode:      table.JoinCode,
-		HostID:        table.HostID,
-		Players:       make([]playerDocument, 0, len(table.Players)),
-		CurrentRound:  encodeRound(table.CurrentRound),
-		LastResult:    encodeResult(table.LastResult),
-		WinnerID:      table.WinnerID,
-		Version:       strconv.FormatUint(table.Version, 10),
-		EventSequence: strconv.FormatUint(table.EventSequence, 10),
+		Name:               table.Name,
+		JoinCode:           table.JoinCode,
+		HostID:             table.HostID,
+		Players:            make([]playerDocument, 0, len(table.Players)),
+		CurrentRound:       encodeRound(table.CurrentRound),
+		LastResult:         encodeResult(table.LastResult),
+		WinnerID:           table.WinnerID,
+		WinnerLifetimeWins: optionalUint64(table.WinnerLifetimeWins),
+		Version:            strconv.FormatUint(table.Version, 10),
+		EventSequence:      strconv.FormatUint(table.EventSequence, 10),
 	}
 	for _, player := range table.Players {
 		document.Players = append(document.Players, playerDocument{
-			ID:     player.ID,
-			Name:   player.Name,
-			Avatar: player.Avatar,
-			Score:  int64(player.Score),
-			Locked: player.Locked,
-			Pick:   strconv.FormatUint(player.Pick, 10),
+			ID:           player.ID,
+			GameCenterID: player.GameCenterID,
+			Name:         player.Name,
+			Avatar:       player.Avatar,
+			Score:        int64(player.Score),
+			Locked:       player.Locked,
+			Pick:         strconv.FormatUint(player.Pick, 10),
 		})
 	}
 	return document
@@ -185,18 +292,19 @@ func privateDocument(table *game.Table) tableDocument {
 
 func publicDocument(table *game.Table) safeTableDocument {
 	document := safeTableDocument{
-		ID:             table.ID,
-		Name:           table.Name,
-		JoinCode:       table.JoinCode,
-		HostID:         table.HostID,
-		PlayerIDs:      make([]string, 0, len(table.Players)),
-		Players:        make([]safePlayerDocument, 0, len(table.Players)),
-		State:          "active",
-		WinsToFinish:   game.WinningScore,
-		Version:        strconv.FormatUint(table.Version, 10),
-		EventSequence:  strconv.FormatUint(table.EventSequence, 10),
-		WinnerPlayerID: table.WinnerID,
-		LastResult:     encodeResult(table.LastResult),
+		ID:                 table.ID,
+		Name:               table.Name,
+		JoinCode:           table.JoinCode,
+		HostID:             table.HostID,
+		PlayerIDs:          make([]string, 0, len(table.Players)),
+		Players:            make([]safePlayerDocument, 0, len(table.Players)),
+		State:              "active",
+		WinsToFinish:       game.WinningScore,
+		Version:            strconv.FormatUint(table.Version, 10),
+		EventSequence:      strconv.FormatUint(table.EventSequence, 10),
+		WinnerPlayerID:     table.WinnerID,
+		WinnerLifetimeWins: optionalUint64(table.WinnerLifetimeWins),
+		LastResult:         encodeResult(table.LastResult),
 	}
 	if table.WinnerID == "" {
 		round := encodeRound(table.CurrentRound)
@@ -223,6 +331,17 @@ func encodeRound(round game.Round) roundDocument {
 		phase = "ready_to_reveal"
 	}
 	return roundDocument{Number: int64(round.Number), Phase: phase}
+}
+
+func optionalUint64(value uint64) string {
+	if value == 0 {
+		return ""
+	}
+	return strconv.FormatUint(value, 10)
+}
+
+func statsDocumentID(gameCenterID string) string {
+	return fmt.Sprintf("%x", sha256.Sum256([]byte(gameCenterID)))
 }
 
 func encodeResult(result *game.Result) *resultDocument {
@@ -268,16 +387,24 @@ func decodeDocument(id string, document tableDocument) (*game.Table, error) {
 	if err != nil {
 		return nil, fmt.Errorf("decode event sequence: %w", err)
 	}
+	winnerLifetimeWins := uint64(0)
+	if document.WinnerLifetimeWins != "" {
+		winnerLifetimeWins, err = strconv.ParseUint(document.WinnerLifetimeWins, 10, 64)
+		if err != nil {
+			return nil, fmt.Errorf("decode winner lifetime wins: %w", err)
+		}
+	}
 	table := &game.Table{
-		ID:            id,
-		Name:          document.Name,
-		JoinCode:      document.JoinCode,
-		HostID:        document.HostID,
-		Players:       make([]*game.Player, 0, len(document.Players)),
-		CurrentRound:  game.Round{Number: roundNumber, Phase: phase},
-		WinnerID:      document.WinnerID,
-		Version:       version,
-		EventSequence: eventSequence,
+		ID:                 id,
+		Name:               document.Name,
+		JoinCode:           document.JoinCode,
+		HostID:             document.HostID,
+		Players:            make([]*game.Player, 0, len(document.Players)),
+		CurrentRound:       game.Round{Number: roundNumber, Phase: phase},
+		WinnerID:           document.WinnerID,
+		WinnerLifetimeWins: winnerLifetimeWins,
+		Version:            version,
+		EventSequence:      eventSequence,
 	}
 	for _, player := range document.Players {
 		score, err := uint32Value(player.Score, "player wins")
@@ -289,12 +416,13 @@ func decodeDocument(id string, document tableDocument) (*game.Table, error) {
 			return nil, fmt.Errorf("decode player pick: %w", err)
 		}
 		table.Players = append(table.Players, &game.Player{
-			ID:     player.ID,
-			Name:   player.Name,
-			Avatar: player.Avatar,
-			Score:  score,
-			Locked: player.Locked,
-			Pick:   pick,
+			ID:           player.ID,
+			GameCenterID: player.GameCenterID,
+			Name:         player.Name,
+			Avatar:       player.Avatar,
+			Score:        score,
+			Locked:       player.Locked,
+			Pick:         pick,
 		})
 	}
 	if document.LastResult != nil {

@@ -8,6 +8,7 @@ import Security
 @MainActor
 @Observable
 final class AppleSignInModel {
+    private let client: any GameClient
     private var currentNonce: String?
 
     private(set) var isWorking = false
@@ -17,7 +18,8 @@ final class AppleSignInModel {
     var isConfirmingDeletion = false
     var isAwaitingDeletionAuthorization = false
 
-    init() {
+    init(client: any GameClient) {
+        self.client = client
         isSignedIn = Self.currentUserUsesApple
     }
 
@@ -77,17 +79,47 @@ final class AppleSignInModel {
         isAwaitingDeletionAuthorization = false
     }
 
+    func signOut() {
+        do {
+            try Auth.auth().signOut()
+            isSignedIn = false
+        } catch {
+            showError(error)
+        }
+    }
+
+    func deleteProfile() async {
+        guard !Self.currentUserUsesApple else {
+            requestDeletionAuthorization()
+            return
+        }
+        guard let user = Auth.auth().currentUser else { return }
+
+        isWorking = true
+        defer { isWorking = false }
+        do {
+            try await client.deleteProfile()
+            try await user.delete()
+            isSignedIn = false
+        } catch {
+            showError(error)
+        }
+    }
+
     func refreshCredentialState() async {
-        guard let appleUserID = Auth.auth().currentUser?.providerData
-            .first(where: { $0.providerID == "apple.com" })?
-            .uid
+        guard let user = Auth.auth().currentUser,
+              let appleUserID = user.providerData
+                  .first(where: { $0.providerID == "apple.com" })?
+                  .uid
         else {
             isSignedIn = false
             return
         }
+        let firebaseUserID = user.uid
 
         do {
             let state = try await credentialState(for: appleUserID)
+            guard Auth.auth().currentUser?.uid == firebaseUserID else { return }
             guard state == .authorized else {
                 try? Auth.auth().signOut()
                 isSignedIn = false
@@ -95,6 +127,7 @@ final class AppleSignInModel {
             }
             isSignedIn = true
         } catch {
+            guard Auth.auth().currentUser?.uid == firebaseUserID else { return }
             showError(error)
         }
     }
@@ -196,6 +229,7 @@ final class AppleSignInModel {
         defer { isWorking = false }
         do {
             _ = try await user.reauthenticate(with: credential)
+            try await client.deleteProfile()
             try await Auth.auth().revokeToken(withAuthorizationCode: authorizationCode)
             try await user.delete()
             isAwaitingDeletionAuthorization = false

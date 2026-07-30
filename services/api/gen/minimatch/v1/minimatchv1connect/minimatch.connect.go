@@ -51,6 +51,9 @@ const (
 	// MiniMatchServiceGetTableProcedure is the fully-qualified name of the MiniMatchService's GetTable
 	// RPC.
 	MiniMatchServiceGetTableProcedure = "/minimatch.v1.MiniMatchService/GetTable"
+	// MiniMatchServiceDeleteProfileProcedure is the fully-qualified name of the MiniMatchService's
+	// DeleteProfile RPC.
+	MiniMatchServiceDeleteProfileProcedure = "/minimatch.v1.MiniMatchService/DeleteProfile"
 )
 
 // MiniMatchServiceClient is a client for the minimatch.v1.MiniMatchService service.
@@ -62,6 +65,7 @@ type MiniMatchServiceClient interface {
 	// Reveals the named round and opens the next unless the match is won.
 	StartRound(context.Context, *connect.Request[v1.StartRoundRequest]) (*connect.Response[v1.StartRoundResponse], error)
 	GetTable(context.Context, *connect.Request[v1.GetTableRequest]) (*connect.Response[v1.GetTableResponse], error)
+	DeleteProfile(context.Context, *connect.Request[v1.DeleteProfileRequest]) (*connect.Response[v1.DeleteProfileResponse], error)
 }
 
 // NewMiniMatchServiceClient constructs a client for the minimatch.v1.MiniMatchService service. By
@@ -111,17 +115,24 @@ func NewMiniMatchServiceClient(httpClient connect.HTTPClient, baseURL string, op
 			connect.WithSchema(miniMatchServiceMethods.ByName("GetTable")),
 			connect.WithClientOptions(opts...),
 		),
+		deleteProfile: connect.NewClient[v1.DeleteProfileRequest, v1.DeleteProfileResponse](
+			httpClient,
+			baseURL+MiniMatchServiceDeleteProfileProcedure,
+			connect.WithSchema(miniMatchServiceMethods.ByName("DeleteProfile")),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
 // miniMatchServiceClient implements MiniMatchServiceClient.
 type miniMatchServiceClient struct {
-	createTable *connect.Client[v1.CreateTableRequest, v1.CreateTableResponse]
-	joinTable   *connect.Client[v1.JoinTableRequest, v1.JoinTableResponse]
-	leaveTable  *connect.Client[v1.LeaveTableRequest, v1.LeaveTableResponse]
-	lockPick    *connect.Client[v1.LockPickRequest, v1.LockPickResponse]
-	startRound  *connect.Client[v1.StartRoundRequest, v1.StartRoundResponse]
-	getTable    *connect.Client[v1.GetTableRequest, v1.GetTableResponse]
+	createTable   *connect.Client[v1.CreateTableRequest, v1.CreateTableResponse]
+	joinTable     *connect.Client[v1.JoinTableRequest, v1.JoinTableResponse]
+	leaveTable    *connect.Client[v1.LeaveTableRequest, v1.LeaveTableResponse]
+	lockPick      *connect.Client[v1.LockPickRequest, v1.LockPickResponse]
+	startRound    *connect.Client[v1.StartRoundRequest, v1.StartRoundResponse]
+	getTable      *connect.Client[v1.GetTableRequest, v1.GetTableResponse]
+	deleteProfile *connect.Client[v1.DeleteProfileRequest, v1.DeleteProfileResponse]
 }
 
 // CreateTable calls minimatch.v1.MiniMatchService.CreateTable.
@@ -154,6 +165,11 @@ func (c *miniMatchServiceClient) GetTable(ctx context.Context, req *connect.Requ
 	return c.getTable.CallUnary(ctx, req)
 }
 
+// DeleteProfile calls minimatch.v1.MiniMatchService.DeleteProfile.
+func (c *miniMatchServiceClient) DeleteProfile(ctx context.Context, req *connect.Request[v1.DeleteProfileRequest]) (*connect.Response[v1.DeleteProfileResponse], error) {
+	return c.deleteProfile.CallUnary(ctx, req)
+}
+
 // MiniMatchServiceHandler is an implementation of the minimatch.v1.MiniMatchService service.
 type MiniMatchServiceHandler interface {
 	CreateTable(context.Context, *connect.Request[v1.CreateTableRequest]) (*connect.Response[v1.CreateTableResponse], error)
@@ -163,6 +179,7 @@ type MiniMatchServiceHandler interface {
 	// Reveals the named round and opens the next unless the match is won.
 	StartRound(context.Context, *connect.Request[v1.StartRoundRequest]) (*connect.Response[v1.StartRoundResponse], error)
 	GetTable(context.Context, *connect.Request[v1.GetTableRequest]) (*connect.Response[v1.GetTableResponse], error)
+	DeleteProfile(context.Context, *connect.Request[v1.DeleteProfileRequest]) (*connect.Response[v1.DeleteProfileResponse], error)
 }
 
 // NewMiniMatchServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -208,6 +225,12 @@ func NewMiniMatchServiceHandler(svc MiniMatchServiceHandler, opts ...connect.Han
 		connect.WithSchema(miniMatchServiceMethods.ByName("GetTable")),
 		connect.WithHandlerOptions(opts...),
 	)
+	miniMatchServiceDeleteProfileHandler := connect.NewUnaryHandler(
+		MiniMatchServiceDeleteProfileProcedure,
+		svc.DeleteProfile,
+		connect.WithSchema(miniMatchServiceMethods.ByName("DeleteProfile")),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/minimatch.v1.MiniMatchService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case MiniMatchServiceCreateTableProcedure:
@@ -222,6 +245,8 @@ func NewMiniMatchServiceHandler(svc MiniMatchServiceHandler, opts ...connect.Han
 			miniMatchServiceStartRoundHandler.ServeHTTP(w, r)
 		case MiniMatchServiceGetTableProcedure:
 			miniMatchServiceGetTableHandler.ServeHTTP(w, r)
+		case MiniMatchServiceDeleteProfileProcedure:
+			miniMatchServiceDeleteProfileHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -253,4 +278,8 @@ func (UnimplementedMiniMatchServiceHandler) StartRound(context.Context, *connect
 
 func (UnimplementedMiniMatchServiceHandler) GetTable(context.Context, *connect.Request[v1.GetTableRequest]) (*connect.Response[v1.GetTableResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("minimatch.v1.MiniMatchService.GetTable is not implemented"))
+}
+
+func (UnimplementedMiniMatchServiceHandler) DeleteProfile(context.Context, *connect.Request[v1.DeleteProfileRequest]) (*connect.Response[v1.DeleteProfileResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("minimatch.v1.MiniMatchService.DeleteProfile is not implemented"))
 }

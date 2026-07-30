@@ -15,12 +15,14 @@ service MiniMatchService {
   // Reveals the named round and opens the next unless the match is won.
   rpc StartRound(StartRoundRequest) returns (StartRoundResponse);
   rpc GetTable(GetTableRequest) returns (GetTableResponse);
+  rpc DeleteProfile(DeleteProfileRequest) returns (DeleteProfileResponse);
 }
 
 message CreateTableRequest {
   string name = 1;
   string host_display_name = 2;
   string host_avatar = 3;
+  GameCenterIdentity game_center_identity = 4;
 }
 
 message CreateTableResponse {
@@ -32,6 +34,15 @@ message JoinTableRequest {
   string join_code = 1;
   string display_name = 2;
   string avatar = 3;
+  GameCenterIdentity game_center_identity = 4;
+}
+
+message GameCenterIdentity {
+  string team_player_id = 1;
+  string public_key_url = 2;
+  bytes signature = 3;
+  bytes salt = 4;
+  uint64 timestamp = 5;
 }
 
 message JoinTableResponse {
@@ -77,6 +88,10 @@ message GetTableResponse {
   Table table = 1;
 }
 
+message DeleteProfileRequest {}
+
+message DeleteProfileResponse {}
+
 message Table {
   string id = 1;
   string name = 2;
@@ -93,6 +108,7 @@ message Table {
   // Monotonic cursor of the latest safe event projected to Firestore.
   uint64 event_sequence = 11;
   optional string winner_player_id = 12;
+  optional uint64 winner_lifetime_wins = 13;
 }
 
 message Player {

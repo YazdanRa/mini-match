@@ -49,10 +49,26 @@ struct GameTable: Equatable, Sendable {
     var stateVersion: UInt64
     var eventSequence: UInt64
     var winnerPlayerID: String?
+    var winnerLifetimeWins: UInt64? = nil
 
     var allPlayersLocked: Bool {
         !players.isEmpty && players.allSatisfy(\.isLocked)
     }
+
+    func completedMatchWin(for playerID: String?) -> CompletedMatchWin? {
+        guard state == .finished,
+              winnerPlayerID == playerID,
+              let winnerLifetimeWins
+        else {
+            return nil
+        }
+        return CompletedMatchWin(matchID: id, lifetimeWins: winnerLifetimeWins)
+    }
+}
+
+struct CompletedMatchWin: Equatable, Sendable {
+    let matchID: String
+    let lifetimeWins: UInt64
 }
 
 struct GamePlayer: Identifiable, Equatable, Sendable {

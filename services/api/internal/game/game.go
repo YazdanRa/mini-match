@@ -34,25 +34,27 @@ const (
 )
 
 type Table struct {
-	ID            string
-	Name          string
-	JoinCode      string
-	HostID        string
-	Players       []*Player
-	CurrentRound  Round
-	LastResult    *Result
-	WinnerID      string
-	Version       uint64
-	EventSequence uint64
+	ID                 string
+	Name               string
+	JoinCode           string
+	HostID             string
+	Players            []*Player
+	CurrentRound       Round
+	LastResult         *Result
+	WinnerID           string
+	WinnerLifetimeWins uint64
+	Version            uint64
+	EventSequence      uint64
 }
 
 type Player struct {
-	ID     string
-	Name   string
-	Avatar string
-	Score  uint32
-	Locked bool
-	Pick   uint64
+	ID           string
+	GameCenterID string
+	Name         string
+	Avatar       string
+	Score        uint32
+	Locked       bool
+	Pick         uint64
 }
 
 type Round struct {
@@ -258,6 +260,47 @@ func (t *Table) HasPlayer(id string) bool {
 	return t.player(id) != nil
 }
 
+func (t *Table) SetGameCenterID(playerID, gameCenterID string) error {
+	player := t.player(playerID)
+	if player == nil {
+		return ErrNotFound
+	}
+	player.GameCenterID = gameCenterID
+	return nil
+}
+
+func (t *Table) DeletePlayerProfile(playerID, replacementID string) error {
+	if t.WinnerID == "" {
+		return t.Leave(playerID)
+	}
+	player := t.player(playerID)
+	if player == nil {
+		return ErrNotFound
+	}
+	player.ID = replacementID
+	player.GameCenterID = ""
+	player.Name = "Deleted Player"
+	player.Avatar = "spark"
+	if t.HostID == playerID {
+		t.HostID = replacementID
+	}
+	if t.WinnerID == playerID {
+		t.WinnerID = replacementID
+	}
+	if t.LastResult != nil {
+		if t.LastResult.WinnerID == playerID {
+			t.LastResult.WinnerID = replacementID
+		}
+		for index := range t.LastResult.Selections {
+			if t.LastResult.Selections[index].PlayerID == playerID {
+				t.LastResult.Selections[index].PlayerID = replacementID
+			}
+		}
+	}
+	t.changed()
+	return nil
+}
+
 func (t *Table) changed() {
 	t.Version++
 	t.EventSequence++
@@ -293,15 +336,20 @@ type Repository interface {
 	Get(context.Context, string) (*Table, error)
 	GetByJoinCode(context.Context, string) (*Table, error)
 	Update(context.Context, string, func(*Table) error) (*Table, error)
+	DeleteProfile(context.Context, string) error
 }
 
 type MemoryRepository struct {
 	mu     sync.Mutex
 	tables map[string]*Table
+	wins   map[string]uint64
 }
 
 func NewMemoryRepository() *MemoryRepository {
-	return &MemoryRepository{tables: make(map[string]*Table)}
+	return &MemoryRepository{
+		tables: make(map[string]*Table),
+		wins:   make(map[string]uint64),
+	}
 }
 
 func (r *MemoryRepository) Create(_ context.Context, table *Table) error {
@@ -349,8 +397,31 @@ func (r *MemoryRepository) Update(_ context.Context, id string, update func(*Tab
 	if err := update(next); err != nil {
 		return nil, err
 	}
+	if table.WinnerID == "" && next.WinnerID != "" {
+		if winner := next.player(next.WinnerID); winner != nil && winner.GameCenterID != "" {
+			r.wins[winner.GameCenterID]++
+			next.WinnerLifetimeWins = r.wins[winner.GameCenterID]
+		}
+	}
 	r.tables[id] = next
 	return clone(next), nil
+}
+
+func (r *MemoryRepository) DeleteProfile(_ context.Context, playerID string) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	for id, table := range r.tables {
+		next := clone(table)
+		for _, player := range next.Players {
+			if player.ID == playerID && player.GameCenterID != "" {
+				delete(r.wins, player.GameCenterID)
+			}
+		}
+		if err := next.DeletePlayerProfile(playerID, "deleted:"+id); err == nil {
+			r.tables[id] = next
+		}
+	}
+	return nil
 }
 
 func clone(table *Table) *Table {

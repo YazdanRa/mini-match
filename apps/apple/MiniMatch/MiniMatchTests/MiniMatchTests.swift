@@ -83,7 +83,8 @@ struct MiniMatchTests {
             "roundNumber": 1,
             "selections": [{"playerId": "maya", "pick": {}}]
           },
-          "winsToFinish": 5
+          "winsToFinish": 5,
+          "winnerLifetimeWins": "12"
         }
         """
 
@@ -108,6 +109,33 @@ struct MiniMatchTests {
         #expect(table.stateVersion == 0)
         #expect(table.eventSequence == 0)
         #expect(table.lastResult?.selections.first?.pick == 0)
+        #expect(table.winnerLifetimeWins == 12)
+    }
+
+    @Test
+    func completedMatchWinIsReportedOnlyForItsWinner() {
+        let table = GameTable(
+            id: "table-1",
+            name: "Friday Mini Match",
+            joinCode: "7X2G9K",
+            hostPlayerID: "maya",
+            players: [],
+            state: .finished,
+            currentRound: nil,
+            lastResult: nil,
+            winsToFinish: 5,
+            stateVersion: 10,
+            eventSequence: 10,
+            winnerPlayerID: "maya",
+            winnerLifetimeWins: 7
+        )
+
+        #expect(table.completedMatchWin(for: "maya") == CompletedMatchWin(
+            matchID: "table-1",
+            lifetimeWins: 7
+        ))
+        #expect(table.completedMatchWin(for: "liam") == nil)
+        #expect(table.completedMatchWin(for: nil) == nil)
     }
 
     @Test

@@ -3,14 +3,18 @@ import SwiftUI
 
 @main
 struct MiniMatchApp: App {
-    @State private var model = GameModel(client: GameClientFactory.make())
+    @State private var model: GameModel
     @State private var gameCenter: GameCenterModel
+    @State private var appleSignIn: AppleSignInModel
     @State private var loadedLaunchPreview = false
 
     init() {
         FirebaseApp.configure()
+        let client = GameClientFactory.make()
         let arguments = ProcessInfo.processInfo.arguments
         let isTesting = ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil
+        _model = State(initialValue: GameModel(client: client))
+        _appleSignIn = State(initialValue: AppleSignInModel(client: client))
         _gameCenter = State(initialValue: GameCenterModel(
             isEnabled: !isTesting
                 && !arguments.contains("--preview-lobby")
@@ -20,7 +24,7 @@ struct MiniMatchApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView(model: model, gameCenter: gameCenter)
+            ContentView(model: model, gameCenter: gameCenter, appleSignIn: appleSignIn)
                 .task {
                     gameCenter.authenticate()
                     #if DEBUG
