@@ -390,7 +390,7 @@
 				};
 			};
 			buildConfigurationList = 6EB1BB64DD01E60F8E3349CE /* Build configuration list for PBXProject "MiniMatch" */;
-			developmentRegion = fr;
+			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				Base,
