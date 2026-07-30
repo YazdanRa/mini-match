@@ -223,7 +223,6 @@ struct HomeView: View {
                 model: model,
                 gameCenter: gameCenter,
                 defaultDisplayName: gameCenter.displayName,
-                profileImage: gameCenter.avatarImage,
                 multiplayerIsRestricted: multiplayerIsRestricted
             )
         }
@@ -238,115 +237,122 @@ private enum EntryMode: String, Identifiable {
 }
 
 private struct TableEntrySheet: View {
+    private enum FocusedField {
+        case entry
+        case displayName
+    }
+
     let mode: EntryMode
     let model: GameModel
     let gameCenter: GameCenterModel
-    let profileImage: UIImage?
     let multiplayerIsRestricted: Bool
 
     @Environment(\.dismiss) private var dismiss
-    @State private var tableName = "Friday Mini Match"
+    @State private var tableName = ""
     @State private var tableCode = ""
     @State private var displayName: String
     @State private var avatarID: String
     @State private var errorMessage: String?
     @AccessibilityFocusState private var errorIsFocused: Bool
+    @FocusState private var focusedField: FocusedField?
+    private let hasKnownDisplayName: Bool
 
     init(
         mode: EntryMode,
         model: GameModel,
         gameCenter: GameCenterModel,
         defaultDisplayName: String,
-        profileImage: UIImage?,
         multiplayerIsRestricted: Bool
     ) {
         self.mode = mode
         self.model = model
         self.gameCenter = gameCenter
-        self.profileImage = profileImage
         self.multiplayerIsRestricted = multiplayerIsRestricted
-        _displayName = State(initialValue: defaultDisplayName)
+        let displayName = defaultDisplayName.trimmingCharacters(in: .whitespacesAndNewlines)
+        hasKnownDisplayName = !displayName.isEmpty
+        _displayName = State(initialValue: displayName)
         _avatarID = State(initialValue: PlayerAvatar.allCases.randomElement()!.rawValue)
     }
 
     var body: some View {
         NavigationStack {
-            Form {
-                if let profileImage {
-                    HStack(spacing: 12) {
-                        ProfileAvatar(image: profileImage, size: 44)
-                        Text(displayName)
+            ScrollView {
+                VStack(alignment: .leading, spacing: 20) {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text(mode == .create ? "Table name" : "Table code")
                             .font(.headline)
-                            .lineLimit(1)
-                    }
-                    .accessibilityElement(children: .combine)
-                    .accessibilityLabel("Game Center profile, \(displayName)")
-                }
 
-                if mode == .create {
-                    TextField("Table name", text: $tableName)
-                        .textContentType(.organizationName)
-                } else {
-                    TextField("Table code", text: $tableCode)
-                        .textInputAutocapitalization(.characters)
-                        .autocorrectionDisabled()
-                }
-
-                TextField("Your name", text: $displayName)
-                    .textContentType(.name)
-                    .submitLabel(.go)
-
-                if let errorMessage {
-                    Text(errorMessage)
-                        .foregroundStyle(MiniMatchColors.coralText)
-                        .accessibilityFocused($errorIsFocused)
-                }
-
-                Button {
-                    Task {
-                        do {
-                            let identity = try await gameCenter.identityVerification()
-                            let succeeded = if mode == .create {
-                                await model.createTable(
-                                    name: tableName,
-                                    displayName: displayName,
-                                    avatarID: avatarID,
-                                    gameCenterIdentity: identity
-                                )
-                            } else {
-                                await model.joinTable(
-                                    code: tableCode,
-                                    displayName: displayName,
-                                    avatarID: avatarID,
-                                    gameCenterIdentity: identity
-                                )
-                            }
-                            if succeeded {
-                                dismiss()
-                            } else {
-                                errorMessage = model.errorMessage
-                                model.isShowingError = false
-                                errorIsFocused = true
-                            }
-                        } catch {
-                            errorMessage = error.localizedDescription
-                            errorIsFocused = true
+                        if mode == .create {
+                            TextField(
+                                "Table name",
+                                text: $tableName,
+                                prompt: Text("Friday game")
+                            )
+                                .textFieldStyle(.roundedBorder)
+                                .focused($focusedField, equals: .entry)
+                                .submitLabel(hasKnownDisplayName ? .go : .next)
+                                .onSubmit { submitEntryField() }
+                        } else {
+                            TextField(
+                                "Table code",
+                                text: $tableCode,
+                                prompt: Text("6-character code")
+                            )
+                                .textFieldStyle(.roundedBorder)
+                                .textInputAutocapitalization(.characters)
+                                .autocorrectionDisabled()
+                                .focused($focusedField, equals: .entry)
+                                .submitLabel(hasKnownDisplayName ? .go : .next)
+                                .onSubmit { submitEntryField() }
                         }
                     }
-                } label: {
-                    if model.isWorking {
-                        HStack {
-                            ProgressView()
-                            Text(mode == .create ? "Creating…" : "Joining…")
-                        }
+
+                    if hasKnownDisplayName {
+                        Text("Playing as \(displayName)")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
                     } else {
-                        Text(mode == .create ? "Create table" : "Join table")
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Your name")
+                                .font(.headline)
+                            TextField("Your name", text: $displayName, prompt: Text("Name"))
+                                .textFieldStyle(.roundedBorder)
+                                .textContentType(.name)
+                                .focused($focusedField, equals: .displayName)
+                                .submitLabel(.go)
+                                .onSubmit { submitIfPossible() }
+                        }
                     }
+
+                    if let errorMessage {
+                        Text(errorMessage)
+                            .font(.callout)
+                            .foregroundStyle(MiniMatchColors.coralText)
+                            .accessibilityFocused($errorIsFocused)
+                    }
+
+                    Button {
+                        submit()
+                    } label: {
+                        Group {
+                            if model.isWorking {
+                                HStack(spacing: 10) {
+                                    ProgressView()
+                                    Text(mode == .create ? "Creating…" : "Joining…")
+                                }
+                            } else {
+                                Text(mode == .create ? "Create table" : "Join table")
+                            }
+                        }
+                        .frame(maxWidth: .infinity, minHeight: 22)
+                    }
+                    .fontWeight(.semibold)
+                    .buttonStyle(.borderedProminent)
+                    .controlSize(.large)
+                    .disabled(!canSubmit || model.isWorking || multiplayerIsRestricted)
                 }
-                .disabled(model.isWorking || multiplayerIsRestricted)
+                .padding(24)
             }
-            .scrollContentBackground(.hidden)
-            .background(MiniMatchColors.background)
             .navigationTitle(mode == .create ? "Create a table" : "Join a table")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -359,8 +365,61 @@ private struct TableEntrySheet: View {
             }
         }
         .interactiveDismissDisabled(model.isWorking)
-        .presentationDetents([.medium])
-        .presentationBackground(MiniMatchColors.background)
+        .presentationDetents([.height(hasKnownDisplayName ? 320 : 380), .large])
+        .presentationDragIndicator(.visible)
+    }
+
+    private var canSubmit: Bool {
+        let entry = mode == .create ? tableName : tableCode
+        return !entry.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            && !displayName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
+    private func submitEntryField() {
+        if hasKnownDisplayName {
+            submitIfPossible()
+        } else {
+            focusedField = .displayName
+        }
+    }
+
+    private func submitIfPossible() {
+        guard canSubmit else { return }
+        submit()
+    }
+
+    private func submit() {
+        focusedField = nil
+        Task {
+            do {
+                let identity = try await gameCenter.identityVerification()
+                let succeeded = if mode == .create {
+                    await model.createTable(
+                        name: tableName,
+                        displayName: displayName,
+                        avatarID: avatarID,
+                        gameCenterIdentity: identity
+                    )
+                } else {
+                    await model.joinTable(
+                        code: tableCode,
+                        displayName: displayName,
+                        avatarID: avatarID,
+                        gameCenterIdentity: identity
+                    )
+                }
+                if succeeded {
+                    dismiss()
+                } else {
+                    errorMessage = model.errorMessage
+                    model.isShowingError = false
+                    errorIsFocused = true
+                }
+            } catch {
+                errorMessage = error.localizedDescription
+                errorIsFocused = true
+            }
+        }
     }
 }
 
