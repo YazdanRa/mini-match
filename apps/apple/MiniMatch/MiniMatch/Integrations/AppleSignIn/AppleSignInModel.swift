@@ -23,6 +23,11 @@ final class AppleSignInModel {
         isSignedIn = Self.currentUserUsesApple
     }
 
+    init(previewIsSignedIn: Bool = true) {
+        client = PreviewGameClient()
+        isSignedIn = previewIsSignedIn
+    }
+
     func prepare(_ request: ASAuthorizationAppleIDRequest) {
         do {
             let nonce = try Self.randomNonce()
@@ -107,6 +112,7 @@ final class AppleSignInModel {
     }
 
     func refreshCredentialState() async {
+        guard !(client is PreviewGameClient) else { return }
         guard let user = Auth.auth().currentUser,
               let appleUserID = user.providerData
                   .first(where: { $0.providerID == "apple.com" })?

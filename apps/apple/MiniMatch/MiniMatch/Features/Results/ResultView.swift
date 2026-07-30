@@ -62,3 +62,8 @@ struct ResultView: View {
         }
     }
 }
+
+#Preview {
+    ResultView(model: GameModel.preview(table: PreviewFixtures.resultTable))
+        .background(MiniMatchColors.background)
+}

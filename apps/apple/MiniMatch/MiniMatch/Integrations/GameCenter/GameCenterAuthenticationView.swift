@@ -10,3 +10,7 @@ struct GameCenterAuthenticationView: UIViewControllerRepresentable {
 
     func updateUIViewController(_ uiViewController: UIViewController, context: Context) {}
 }
+
+#Preview {
+    GameCenterAuthenticationView(viewController: UIViewController())
+}

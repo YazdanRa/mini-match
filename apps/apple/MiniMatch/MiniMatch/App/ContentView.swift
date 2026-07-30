@@ -135,3 +135,11 @@ struct ContentView: View {
         }
     }
 }
+
+#Preview {
+    ContentView(
+        model: GameModel.preview(),
+        gameCenter: GameCenterModel.preview(),
+        appleSignIn: AppleSignInModel()
+    )
+}

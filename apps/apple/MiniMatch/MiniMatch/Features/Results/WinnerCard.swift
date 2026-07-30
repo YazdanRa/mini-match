@@ -57,3 +57,8 @@ struct WinnerCard: View {
             .clipShape(Capsule())
     }
 }
+
+#Preview {
+    WinnerCard(result: PreviewFixtures.result)
+        .padding()
+}

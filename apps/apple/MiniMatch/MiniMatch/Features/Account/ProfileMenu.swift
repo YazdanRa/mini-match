@@ -38,3 +38,11 @@ struct ProfileMenu: View {
         .accessibilityHint("Opens account and game options")
     }
 }
+
+#Preview {
+    ProfileMenu(
+        gameCenter: GameCenterModel.preview(),
+        appleSignIn: AppleSignInModel(),
+        canManageAccount: true
+    )
+}

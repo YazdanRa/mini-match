@@ -58,11 +58,16 @@ struct ResultRow: View {
     private var statusText: LocalizedStringResource {
         switch row.status {
         case .winner:
-            "Lowest unique — winner"
+            "Winner"
         case .duplicate:
-            "Duplicate — not unique"
+            "Duplicate"
         case .unique:
             "Unique"
         }
     }
+}
+
+#Preview {
+    ResultRow(row: PreviewFixtures.winnerRow)
+        .padding()
 }

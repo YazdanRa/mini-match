@@ -35,3 +35,7 @@ struct DeletionAuthorizationView: View {
         .presentationDetents([.medium])
     }
 }
+
+#Preview {
+    DeletionAuthorizationView(appleSignIn: AppleSignInModel())
+}

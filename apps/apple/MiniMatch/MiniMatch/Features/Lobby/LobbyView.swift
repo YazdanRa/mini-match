@@ -59,3 +59,12 @@ struct LobbyView: View {
         }
     }
 }
+
+#Preview {
+    LobbyView(
+        model: GameModel.preview(table: PreviewFixtures.lobbyTable),
+        profileImage: nil,
+        canShareInvites: true
+    )
+    .background(MiniMatchColors.background)
+}

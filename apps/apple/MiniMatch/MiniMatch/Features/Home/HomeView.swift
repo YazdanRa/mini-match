@@ -86,3 +86,13 @@ struct HomeView: View {
         }
     }
 }
+
+#Preview {
+    HomeView(
+        model: GameModel.preview(),
+        gameCenter: GameCenterModel.preview(),
+        appleSignIn: AppleSignInModel(),
+        multiplayerIsUnavailable: false,
+        multiplayerIsRestricted: false
+    )
+}

@@ -17,3 +17,7 @@ struct BrandHeader: View {
         .accessibilityLabel("Mini Match")
     }
 }
+
+#Preview {
+    BrandHeader()
+}

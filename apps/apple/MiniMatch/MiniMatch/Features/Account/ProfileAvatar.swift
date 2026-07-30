@@ -22,3 +22,7 @@ struct ProfileAvatar: View {
         .accessibilityHidden(true)
     }
 }
+
+#Preview {
+    ProfileAvatar(image: nil, size: 72)
+}

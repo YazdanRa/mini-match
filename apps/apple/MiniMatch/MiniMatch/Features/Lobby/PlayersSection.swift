@@ -96,3 +96,12 @@ struct PlayersSection: View {
         return Text("\(player.displayName), \(avatar) avatar, \(details.formatted())")
     }
 }
+
+#Preview {
+    PlayersSection(
+        table: PreviewFixtures.lobbyTable,
+        currentPlayerID: PreviewFixtures.currentPlayerID,
+        profileImage: nil
+    )
+    .padding()
+}

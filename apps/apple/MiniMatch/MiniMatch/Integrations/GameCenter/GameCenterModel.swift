@@ -196,6 +196,15 @@ final class GameCenterModel {
     }
 }
 
+extension GameCenterModel {
+    static func preview(isAuthenticated: Bool = true) -> GameCenterModel {
+        let model = GameCenterModel(isEnabled: false)
+        model.isAuthenticated = isAuthenticated
+        model.displayName = isAuthenticated ? "Maya" : ""
+        return model
+    }
+}
+
 private struct GameCenterVerificationItems {
     let publicKeyURL: URL
     let signature: Data

@@ -26,3 +26,8 @@ struct HostActionSection: View {
         .accessibilityHint("Available only to the host after every player locks a number")
     }
 }
+
+#Preview {
+    HostActionSection(model: GameModel.preview(table: PreviewFixtures.readyTable))
+        .padding()
+}

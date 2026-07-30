@@ -282,3 +282,26 @@ final class GameModel {
         presentResult(from: updated, for: roundNumber)
     }
 }
+
+extension GameModel {
+    static func preview(table: GameTable? = nil) -> GameModel {
+        let model = GameModel(
+            client: PreviewGameClient(
+                table: table,
+                localPick: table?.allPlayersLocked == true ? 2 : nil
+            )
+        )
+        guard let table else { return model }
+
+        model.table = table
+        model.currentPlayerID = PreviewFixtures.currentPlayerID
+        model.lastPresentedRound = table.lastResult?.roundNumber
+        if let result = table.lastResult {
+            model.result = ResultPresentation(table: table, result: result)
+            model.screen = .result
+        } else {
+            model.screen = .lobby
+        }
+        return model
+    }
+}

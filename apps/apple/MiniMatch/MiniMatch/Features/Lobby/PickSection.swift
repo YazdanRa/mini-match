@@ -53,3 +53,8 @@ struct PickSection: View {
         }
     }
 }
+
+#Preview {
+    PickSection(model: GameModel.preview(table: PreviewFixtures.lobbyTable))
+        .padding()
+}

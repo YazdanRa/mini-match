@@ -51,3 +51,8 @@ struct ScoreSection: View {
         }
     }
 }
+
+#Preview {
+    ScoreSection(table: PreviewFixtures.resultTable)
+        .padding()
+}

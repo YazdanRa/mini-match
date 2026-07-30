@@ -2,8 +2,17 @@ import Foundation
 
 actor PreviewGameClient: GameClient {
     private var table: GameTable?
-    private var currentPlayerID = "local-player"
+    private var currentPlayerID: String
     private var localPick: UInt64?
+
+    init(
+        table: GameTable? = nil,
+        localPick: UInt64? = nil
+    ) {
+        self.table = table
+        currentPlayerID = PreviewFixtures.currentPlayerID
+        self.localPick = localPick
+    }
 
     func createTable(
         name: String,
@@ -12,7 +21,7 @@ actor PreviewGameClient: GameClient {
         gameCenterIdentity _: GameCenterIdentityDTO?
     ) async throws -> GameSession {
         currentPlayerID = "local-player"
-        let created = sampleTable(
+        let created = PreviewFixtures.table(
             name: name,
             hostID: currentPlayerID,
             hostName: displayName,
@@ -29,7 +38,7 @@ actor PreviewGameClient: GameClient {
         gameCenterIdentity _: GameCenterIdentityDTO?
     ) async throws -> GameSession {
         currentPlayerID = "local-player"
-        var joined = sampleTable(
+        var joined = PreviewFixtures.table(
             name: "Friday Mini Match",
             hostID: "casey",
             hostName: "Casey",
@@ -152,38 +161,6 @@ actor PreviewGameClient: GameClient {
 
     func deleteProfile() async throws {}
 
-    private func sampleTable(
-        name: String,
-        hostID: String,
-        hostName: String,
-        hostAvatarID: String
-    ) -> GameTable {
-        GameTable(
-            id: "preview-table",
-            name: name,
-            joinCode: "7X2G9K",
-            hostPlayerID: hostID,
-            players: [
-                GamePlayer(
-                    id: hostID,
-                    displayName: hostName,
-                    avatarID: hostAvatarID,
-                    wins: 0,
-                    isLocked: false
-                ),
-                GamePlayer(id: "zoe", displayName: "Zoe", avatarID: "owl", wins: 0, isLocked: false),
-                GamePlayer(id: "liam", displayName: "Liam", avatarID: "frog", wins: 0, isLocked: false),
-            ],
-            state: .active,
-            currentRound: GameRound(number: 1, phase: .acceptingPicks),
-            lastResult: nil,
-            winsToFinish: 5,
-            stateVersion: 1,
-            eventSequence: 1,
-            winnerPlayerID: nil
-        )
-    }
-
     private func withPlayer(_ player: GamePlayer, addedTo table: GameTable) -> GameTable {
         var updated = table
         updated.players.append(player)
@@ -223,6 +200,89 @@ actor PreviewGameClient: GameClient {
             eventSequence: table.eventSequence,
             winnerPlayerID: table.winnerPlayerID,
             winnerLifetimeWins: table.winnerLifetimeWins
+        )
+    }
+}
+
+enum PreviewFixtures {
+    static let currentPlayerID = "local-player"
+
+    static var lobbyTable: GameTable {
+        table(
+            name: "Friday Mini Match",
+            hostID: currentPlayerID,
+            hostName: "Maya",
+            hostAvatarID: "spark"
+        )
+    }
+
+    static var readyTable: GameTable {
+        var table = lobbyTable
+        for index in table.players.indices {
+            table.players[index].isLocked = true
+        }
+        table.currentRound = GameRound(number: 1, phase: .readyToReveal)
+        return table
+    }
+
+    static var resultTable: GameTable {
+        var table = lobbyTable
+        table.players[2].wins = 1
+        table.currentRound = GameRound(number: 2, phase: .acceptingPicks)
+        table.lastResult = roundResult
+        return table
+    }
+
+    static var result: ResultPresentation {
+        ResultPresentation(table: resultTable, result: roundResult)
+    }
+
+    static let winnerRow = ResultPresentation.Row(
+        playerID: "liam",
+        displayName: "Liam",
+        pick: 5,
+        status: .winner
+    )
+
+    private static let roundResult = GameRoundResult(
+        roundNumber: 1,
+        selections: [
+            GameSelection(playerID: currentPlayerID, pick: 2),
+            GameSelection(playerID: "zoe", pick: 2),
+            GameSelection(playerID: "liam", pick: 5),
+        ],
+        winnerPlayerID: "liam"
+    )
+
+    static func table(
+        name: String,
+        hostID: String,
+        hostName: String,
+        hostAvatarID: String
+    ) -> GameTable {
+        GameTable(
+            id: "preview-table",
+            name: name,
+            joinCode: "7X2G9K",
+            hostPlayerID: hostID,
+            players: [
+                GamePlayer(
+                    id: hostID,
+                    displayName: hostName,
+                    avatarID: hostAvatarID,
+                    wins: 0,
+                    isLocked: false
+                ),
+                GamePlayer(id: "zoe", displayName: "Zoe", avatarID: "owl", wins: 0, isLocked: false),
+                GamePlayer(id: "liam", displayName: "Liam", avatarID: "frog", wins: 0, isLocked: false),
+            ],
+            state: .active,
+            currentRound: GameRound(number: 1, phase: .acceptingPicks),
+            lastResult: nil,
+            winsToFinish: 5,
+            stateVersion: 1,
+            eventSequence: 1,
+            winnerPlayerID: nil
         )
     }
 }

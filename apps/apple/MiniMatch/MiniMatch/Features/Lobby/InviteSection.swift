@@ -30,3 +30,8 @@ struct InviteSection: View {
         }
     }
 }
+
+#Preview {
+    InviteSection(table: PreviewFixtures.lobbyTable, canShare: true)
+        .padding()
+}

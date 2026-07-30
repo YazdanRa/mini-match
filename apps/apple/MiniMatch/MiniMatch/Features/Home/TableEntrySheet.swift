@@ -188,3 +188,12 @@ struct TableEntrySheet: View {
         }
     }
 }
+
+#Preview {
+    TableEntrySheet(
+        mode: .create,
+        model: GameModel.preview(),
+        gameCenter: GameCenterModel.preview(isAuthenticated: false),
+        multiplayerIsRestricted: false
+    )
+}
