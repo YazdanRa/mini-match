@@ -14,6 +14,7 @@
 		518A769C5EC08C1E05344660 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDED65F93ED79B532488F42F /* ContentView.swift */; };
 		63B2A8E1435343C4A3AB0CF0 /* GameModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = C395C0D8211F4A7BBA1F0065 /* GameModels.swift */; };
 		6A8C86D601CF4D9698A48128 /* GameCenterModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A514B6D54DE4489B68C8EB4 /* GameCenterModel.swift */; };
+		7B4940F317DC4A22A42C3D3D /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 1C9872C6908E4474AB19E42F /* PrivacyInfo.xcprivacy */; };
 		85A3BC430C8A4DF5B0295B08 /* GameViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E721952B13D470FA5594B6D /* GameViews.swift */; };
 		A40B26B0B6694A4988335295 /* GameClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3447AB36E0634BEDA51A6AEF /* GameClient.swift */; };
 		B8DB8FBADF4702F86057C478 /* MiniMatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BAA5639A2A8BF42643E6AF3 /* MiniMatchApp.swift */; };
@@ -33,6 +34,7 @@
 
 /* Begin PBXFileReference section */
 		0E721952B13D470FA5594B6D /* GameViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameViews.swift; sourceTree = "<group>"; };
+		1C9872C6908E4474AB19E42F /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		3447AB36E0634BEDA51A6AEF /* GameClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameClient.swift; sourceTree = "<group>"; };
 		3F9086B3E6EAA8CD569C38C8 /* MiniMatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MiniMatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		5A514B6D54DE4489B68C8EB4 /* GameCenterModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameCenterModel.swift; sourceTree = "<group>"; };
@@ -74,6 +76,7 @@
 				95B8263978044D02A158AE30 /* GoogleService-Info.plist */,
 				F292770B1D1C4E6EB44A5F6C /* MiniMatch.entitlements */,
 				6BAA5639A2A8BF42643E6AF3 /* MiniMatchApp.swift */,
+				1C9872C6908E4474AB19E42F /* PrivacyInfo.xcprivacy */,
 			);
 			path = MiniMatch;
 			sourceTree = "<group>";
@@ -197,6 +200,7 @@
 			files = (
 				28BAAFDB33A96F2F20C69D6E /* Assets.xcassets in Resources */,
 				3E7A29BE63894BB1A3D9C631 /* GoogleService-Info.plist in Resources */,
+				7B4940F317DC4A22A42C3D3D /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -325,6 +329,7 @@
 				DEVELOPMENT_TEAM = F5MV3G97S3;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "Mini Match";
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.games";
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.6;
@@ -435,6 +440,7 @@
 				DEVELOPMENT_TEAM = F5MV3G97S3;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "Mini Match";
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.games";
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.6;
