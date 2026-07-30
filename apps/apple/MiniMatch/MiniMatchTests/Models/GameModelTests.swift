@@ -108,7 +108,10 @@ struct GameModelTests {
 
         #expect(await model.createTable(name: "Friday", displayName: "Maya") == false)
         #expect(model.screen == .home)
-        #expect(model.errorMessage.contains("Screen Time"))
+        #expect(
+            model.errorMessage
+                == String(localized: "Multiplayer is unavailable because of Screen Time settings.")
+        )
     }
 
     @Test

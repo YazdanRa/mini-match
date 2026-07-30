@@ -52,7 +52,9 @@ struct LobbyView: View {
             guard let table = model.table else { return }
             UIAccessibility.post(
                 notification: .announcement,
-                argument: "\(table.players.count) players. \(table.players.filter(\.isLocked).count) locked in."
+                argument: String(
+                    localized: "\(table.players.count) players. \(table.players.filter(\.isLocked).count) locked in."
+                )
             )
         }
     }

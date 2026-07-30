@@ -67,9 +67,7 @@ struct PlayersSection: View {
                         }
                         .frame(width: 88)
                         .accessibilityElement(children: .ignore)
-                        .accessibilityLabel(
-                            "\(player.displayName), \(PlayerAvatar(rawValue: player.avatarID)?.label ?? "Spark") avatar, \(player.id == currentPlayerID ? "you, " : "")\(player.id == table.hostPlayerID ? "host, " : "")\(player.isLocked ? "locked" : "not locked")"
-                        )
+                        .accessibilityLabel(accessibilityLabel(for: player))
                         .transition(.scale(scale: 0.94).combined(with: .opacity))
                     }
                 }
@@ -81,5 +79,20 @@ struct PlayersSection: View {
             .scrollIndicators(.hidden)
         }
         .foregroundStyle(MiniMatchColors.ink)
+    }
+
+    private func accessibilityLabel(for player: GamePlayer) -> Text {
+        var details = [String]()
+        if player.id == currentPlayerID {
+            details.append(String(localized: "You"))
+        }
+        if player.id == table.hostPlayerID {
+            details.append(String(localized: "Host"))
+        }
+        details.append(
+            player.isLocked ? String(localized: "Locked") : String(localized: "Not locked")
+        )
+        let avatar = PlayerAvatar(rawValue: player.avatarID)?.label ?? PlayerAvatar.spark.label
+        return Text("\(player.displayName), \(avatar) avatar, \(details.formatted())")
     }
 }

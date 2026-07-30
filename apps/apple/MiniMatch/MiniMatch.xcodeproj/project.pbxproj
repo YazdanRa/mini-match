@@ -44,6 +44,7 @@
 		000000000000000000002018 /* GameTableTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000001018 /* GameTableTests.swift */; };
 		000000000000000000002019 /* GameClientDTOTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000001019 /* GameClientDTOTests.swift */; };
 		00000000000000000000201A /* GameCenterAuthenticationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00000000000000000000101A /* GameCenterAuthenticationView.swift */; };
+		00000000000000000000201B /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 00000000000000000000101B /* Localizable.xcstrings */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -96,6 +97,7 @@
 		000000000000000000001018 /* GameTableTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameTableTests.swift; sourceTree = "<group>"; };
 		000000000000000000001019 /* GameClientDTOTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameClientDTOTests.swift; sourceTree = "<group>"; };
 		00000000000000000000101A /* GameCenterAuthenticationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameCenterAuthenticationView.swift; sourceTree = "<group>"; };
+		00000000000000000000101B /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -238,6 +240,7 @@
 			children = (
 				83296CFF50320284730F0D51 /* Assets.xcassets */,
 				95B8263978044D02A158AE30 /* GoogleService-Info.plist */,
+				00000000000000000000101B /* Localizable.xcstrings */,
 				F292770B1D1C4E6EB44A5F6C /* MiniMatch.entitlements */,
 				1C9872C6908E4474AB19E42F /* PrivacyInfo.xcprivacy */,
 			);
@@ -387,10 +390,12 @@
 				};
 			};
 			buildConfigurationList = 6EB1BB64DD01E60F8E3349CE /* Build configuration list for PBXProject "MiniMatch" */;
-			developmentRegion = en;
+			developmentRegion = fr;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				Base,
+				fr,
+				es,
 				en,
 			);
 			mainGroup = 05C95AD6E2DB9F3DE9BFF203;
@@ -416,6 +421,7 @@
 			files = (
 				28BAAFDB33A96F2F20C69D6E /* Assets.xcassets in Resources */,
 				3E7A29BE63894BB1A3D9C631 /* GoogleService-Info.plist in Resources */,
+				00000000000000000000201B /* Localizable.xcstrings in Resources */,
 				7B4940F317DC4A22A42C3D3D /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -120,7 +120,7 @@ struct ConnectGameClient: GameClient {
             throw GameClientError.invalidResponse
         }
         guard (200..<300).contains(httpResponse.statusCode) else {
-            let message = (try? JSONDecoder().decode(ErrorResponse.self, from: data).message)
+            let message = (try? JSONDecoder().decode(ErrorResponse.self, from: data).localizedMessage)
                 ?? String(localized: "The request failed.")
             throw GameClientError.server(message)
         }

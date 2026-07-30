@@ -55,7 +55,7 @@ struct ResultRow: View {
         .foregroundStyle(row.status == .duplicate ? MiniMatchColors.coralText : MiniMatchColors.blueText)
     }
 
-    private var statusText: String {
+    private var statusText: LocalizedStringResource {
         switch row.status {
         case .winner:
             "Lowest unique — winner"

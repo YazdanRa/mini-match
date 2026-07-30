@@ -58,7 +58,28 @@ struct TableResponse: Decodable {
 }
 
 struct ErrorResponse: Decodable {
-    let message: String
+    let code: String
+
+    var localizedMessage: String {
+        switch code {
+        case "invalid_argument":
+            String(localized: "Check the table details and try again.")
+        case "not_found":
+            String(localized: "Table not found.")
+        case "already_exists":
+            String(localized: "That table already exists.")
+        case "permission_denied":
+            String(localized: "You don’t have permission to do that.")
+        case "failed_precondition":
+            String(localized: "The table is not ready.")
+        case "unauthenticated":
+            String(localized: "Sign in and try again.")
+        case "resource_exhausted":
+            String(localized: "Couldn’t create a table. Try again.")
+        default:
+            String(localized: "The request failed.")
+        }
+    }
 }
 
 struct TableDTO: Decodable {

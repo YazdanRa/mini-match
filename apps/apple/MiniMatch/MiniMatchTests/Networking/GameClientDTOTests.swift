@@ -52,4 +52,16 @@ struct GameClientDTOTests {
         #expect(table.lastResult?.selections.first?.pick == 0)
         #expect(table.winnerLifetimeWins == 12)
     }
+
+    @Test
+    func connectErrorsUseLocalizedMessages() {
+        #expect(
+            ErrorResponse(code: "not_found").localizedMessage
+                == String(localized: "Table not found.")
+        )
+        #expect(
+            ErrorResponse(code: "unknown").localizedMessage
+                == String(localized: "The request failed.")
+        )
+    }
 }

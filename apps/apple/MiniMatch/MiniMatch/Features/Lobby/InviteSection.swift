@@ -15,7 +15,7 @@ struct InviteSection: View {
                     .frame(maxWidth: .infinity)
 
                 if canShare {
-                    ShareLink(item: "Join \(table.name) with code \(table.joinCode)") {
+                    ShareLink(item: String(localized: "Join \(table.name) with code \(table.joinCode)")) {
                         Label("Share", systemImage: "square.and.arrow.up")
                             .frame(maxWidth: .infinity)
                             .frame(minHeight: 44)

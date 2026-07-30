@@ -41,9 +41,9 @@ struct WinnerCard: View {
 
     private var accessibilitySummary: String {
         if let winnerName = result.winnerName, let winningPick = result.winningPick {
-            return "\(winnerName) wins with \(winningPick)"
+            return String(localized: "\(winnerName) wins with \(winningPick)")
         }
-        return "No winner. Every number was duplicated."
+        return String(localized: "No winner. Every number was duplicated.")
     }
 
     private func pick(_ value: UInt64) -> some View {

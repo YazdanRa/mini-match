@@ -28,9 +28,7 @@ struct ScoreSection: View {
                         }
                         .frame(minWidth: 68)
                         .accessibilityElement(children: .ignore)
-                        .accessibilityLabel(
-                            "\(player.displayName), \(player.wins) wins\(player.id == table.winnerPlayerID ? ", game winner" : "")"
-                        )
+                        .accessibilityLabel(accessibilityLabel(for: player))
                     }
                 }
                 .padding(.horizontal)
@@ -43,5 +41,13 @@ struct ScoreSection: View {
         .padding(.vertical, 12)
         .background(MiniMatchColors.surface)
         .clipShape(.rect(cornerRadius: 20))
+    }
+
+    private func accessibilityLabel(for player: GamePlayer) -> Text {
+        if player.id == table.winnerPlayerID {
+            Text("\(player.displayName), \(player.wins) wins, game winner")
+        } else {
+            Text("\(player.displayName), \(player.wins) wins")
+        }
     }
 }

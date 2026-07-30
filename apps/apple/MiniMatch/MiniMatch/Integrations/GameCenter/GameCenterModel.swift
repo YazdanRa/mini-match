@@ -210,9 +210,9 @@ private enum GameCenterError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .accountChanged:
-            "The Game Center account changed. Try again."
+            String(localized: "The Game Center account changed. Try again.")
         case .invalidIdentity:
-            "Game Center couldn’t verify this player. Try again."
+            String(localized: "Game Center couldn’t verify this player. Try again.")
         }
     }
 }

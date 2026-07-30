@@ -21,8 +21,15 @@ enum PlayerAvatar: String, CaseIterable, Identifiable, Sendable {
         }
     }
 
-    var label: String {
-        rawValue.capitalized
+    var label: LocalizedStringResource {
+        switch self {
+        case .spark: "Spark"
+        case .fox: "Fox"
+        case .owl: "Owl"
+        case .cat: "Cat"
+        case .dog: "Dog"
+        case .frog: "Frog"
+        }
     }
 }
 
