@@ -17,6 +17,7 @@ enum MiniMatchColors {
 private struct PrimaryButtonStyle: ButtonStyle {
     let color: Color
     @Environment(\.isEnabled) private var isEnabled
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
@@ -25,7 +26,11 @@ private struct PrimaryButtonStyle: ButtonStyle {
             .frame(maxWidth: .infinity, minHeight: 56)
             .background(color.opacity(!isEnabled ? 0.45 : configuration.isPressed ? 0.78 : 1))
             .clipShape(.rect(cornerRadius: 18))
-            .scaleEffect(configuration.isPressed ? 0.98 : 1)
+            .scaleEffect(reduceMotion ? 1 : configuration.isPressed ? 0.98 : 1)
+            .animation(
+                reduceMotion ? nil : .easeOut(duration: 0.12),
+                value: configuration.isPressed
+            )
     }
 }
 
@@ -478,6 +483,7 @@ private struct PlayersSection: View {
     let table: GameTable
     let currentPlayerID: String?
     let profileImage: UIImage?
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
@@ -512,6 +518,11 @@ private struct PlayersSection: View {
                                 Image(systemName: player.isLocked ? "checkmark.circle.fill" : "ellipsis.circle.fill")
                                     .foregroundStyle(player.isLocked ? MiniMatchColors.blueText : .secondary)
                                     .background(Circle().fill(MiniMatchColors.background))
+                                    .contentTransition(.symbolEffect(.replace))
+                                    .animation(
+                                        reduceMotion ? nil : .snappy(duration: 0.2),
+                                        value: player.isLocked
+                                    )
                             }
 
                             Text(player.displayName)
@@ -537,8 +548,13 @@ private struct PlayersSection: View {
                         .accessibilityLabel(
                             "\(player.displayName), \(PlayerAvatar(rawValue: player.avatarID)?.label ?? "Spark") avatar, \(player.id == currentPlayerID ? "you, " : "")\(player.id == table.hostPlayerID ? "host, " : "")\(player.isLocked ? "locked" : "not locked")"
                         )
+                        .transition(.scale(scale: 0.94).combined(with: .opacity))
                     }
                 }
+                .animation(
+                    reduceMotion ? nil : .snappy(duration: 0.25),
+                    value: table.players.map(\.id)
+                )
             }
             .scrollIndicators(.hidden)
         }
