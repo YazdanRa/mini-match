@@ -2,13 +2,9 @@ import AuthenticationServices
 import SwiftUI
 
 struct HomeView: View {
-    let model: GameModel
     let gameCenter: GameCenterModel
     let appleSignIn: AppleSignInModel
-    let multiplayerIsUnavailable: Bool
-    let multiplayerIsRestricted: Bool
     @Environment(\.colorScheme) private var colorScheme
-    @State private var entryMode: TableEntrySheet.Mode?
 
     var body: some View {
         ScrollView {
@@ -25,22 +21,14 @@ struct HomeView: View {
                     .multilineTextAlignment(.center)
 
                 Button {
-                    entryMode = .create
+                    gameCenter.startMatchmaking()
                 } label: {
-                    Label("Create a table", systemImage: "person.3.fill")
+                    Label("Invite players", systemImage: "person.3.fill")
                 }
                 .buttonStyle(PrimaryButtonStyle(color: MiniMatchColors.blue))
                 .disabled(multiplayerIsUnavailable)
 
-                Button {
-                    entryMode = .join
-                } label: {
-                    Label("Join a table", systemImage: "person.2.fill")
-                }
-                .buttonStyle(PrimaryButtonStyle(color: MiniMatchColors.coral))
-                .disabled(multiplayerIsUnavailable)
-
-                if multiplayerIsRestricted {
+                if gameCenter.isMultiplayerRestricted {
                     Label(
                         "Multiplayer is unavailable because of Screen Time settings.",
                         systemImage: "lock.fill"
@@ -48,8 +36,18 @@ struct HomeView: View {
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
-                } else if multiplayerIsUnavailable {
+                } else if !gameCenter.restrictionIsResolved {
                     ProgressView("Checking Game Center…")
+                } else if !gameCenter.isAuthenticated {
+                    Label(
+                        "Sign in to Game Center to play with friends.",
+                        systemImage: "person.crop.circle.badge.exclamationmark"
+                    )
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+                } else if gameCenter.displayName.isEmpty {
+                    ProgressView("Loading Game Center profile…")
                 }
 
                 if !appleSignIn.isSignedIn {
@@ -76,23 +74,19 @@ struct HomeView: View {
             .padding(.vertical, 32)
             .frame(maxWidth: .infinity)
         }
-        .sheet(item: $entryMode) { mode in
-            TableEntrySheet(
-                mode: mode,
-                model: model,
-                gameCenter: gameCenter,
-                multiplayerIsRestricted: multiplayerIsRestricted
-            )
-        }
+    }
+
+    private var multiplayerIsUnavailable: Bool {
+        !gameCenter.restrictionIsResolved
+            || gameCenter.isMultiplayerRestricted
+            || !gameCenter.isAuthenticated
+            || gameCenter.displayName.isEmpty
     }
 }
 
 #Preview {
     HomeView(
-        model: GameModel.preview(),
         gameCenter: GameCenterModel.preview(),
-        appleSignIn: AppleSignInModel(),
-        multiplayerIsUnavailable: false,
-        multiplayerIsRestricted: false
+        appleSignIn: AppleSignInModel()
     )
 }

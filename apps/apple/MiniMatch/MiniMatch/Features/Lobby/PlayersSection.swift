@@ -4,7 +4,7 @@ import UIKit
 struct PlayersSection: View {
     let table: GameTable
     let currentPlayerID: String?
-    let profileImage: UIImage?
+    let playerImages: [String: UIImage]
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
@@ -28,8 +28,8 @@ struct PlayersSection: View {
                                           : MiniMatchColors.coral.opacity(0.84))
                                     .frame(width: 62, height: 62)
                                     .overlay {
-                                        if player.id == currentPlayerID, let profileImage {
-                                            ProfileAvatar(image: profileImage, size: 56)
+                                        if let image = playerImages[player.id] {
+                                            ProfileAvatar(image: image, size: 56)
                                         } else {
                                             Text(player.avatarGlyph)
                                                 .font(.title2.bold())
@@ -92,6 +92,9 @@ struct PlayersSection: View {
         details.append(
             player.isLocked ? String(localized: "Locked") : String(localized: "Not locked")
         )
+        if playerImages[player.id] != nil {
+            return Text("\(player.displayName), Game Center profile photo, \(details.formatted())")
+        }
         let avatar = PlayerAvatar(rawValue: player.avatarID)?.label ?? PlayerAvatar.spark.label
         return Text("\(player.displayName), \(avatar) avatar, \(details.formatted())")
     }
@@ -101,7 +104,7 @@ struct PlayersSection: View {
     PlayersSection(
         table: PreviewFixtures.lobbyTable,
         currentPlayerID: PreviewFixtures.currentPlayerID,
-        profileImage: nil
+        playerImages: [:]
     )
     .padding()
 }

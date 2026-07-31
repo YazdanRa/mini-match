@@ -22,9 +22,7 @@
 		000000000000000000002002 /* ProfileAvatar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000001002 /* ProfileAvatar.swift */; };
 		000000000000000000002003 /* ProfileMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000001003 /* ProfileMenu.swift */; };
 		000000000000000000002004 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000001004 /* HomeView.swift */; };
-		000000000000000000002005 /* TableEntrySheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000001005 /* TableEntrySheet.swift */; };
 		000000000000000000002006 /* HostActionSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000001006 /* HostActionSection.swift */; };
-		000000000000000000002007 /* InviteSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000001007 /* InviteSection.swift */; };
 		000000000000000000002008 /* LobbyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000001008 /* LobbyView.swift */; };
 		000000000000000000002009 /* PickSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000001009 /* PickSection.swift */; };
 		00000000000000000000200A /* PlayersSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00000000000000000000100A /* PlayersSection.swift */; };
@@ -75,9 +73,7 @@
 		000000000000000000001002 /* ProfileAvatar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileAvatar.swift; sourceTree = "<group>"; };
 		000000000000000000001003 /* ProfileMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileMenu.swift; sourceTree = "<group>"; };
 		000000000000000000001004 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
-		000000000000000000001005 /* TableEntrySheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TableEntrySheet.swift; sourceTree = "<group>"; };
 		000000000000000000001006 /* HostActionSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HostActionSection.swift; sourceTree = "<group>"; };
-		000000000000000000001007 /* InviteSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InviteSection.swift; sourceTree = "<group>"; };
 		000000000000000000001008 /* LobbyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LobbyView.swift; sourceTree = "<group>"; };
 		000000000000000000001009 /* PickSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PickSection.swift; sourceTree = "<group>"; };
 		00000000000000000000100A /* PlayersSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayersSection.swift; sourceTree = "<group>"; };
@@ -160,7 +156,6 @@
 			isa = PBXGroup;
 			children = (
 				000000000000000000001004 /* HomeView.swift */,
-				000000000000000000001005 /* TableEntrySheet.swift */,
 			);
 			path = Home;
 			sourceTree = "<group>";
@@ -169,7 +164,6 @@
 			isa = PBXGroup;
 			children = (
 				000000000000000000001006 /* HostActionSection.swift */,
-				000000000000000000001007 /* InviteSection.swift */,
 				000000000000000000001008 /* LobbyView.swift */,
 				000000000000000000001009 /* PickSection.swift */,
 				00000000000000000000100A /* PlayersSection.swift */,
@@ -439,9 +433,7 @@
 				000000000000000000002002 /* ProfileAvatar.swift in Sources */,
 				000000000000000000002003 /* ProfileMenu.swift in Sources */,
 				000000000000000000002004 /* HomeView.swift in Sources */,
-				000000000000000000002005 /* TableEntrySheet.swift in Sources */,
 				000000000000000000002006 /* HostActionSection.swift in Sources */,
-				000000000000000000002007 /* InviteSection.swift in Sources */,
 				000000000000000000002008 /* LobbyView.swift in Sources */,
 				000000000000000000002009 /* PickSection.swift in Sources */,
 				00000000000000000000200A /* PlayersSection.swift in Sources */,

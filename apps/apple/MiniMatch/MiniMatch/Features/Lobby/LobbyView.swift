@@ -3,8 +3,7 @@ import UIKit
 
 struct LobbyView: View {
     let model: GameModel
-    let profileImage: UIImage?
-    let canShareInvites: Bool
+    let playerImages: [String: UIImage]
     @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
@@ -23,7 +22,7 @@ struct LobbyView: View {
                     PlayersSection(
                         table: table,
                         currentPlayerID: model.currentPlayerID,
-                        profileImage: profileImage
+                        playerImages: playerImages
                     )
 
                     if model.isReconnecting {
@@ -37,8 +36,6 @@ struct LobbyView: View {
                     if model.isHost {
                         HostActionSection(model: model)
                     }
-
-                    InviteSection(table: table, canShare: canShareInvites)
                 }
             }
             .padding(20)
@@ -63,8 +60,7 @@ struct LobbyView: View {
 #Preview {
     LobbyView(
         model: GameModel.preview(table: PreviewFixtures.lobbyTable),
-        profileImage: nil,
-        canShareInvites: true
+        playerImages: [:]
     )
     .background(MiniMatchColors.background)
 }

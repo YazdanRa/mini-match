@@ -20,18 +20,13 @@ struct ContentView: View {
                 switch model.screen {
                 case .home:
                     HomeView(
-                        model: model,
                         gameCenter: gameCenter,
-                        appleSignIn: appleSignIn,
-                        multiplayerIsUnavailable: !gameCenter.restrictionIsResolved
-                            || gameCenter.isMultiplayerRestricted,
-                        multiplayerIsRestricted: gameCenter.isMultiplayerRestricted
+                        appleSignIn: appleSignIn
                     )
                 case .lobby:
                     LobbyView(
                         model: model,
-                        profileImage: gameCenter.avatarImage,
-                        canShareInvites: !gameCenter.personalizedCommunicationIsRestricted
+                        playerImages: gameCenter.playerImages
                     )
                 case .result:
                     ResultView(model: model)
@@ -44,6 +39,9 @@ struct ContentView: View {
                         Button {
                             Task {
                                 await model.leaveTable()
+                                if model.screen == .home {
+                                    gameCenter.endMatch()
+                                }
                             }
                         } label: {
                             if model.isWorking {
@@ -76,6 +74,9 @@ struct ContentView: View {
         ) { _, multiplayerIsAvailable in
             Task {
                 await model.setMultiplayerRestricted(!multiplayerIsAvailable)
+                if !multiplayerIsAvailable {
+                    gameCenter.endMatch()
+                }
             }
         }
         .onChange(of: scenePhase) { _, phase in
@@ -83,11 +84,17 @@ struct ContentView: View {
                 gameCenter.refreshRestrictions()
             }
         }
+        .onChange(of: model.screen) { _, screen in
+            if screen == .home {
+                gameCenter.endMatch()
+            }
+        }
         .task(id: model.completedMatchWin) {
             guard let win = model.completedMatchWin else { return }
             await gameCenter.reportMatchWin(win)
         }
         .task {
+            gameCenter.attach(to: model)
             await appleSignIn.refreshCredentialState()
             for await _ in NotificationCenter.default.notifications(
                 named: ASAuthorizationAppleIDProvider.credentialRevokedNotification
@@ -95,6 +102,7 @@ struct ContentView: View {
                 if model.screen != .home {
                     await model.leaveTable()
                     model.discardSession()
+                    gameCenter.endMatch()
                 }
                 await appleSignIn.refreshCredentialState()
             }
@@ -105,12 +113,23 @@ struct ContentView: View {
             GameCenterAuthenticationView(viewController: authentication.viewController)
                 .ignoresSafeArea()
         }
+        .fullScreenCover(item: $gameCenter.matchmaking, onDismiss: {
+            gameCenter.dismissMatchmaking()
+        }) { matchmaking in
+            GameCenterAuthenticationView(viewController: matchmaking.viewController)
+                .ignoresSafeArea()
+        }
         .alert(
             "Couldn’t continue",
             isPresented: $model.isShowingError,
             actions: { Button("OK") {} },
             message: { Text(model.errorMessage) }
         )
+        .alert("Game Center failed", isPresented: $gameCenter.isShowingError) {
+            Button("OK") {}
+        } message: {
+            Text(gameCenter.errorMessage)
+        }
         .alert("Apple sign-in failed", isPresented: $appleSignIn.isShowingError) {
             Button("OK") {}
         } message: {
