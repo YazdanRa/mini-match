@@ -190,6 +190,9 @@ func (t *Table) StartRound(actorID string, roundNumber uint32) error {
 	if t.WinnerID != "" {
 		return ErrFinished
 	}
+	if len(t.Players) < 2 {
+		return ErrNotReady
+	}
 	if actorID != t.HostID {
 		return ErrForbidden
 	}

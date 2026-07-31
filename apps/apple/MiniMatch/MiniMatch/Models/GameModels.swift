@@ -59,7 +59,7 @@ struct GameTable: Equatable, Sendable {
     var winnerLifetimeWins: UInt64? = nil
 
     var allPlayersLocked: Bool {
-        !players.isEmpty && players.allSatisfy(\.isLocked)
+        players.count >= 2 && players.allSatisfy(\.isLocked)
     }
 
     func completedMatchWin(for playerID: String?) -> CompletedMatchWin? {

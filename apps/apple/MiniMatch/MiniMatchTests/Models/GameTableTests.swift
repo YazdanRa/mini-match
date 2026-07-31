@@ -4,6 +4,34 @@ import Testing
 
 struct GameTableTests {
     @Test
+    func soloPlayerCannotMakeRoundReady() {
+        let table = GameTable(
+            id: "table-1",
+            name: "Mini Match",
+            joinCode: "7X2G9K",
+            hostPlayerID: "maya",
+            players: [
+                GamePlayer(
+                    id: "maya",
+                    displayName: "Maya",
+                    avatarID: "fox",
+                    wins: 0,
+                    isLocked: true
+                ),
+            ],
+            state: .active,
+            currentRound: nil,
+            lastResult: nil,
+            winsToFinish: 5,
+            stateVersion: 1,
+            eventSequence: 1,
+            winnerPlayerID: nil
+        )
+
+        #expect(!table.allPlayersLocked)
+    }
+
+    @Test
     func completedMatchWinIsReportedOnlyForItsWinner() {
         let table = GameTable(
             id: "table-1",

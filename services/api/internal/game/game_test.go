@@ -88,6 +88,19 @@ func TestTableRules(t *testing.T) {
 	}
 }
 
+func TestSoloPlayerCannotStartRound(t *testing.T) {
+	table, err := NewTable("table", "Friday", "ABC123", "maya", "Maya", "fox")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := table.LockPick("maya", 2, 1); err != nil {
+		t.Fatal(err)
+	}
+	if !errors.Is(table.StartRound("maya", 1), ErrNotReady) {
+		t.Fatal("solo player started the round")
+	}
+}
+
 func TestProfileInputBounds(t *testing.T) {
 	if _, err := NewTable(
 		"table",
