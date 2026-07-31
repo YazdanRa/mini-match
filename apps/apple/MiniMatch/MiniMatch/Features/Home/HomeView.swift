@@ -124,16 +124,42 @@ private struct HomeActionSection: View {
     let gameCenter: GameCenterModel
     let appleSignIn: AppleSignInModel
     @Environment(\.colorScheme) private var colorScheme
+    @State private var isJoiningWithCode = false
+    @State private var partyCode = ""
 
     var body: some View {
         if appleSignIn.isSignedIn {
-            Button {
-                gameCenter.startMatchmaking()
-            } label: {
-                Label("Invite players", systemImage: "person.3.fill")
+            VStack(spacing: 10) {
+                Button {
+                    gameCenter.startActivity()
+                } label: {
+                    Label("Play together", systemImage: "person.3.fill")
+                }
+                .buttonStyle(PrimaryButtonStyle(color: MiniMatchColors.blue))
+                .disabled(multiplayerIsUnavailable)
+
+                Button {
+                    isJoiningWithCode = true
+                } label: {
+                    Label("Join with a code", systemImage: "number")
+                        .frame(maxWidth: .infinity, minHeight: 44)
+                }
+                .buttonStyle(.bordered)
+                .disabled(multiplayerIsUnavailable)
             }
-            .buttonStyle(PrimaryButtonStyle(color: MiniMatchColors.blue))
-            .disabled(multiplayerIsUnavailable)
+            .alert("Join with a code", isPresented: $isJoiningWithCode) {
+                TextField("Party code", text: $partyCode)
+                    .textInputAutocapitalization(.characters)
+                Button("Join") {
+                    gameCenter.joinActivity(code: partyCode)
+                    partyCode = ""
+                }
+                Button("Cancel", role: .cancel) {
+                    partyCode = ""
+                }
+            } message: {
+                Text("Enter the party code from Game Center.")
+            }
         } else {
             SignInWithAppleButton(
                 .continue,

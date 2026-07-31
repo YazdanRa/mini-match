@@ -7,17 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		1E0DF12FEFC34F8790E06E50 /* AppleSignInModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5988938016346E98E3996BC /* AppleSignInModel.swift */; };
-		28BAAFDB33A96F2F20C69D6E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 83296CFF50320284730F0D51 /* Assets.xcassets */; };
-		3E7A29BE63894BB1A3D9C631 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 95B8263978044D02A158AE30 /* GoogleService-Info.plist */; };
-		518A769C5EC08C1E05344660 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDED65F93ED79B532488F42F /* ContentView.swift */; };
-		63B2A8E1435343C4A3AB0CF0 /* GameModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = C395C0D8211F4A7BBA1F0065 /* GameModels.swift */; };
-		6A8C86D601CF4D9698A48128 /* GameCenterModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A514B6D54DE4489B68C8EB4 /* GameCenterModel.swift */; };
-		7B4940F317DC4A22A42C3D3D /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 1C9872C6908E4474AB19E42F /* PrivacyInfo.xcprivacy */; };
-		A40B26B0B6694A4988335295 /* GameClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3447AB36E0634BEDA51A6AEF /* GameClient.swift */; };
-		B8DB8FBADF4702F86057C478 /* MiniMatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BAA5639A2A8BF42643E6AF3 /* MiniMatchApp.swift */; };
-		D0E416549451497B8A9A1272 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = F380CD1A9FEF4AA9A86B8B45 /* FirebaseAuth */; };
-		EE5CC43F3F21467F9D07A4E8 /* GameModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8A4EB400AA14E00A31C19EC /* GameModel.swift */; };
 		000000000000000000002001 /* DeletionAuthorizationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000001001 /* DeletionAuthorizationView.swift */; };
 		000000000000000000002002 /* ProfileAvatar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000001002 /* ProfileAvatar.swift */; };
 		000000000000000000002003 /* ProfileMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000001003 /* ProfileMenu.swift */; };
@@ -42,6 +31,18 @@
 		000000000000000000002019 /* GameClientDTOTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000001019 /* GameClientDTOTests.swift */; };
 		00000000000000000000201A /* GameCenterAuthenticationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00000000000000000000101A /* GameCenterAuthenticationView.swift */; };
 		00000000000000000000201B /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 00000000000000000000101B /* Localizable.xcstrings */; };
+		1E0DF12FEFC34F8790E06E50 /* AppleSignInModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5988938016346E98E3996BC /* AppleSignInModel.swift */; };
+		28BAAFDB33A96F2F20C69D6E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 83296CFF50320284730F0D51 /* Assets.xcassets */; };
+		3E7A29BE63894BB1A3D9C631 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 95B8263978044D02A158AE30 /* GoogleService-Info.plist */; };
+		518A769C5EC08C1E05344660 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDED65F93ED79B532488F42F /* ContentView.swift */; };
+		63B2A8E1435343C4A3AB0CF0 /* GameModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = C395C0D8211F4A7BBA1F0065 /* GameModels.swift */; };
+		6A8C86D601CF4D9698A48128 /* GameCenterModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A514B6D54DE4489B68C8EB4 /* GameCenterModel.swift */; };
+		7B4940F317DC4A22A42C3D3D /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 1C9872C6908E4474AB19E42F /* PrivacyInfo.xcprivacy */; };
+		A40B26B0B6694A4988335295 /* GameClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3447AB36E0634BEDA51A6AEF /* GameClient.swift */; };
+		B8DB8FBADF4702F86057C478 /* MiniMatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BAA5639A2A8BF42643E6AF3 /* MiniMatchApp.swift */; };
+		D0E416549451497B8A9A1272 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = F380CD1A9FEF4AA9A86B8B45 /* FirebaseAuth */; };
+		E75225F9301C7DE5006B1B4C /* MiniMatch.gamekit in Resources */ = {isa = PBXBuildFile; fileRef = E75225F8301C7DE5006B1B4C /* MiniMatch.gamekit */; };
+		EE5CC43F3F21467F9D07A4E8 /* GameModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8A4EB400AA14E00A31C19EC /* GameModel.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -55,19 +56,6 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		1C9872C6908E4474AB19E42F /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
-		3447AB36E0634BEDA51A6AEF /* GameClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameClient.swift; sourceTree = "<group>"; };
-		3F9086B3E6EAA8CD569C38C8 /* MiniMatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MiniMatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		5A514B6D54DE4489B68C8EB4 /* GameCenterModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameCenterModel.swift; sourceTree = "<group>"; };
-		559CA31BB186C9DA301F98E5 /* MiniMatchTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MiniMatchTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		6BAA5639A2A8BF42643E6AF3 /* MiniMatchApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MiniMatchApp.swift; sourceTree = "<group>"; };
-		83296CFF50320284730F0D51 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		95B8263978044D02A158AE30 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
-		C395C0D8211F4A7BBA1F0065 /* GameModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameModels.swift; sourceTree = "<group>"; };
-		C8A4EB400AA14E00A31C19EC /* GameModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameModel.swift; sourceTree = "<group>"; };
-		E5988938016346E98E3996BC /* AppleSignInModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleSignInModel.swift; sourceTree = "<group>"; };
-		EDED65F93ED79B532488F42F /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
-		F292770B1D1C4E6EB44A5F6C /* MiniMatch.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MiniMatch.entitlements; sourceTree = "<group>"; };
 		000000000000000000001001 /* DeletionAuthorizationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeletionAuthorizationView.swift; sourceTree = "<group>"; };
 		000000000000000000001002 /* ProfileAvatar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileAvatar.swift; sourceTree = "<group>"; };
 		000000000000000000001003 /* ProfileMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileMenu.swift; sourceTree = "<group>"; };
@@ -92,6 +80,20 @@
 		000000000000000000001019 /* GameClientDTOTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameClientDTOTests.swift; sourceTree = "<group>"; };
 		00000000000000000000101A /* GameCenterAuthenticationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameCenterAuthenticationView.swift; sourceTree = "<group>"; };
 		00000000000000000000101B /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
+		1C9872C6908E4474AB19E42F /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		3447AB36E0634BEDA51A6AEF /* GameClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameClient.swift; sourceTree = "<group>"; };
+		3F9086B3E6EAA8CD569C38C8 /* MiniMatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MiniMatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		559CA31BB186C9DA301F98E5 /* MiniMatchTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MiniMatchTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		5A514B6D54DE4489B68C8EB4 /* GameCenterModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameCenterModel.swift; sourceTree = "<group>"; };
+		6BAA5639A2A8BF42643E6AF3 /* MiniMatchApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MiniMatchApp.swift; sourceTree = "<group>"; };
+		83296CFF50320284730F0D51 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		95B8263978044D02A158AE30 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		C395C0D8211F4A7BBA1F0065 /* GameModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameModels.swift; sourceTree = "<group>"; };
+		C8A4EB400AA14E00A31C19EC /* GameModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameModel.swift; sourceTree = "<group>"; };
+		E5988938016346E98E3996BC /* AppleSignInModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleSignInModel.swift; sourceTree = "<group>"; };
+		E75225F8301C7DE5006B1B4C /* MiniMatch.gamekit */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = MiniMatch.gamekit; path = MiniMatch/Resources/MiniMatch.gamekit; sourceTree = SOURCE_ROOT; };
+		EDED65F93ED79B532488F42F /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		F292770B1D1C4E6EB44A5F6C /* MiniMatch.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MiniMatch.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -106,20 +108,6 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		02CD513A8AA6696657A2D72F /* MiniMatch */ = {
-			isa = PBXGroup;
-			children = (
-				000000000000000000003001 /* App */,
-				000000000000000000003002 /* Features */,
-				000000000000000000003007 /* Integrations */,
-				00000000000000000000300A /* Models */,
-				00000000000000000000300B /* Networking */,
-				000000000000000000003012 /* Resources */,
-				00000000000000000000300C /* Shared */,
-			);
-			path = MiniMatch;
-			sourceTree = "<group>";
-		};
 		000000000000000000003001 /* App */ = {
 			isa = PBXGroup;
 			children = (
@@ -226,18 +214,6 @@
 			path = Networking;
 			sourceTree = "<group>";
 		};
-		000000000000000000003012 /* Resources */ = {
-			isa = PBXGroup;
-			children = (
-				83296CFF50320284730F0D51 /* Assets.xcassets */,
-				95B8263978044D02A158AE30 /* GoogleService-Info.plist */,
-				00000000000000000000101B /* Localizable.xcstrings */,
-				F292770B1D1C4E6EB44A5F6C /* MiniMatch.entitlements */,
-				1C9872C6908E4474AB19E42F /* PrivacyInfo.xcprivacy */,
-			);
-			path = Resources;
-			sourceTree = "<group>";
-		};
 		00000000000000000000300C /* Shared */ = {
 			isa = PBXGroup;
 			children = (
@@ -262,6 +238,58 @@
 				000000000000000000001015 /* PrimaryButtonStyle.swift */,
 			);
 			path = DesignSystem;
+			sourceTree = "<group>";
+		};
+		00000000000000000000300F /* Integrations */ = {
+			isa = PBXGroup;
+			children = (
+				000000000000000000001016 /* AppleSignInModelTests.swift */,
+			);
+			path = Integrations;
+			sourceTree = "<group>";
+		};
+		000000000000000000003010 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				000000000000000000001017 /* GameModelTests.swift */,
+				000000000000000000001018 /* GameTableTests.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		000000000000000000003011 /* Networking */ = {
+			isa = PBXGroup;
+			children = (
+				000000000000000000001019 /* GameClientDTOTests.swift */,
+			);
+			path = Networking;
+			sourceTree = "<group>";
+		};
+		000000000000000000003012 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				83296CFF50320284730F0D51 /* Assets.xcassets */,
+				95B8263978044D02A158AE30 /* GoogleService-Info.plist */,
+				00000000000000000000101B /* Localizable.xcstrings */,
+				F292770B1D1C4E6EB44A5F6C /* MiniMatch.entitlements */,
+				E75225F8301C7DE5006B1B4C /* MiniMatch.gamekit */,
+				1C9872C6908E4474AB19E42F /* PrivacyInfo.xcprivacy */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		02CD513A8AA6696657A2D72F /* MiniMatch */ = {
+			isa = PBXGroup;
+			children = (
+				000000000000000000003001 /* App */,
+				000000000000000000003002 /* Features */,
+				000000000000000000003007 /* Integrations */,
+				00000000000000000000300A /* Models */,
+				00000000000000000000300B /* Networking */,
+				000000000000000000003012 /* Resources */,
+				00000000000000000000300C /* Shared */,
+			);
+			path = MiniMatch;
 			sourceTree = "<group>";
 		};
 		05C95AD6E2DB9F3DE9BFF203 = {
@@ -290,31 +318,6 @@
 				000000000000000000003011 /* Networking */,
 			);
 			path = MiniMatchTests;
-			sourceTree = "<group>";
-		};
-		00000000000000000000300F /* Integrations */ = {
-			isa = PBXGroup;
-			children = (
-				000000000000000000001016 /* AppleSignInModelTests.swift */,
-			);
-			path = Integrations;
-			sourceTree = "<group>";
-		};
-		000000000000000000003010 /* Models */ = {
-			isa = PBXGroup;
-			children = (
-				000000000000000000001017 /* GameModelTests.swift */,
-				000000000000000000001018 /* GameTableTests.swift */,
-			);
-			path = Models;
-			sourceTree = "<group>";
-		};
-		000000000000000000003011 /* Networking */ = {
-			isa = PBXGroup;
-			children = (
-				000000000000000000001019 /* GameClientDTOTests.swift */,
-			);
-			path = Networking;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -413,6 +416,7 @@
 				28BAAFDB33A96F2F20C69D6E /* Assets.xcassets in Resources */,
 				3E7A29BE63894BB1A3D9C631 /* GoogleService-Info.plist in Resources */,
 				00000000000000000000201B /* Localizable.xcstrings in Resources */,
+				E75225F9301C7DE5006B1B4C /* MiniMatch.gamekit in Resources */,
 				7B4940F317DC4A22A42C3D3D /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

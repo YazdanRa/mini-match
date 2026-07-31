@@ -18,7 +18,8 @@ actor PreviewGameClient: GameClient {
         name: String,
         displayName: String,
         avatarID: String,
-        gameCenterIdentity _: GameCenterIdentityDTO?
+        gameCenterIdentity _: GameCenterIdentityDTO?,
+        joinCode: String?
     ) async throws -> GameSession {
         currentPlayerID = "local-player"
         let created = PreviewFixtures.table(
@@ -27,8 +28,9 @@ actor PreviewGameClient: GameClient {
             hostName: displayName,
             hostAvatarID: avatarID
         )
-        table = created
-        return GameSession(table: created, playerID: currentPlayerID)
+        let table = joinCode.map { withJoinCode($0, in: created) } ?? created
+        self.table = table
+        return GameSession(table: table, playerID: currentPlayerID)
     }
 
     func joinTable(

@@ -22,6 +22,15 @@ struct LobbyView: View {
                             Text("Lobby")
                                 .foregroundStyle(.secondary)
                         }
+                        VStack(spacing: 2) {
+                            Text("Party code")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                            Text(table.joinCode)
+                                .font(.headline.monospaced())
+                                .textSelection(.enabled)
+                        }
+                        .padding(.top, 8)
                     }
                     .foregroundStyle(MiniMatchColors.ink)
 

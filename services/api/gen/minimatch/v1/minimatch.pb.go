@@ -126,6 +126,7 @@ type CreateTableRequest struct {
 	HostDisplayName    string                 `protobuf:"bytes,2,opt,name=host_display_name,json=hostDisplayName,proto3" json:"host_display_name,omitempty"`
 	HostAvatar         string                 `protobuf:"bytes,3,opt,name=host_avatar,json=hostAvatar,proto3" json:"host_avatar,omitempty"`
 	GameCenterIdentity *GameCenterIdentity    `protobuf:"bytes,4,opt,name=game_center_identity,json=gameCenterIdentity,proto3" json:"game_center_identity,omitempty"`
+	JoinCode           string                 `protobuf:"bytes,5,opt,name=join_code,json=joinCode,proto3" json:"join_code,omitempty"`
 	unknownFields      protoimpl.UnknownFields
 	sizeCache          protoimpl.SizeCache
 }
@@ -186,6 +187,13 @@ func (x *CreateTableRequest) GetGameCenterIdentity() *GameCenterIdentity {
 		return x.GameCenterIdentity
 	}
 	return nil
+}
+
+func (x *CreateTableRequest) GetJoinCode() string {
+	if x != nil {
+		return x.JoinCode
+	}
+	return ""
 }
 
 type CreateTableResponse struct {
@@ -1566,13 +1574,14 @@ var File_minimatch_v1_minimatch_proto protoreflect.FileDescriptor
 
 const file_minimatch_v1_minimatch_proto_rawDesc = "" +
 	"\n" +
-	"\x1cminimatch/v1/minimatch.proto\x12\fminimatch.v1\"\xc9\x01\n" +
+	"\x1cminimatch/v1/minimatch.proto\x12\fminimatch.v1\"\xe6\x01\n" +
 	"\x12CreateTableRequest\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12*\n" +
 	"\x11host_display_name\x18\x02 \x01(\tR\x0fhostDisplayName\x12\x1f\n" +
 	"\vhost_avatar\x18\x03 \x01(\tR\n" +
 	"hostAvatar\x12R\n" +
-	"\x14game_center_identity\x18\x04 \x01(\v2 .minimatch.v1.GameCenterIdentityR\x12gameCenterIdentity\"]\n" +
+	"\x14game_center_identity\x18\x04 \x01(\v2 .minimatch.v1.GameCenterIdentityR\x12gameCenterIdentity\x12\x1b\n" +
+	"\tjoin_code\x18\x05 \x01(\tR\bjoinCode\"]\n" +
 	"\x13CreateTableResponse\x12)\n" +
 	"\x05table\x18\x01 \x01(\v2\x13.minimatch.v1.TableR\x05table\x12\x1b\n" +
 	"\tplayer_id\x18\x02 \x01(\tR\bplayerId\"\xbe\x01\n" +

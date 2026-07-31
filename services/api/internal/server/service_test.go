@@ -24,6 +24,28 @@ func (v testVerifier) VerifyIDToken(_ context.Context, token string) (string, er
 	return uid, nil
 }
 
+func TestPartyCodeMatchesGameKitFormat(t *testing.T) {
+	for range 100 {
+		code, err := partyCode()
+		if err != nil {
+			t.Fatal(err)
+		}
+		if !validPartyCode(code) {
+			t.Fatalf("partyCode() = %q, want a valid GameKit party code", code)
+		}
+	}
+	for _, code := range []string{"", "ABCD-EF12", "2345CFGH", "2345-CFG!"} {
+		if validPartyCode(code) {
+			t.Fatalf("validPartyCode(%q) = true, want false", code)
+		}
+	}
+	for _, code := range []string{"23-CF", "234-CFG", "0123-4567"} {
+		if !validPartyCode(code) {
+			t.Fatalf("validPartyCode(%q) = false, want true", code)
+		}
+	}
+}
+
 func TestConnectAndGRPCKeepPicksPrivateUntilReveal(t *testing.T) {
 	mux := http.NewServeMux()
 	path, handler := minimatchv1connect.NewMiniMatchServiceHandler(
@@ -72,6 +94,17 @@ func TestConnectAndGRPCKeepPicksPrivateUntilReveal(t *testing.T) {
 	}
 	if created.Msg.PlayerId != "maya" {
 		t.Fatalf("host ID = %q, want verified UID", created.Msg.PlayerId)
+	}
+	if !validPartyCode(created.Msg.Table.JoinCode) {
+		t.Fatalf("join code = %q, want GameKit-compatible party code", created.Msg.Table.JoinCode)
+	}
+	if _, err := connectClient.CreateTable(ctx, authenticated(&minimatchv1.CreateTableRequest{
+		Name:            "Duplicate",
+		HostDisplayName: "Maya",
+		HostAvatar:      "fox",
+		JoinCode:        created.Msg.Table.JoinCode,
+	}, "host-token")); connect.CodeOf(err) != connect.CodeAlreadyExists {
+		t.Fatalf("duplicate party code = %v, want already exists", connect.CodeOf(err))
 	}
 	joined, err := grpcClient.JoinTable(ctx, authenticated(&minimatchv1.JoinTableRequest{
 		JoinCode:    created.Msg.Table.JoinCode,

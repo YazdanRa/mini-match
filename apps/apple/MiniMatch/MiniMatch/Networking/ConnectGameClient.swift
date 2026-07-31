@@ -14,7 +14,8 @@ struct ConnectGameClient: GameClient {
         name: String,
         displayName: String,
         avatarID: String,
-        gameCenterIdentity: GameCenterIdentityDTO?
+        gameCenterIdentity: GameCenterIdentityDTO?,
+        joinCode: String?
     ) async throws -> GameSession {
         let response: SessionResponse = try await call(
             "CreateTable",
@@ -22,7 +23,8 @@ struct ConnectGameClient: GameClient {
                 name: name,
                 hostDisplayName: displayName,
                 hostAvatar: avatarID,
-                gameCenterIdentity: gameCenterIdentity
+                gameCenterIdentity: gameCenterIdentity,
+                joinCode: joinCode
             )
         )
         return GameSession(table: try response.table.model(), playerID: response.playerId)
@@ -128,8 +130,17 @@ struct ConnectGameClient: GameClient {
             throw GameClientError.invalidResponse
         }
         guard (200..<300).contains(httpResponse.statusCode) else {
-            let message = (try? JSONDecoder().decode(ErrorResponse.self, from: data).localizedMessage)
-                ?? String(localized: "The request failed.")
+            if let error = try? JSONDecoder().decode(ErrorResponse.self, from: data) {
+                switch error.code {
+                case "not_found":
+                    throw GameClientError.notFound
+                case "already_exists":
+                    throw GameClientError.alreadyExists
+                default:
+                    throw GameClientError.server(error.localizedMessage)
+                }
+            }
+            let message = String(localized: "The request failed.")
             throw GameClientError.server(message)
         }
         return try JSONDecoder().decode(Response.self, from: data)

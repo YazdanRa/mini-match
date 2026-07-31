@@ -29,6 +29,7 @@ message CreateTableRequest {
   string host_display_name = 2;
   string host_avatar = 3;
   GameCenterIdentity game_center_identity = 4;
+  string join_code = 5;
 }
 
 message CreateTableResponse {

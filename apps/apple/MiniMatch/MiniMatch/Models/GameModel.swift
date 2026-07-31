@@ -10,6 +10,8 @@ final class GameModel {
     }
 
     private let client: any GameClient
+    @ObservationIgnored var roundResultHandler: ((GameTable, String) -> Void)?
+    @ObservationIgnored private var lastNotifiedResultID: String?
 
     private(set) var screen: Screen = .home
     private(set) var table: GameTable?
@@ -59,7 +61,8 @@ final class GameModel {
         name: String,
         displayName: String,
         avatarID: String = "spark",
-        gameCenterIdentity: GameCenterIdentityDTO? = nil
+        gameCenterIdentity: GameCenterIdentityDTO? = nil,
+        joinCode: String? = nil
     ) async -> Bool {
         guard !multiplayerIsRestricted else {
             showError(String(localized: "Multiplayer is unavailable because of Screen Time settings."))
@@ -74,8 +77,49 @@ final class GameModel {
                 name: name,
                 displayName: displayName,
                 avatarID: avatarID,
-                gameCenterIdentity: gameCenterIdentity
+                gameCenterIdentity: gameCenterIdentity,
+                joinCode: joinCode
             )
+        }
+    }
+
+    @discardableResult
+    func enterActivity(
+        code: String,
+        displayName: String,
+        avatarID: String,
+        gameCenterIdentity: GameCenterIdentityDTO?
+    ) async -> Bool {
+        guard !multiplayerIsRestricted else {
+            showError(String(localized: "Multiplayer is unavailable because of Screen Time settings."))
+            return false
+        }
+        return await loadSession {
+            do {
+                return try await client.joinTable(
+                    code: code,
+                    displayName: displayName,
+                    avatarID: avatarID,
+                    gameCenterIdentity: gameCenterIdentity
+                )
+            } catch GameClientError.notFound {
+                do {
+                    return try await client.createTable(
+                        name: "Mini Match",
+                        displayName: displayName,
+                        avatarID: avatarID,
+                        gameCenterIdentity: gameCenterIdentity,
+                        joinCode: code
+                    )
+                } catch GameClientError.alreadyExists {
+                    return try await client.joinTable(
+                        code: code,
+                        displayName: displayName,
+                        avatarID: avatarID,
+                        gameCenterIdentity: gameCenterIdentity
+                    )
+                }
+            }
         }
     }
 
@@ -238,6 +282,7 @@ final class GameModel {
             myLockedPick = nil
             pickText = ""
             screen = .lobby
+            notifyRoundResult()
             return true
         } catch {
             showError(error.localizedDescription)
@@ -274,10 +319,23 @@ final class GameModel {
         }
         let previousRoundNumber = table?.currentRound?.number
         table = updated
+        notifyRoundResult()
         if updated.currentRound?.number != previousRoundNumber {
             myLockedPick = nil
             pickText = ""
         }
+    }
+
+    private func notifyRoundResult() {
+        guard let table, table.currentRound == nil, let result = table.lastResult,
+              let currentPlayerID
+        else {
+            return
+        }
+        let resultID = "\(table.id):\(result.roundNumber)"
+        guard resultID != lastNotifiedResultID else { return }
+        lastNotifiedResultID = resultID
+        roundResultHandler?(table, currentPlayerID)
     }
 }
 

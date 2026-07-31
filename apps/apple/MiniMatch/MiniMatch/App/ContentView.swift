@@ -52,6 +52,16 @@ struct ContentView: View {
                     }
                 }
                 if gameCenter.isAuthenticated {
+                    if model.screen == .lobby {
+                        ToolbarItem(placement: .topBarTrailing) {
+                            Button {
+                                gameCenter.showActivity()
+                            } label: {
+                                Label("Invite", systemImage: "person.badge.plus")
+                            }
+                            .disabled(!gameCenter.canShareActivity)
+                        }
+                    }
                     ToolbarItem(placement: .topBarTrailing) {
                         ProfileMenu(
                             gameCenter: gameCenter,

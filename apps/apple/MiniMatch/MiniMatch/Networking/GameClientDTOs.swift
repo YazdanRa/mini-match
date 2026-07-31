@@ -5,6 +5,7 @@ struct CreateTableRequest: Encodable {
     let hostDisplayName: String
     let hostAvatar: String
     let gameCenterIdentity: GameCenterIdentityDTO?
+    let joinCode: String?
 }
 
 struct JoinTableRequest: Encodable {

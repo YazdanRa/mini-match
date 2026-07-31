@@ -4,6 +4,36 @@ import Testing
 
 struct GameModelTests {
     @Test
+    func serverConfirmedWinsEarnTheExpectedGameCenterAchievements() {
+        var table = PreviewFixtures.lobbyTable
+        table.lastResult = GameRoundResult(
+            roundNumber: 1,
+            selections: [
+                GameSelection(playerID: PreviewFixtures.currentPlayerID, displayName: "Maya", pick: 0),
+                GameSelection(playerID: "zoe", displayName: "Zoe", pick: 1),
+                GameSelection(playerID: "liam", displayName: "Liam", pick: 2),
+                GameSelection(playerID: "noah", displayName: "Noah", pick: 3),
+            ],
+            winnerPlayerID: PreviewFixtures.currentPlayerID
+        )
+
+        #expect(GameCenterAchievement.earned(
+            in: table,
+            currentPlayerID: PreviewFixtures.currentPlayerID
+        ) == [.firstWin, .zeroWin, .fourPlayerWin])
+
+        table.lastResult = GameRoundResult(
+            roundNumber: 2,
+            selections: table.lastResult?.selections ?? [],
+            winnerPlayerID: "zoe"
+        )
+        #expect(GameCenterAchievement.earned(
+            in: table,
+            currentPlayerID: PreviewFixtures.currentPlayerID
+        ).isEmpty)
+    }
+
+    @Test
     @MainActor
     func pickStartsEmptyAndOnlyAcceptsUInt64Values() async {
         let model = GameModel(client: PreviewGameClient())
@@ -89,6 +119,8 @@ struct GameModelTests {
     func tableRefreshConvergesRemoteStateOnce() async throws {
         let client = PreviewGameClient()
         let model = GameModel(client: client)
+        var reportedResults = 0
+        model.roundResultHandler = { _, _ in reportedResults += 1 }
 
         #expect(await model.createTable(
             name: "Friday Mini Match",
@@ -121,6 +153,9 @@ struct GameModelTests {
         #expect(model.screen == .lobby)
         #expect(model.table?.currentRound == nil)
         #expect(model.result?.winnerName == "Liam")
+        #expect(reportedResults == 1)
+        await model.refreshTable()
+        #expect(reportedResults == 1)
 
         _ = try await client.startRound(
             tableID: table.id,

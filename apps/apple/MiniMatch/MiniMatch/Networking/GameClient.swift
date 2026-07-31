@@ -5,7 +5,8 @@ protocol GameClient: Sendable {
         name: String,
         displayName: String,
         avatarID: String,
-        gameCenterIdentity: GameCenterIdentityDTO?
+        gameCenterIdentity: GameCenterIdentityDTO?,
+        joinCode: String?
     ) async throws -> GameSession
     func joinTable(
         code: String,
@@ -35,12 +36,18 @@ protocol GameClient: Sendable {
 
 enum GameClientError: Error, LocalizedError, Sendable {
     case invalidResponse
+    case notFound
+    case alreadyExists
     case server(String)
 
     var errorDescription: String? {
         switch self {
         case .invalidResponse:
             String(localized: "The server returned an invalid response.")
+        case .notFound:
+            String(localized: "Table not found.")
+        case .alreadyExists:
+            String(localized: "That table already exists.")
         case let .server(message):
             message
         }

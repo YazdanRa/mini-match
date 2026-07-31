@@ -17,6 +17,8 @@ struct GameCenterMatchmaking: Identifiable {
 @MainActor
 @Observable
 final class GameCenterModel: NSObject {
+    static let activityID = "com.yazdanra.minimatch.play"
+
     private let isEnabled: Bool
     private var started = false
     private var listenerIsRegistered = false
@@ -28,6 +30,10 @@ final class GameCenterModel: NSObject {
     private var joinCode: String?
     private var isJoiningTable = false
     private var backendPlayers = [String: GKPlayer]()
+    private var activity: GKGameActivity?
+    private var pendingAchievementIDs = Set<String>()
+    private var completedAchievementIDs = Set<String>()
+    private var reportingAchievementIDs = Set<String>()
 
     var authentication: GameCenterAuthentication?
     var matchmaking: GameCenterMatchmaking?
@@ -35,6 +41,7 @@ final class GameCenterModel: NSObject {
     private(set) var displayName = ""
     private(set) var avatarImage: UIImage?
     private(set) var playerImages = [String: UIImage]()
+    private(set) var canShareActivity = false
     private(set) var isMultiplayerRestricted = false
     private(set) var restrictionIsResolved: Bool
     private(set) var errorMessage = ""
@@ -71,16 +78,149 @@ final class GameCenterModel: NSObject {
 
     func attach(to gameModel: GameModel) {
         self.gameModel = gameModel
+        gameModel.roundResultHandler = { [weak self] table, playerID in
+            self?.reportAchievements(for: table, currentPlayerID: playerID)
+        }
+    }
+
+    func startActivity() {
+        guard authorizeMatchmaking() else { return }
+        Task {
+            do {
+                let definitions = try await GKGameActivityDefinition.loadGameActivityDefinitions(
+                    IDs: [Self.activityID]
+                )
+                guard let definition = definitions.first else {
+                    throw GameCenterError.activityUnavailable
+                }
+                let activity = try GKGameActivity.start(definition: definition)
+                guard await enter(activity: activity) else {
+                    activity.end()
+                    return
+                }
+                presentMatchmaking(for: activity)
+            } catch {
+                startMatchmaking()
+            }
+        }
     }
 
     func startMatchmaking() {
         startMatchmaking(with: nil)
     }
 
+    func showActivity() {
+        guard let activity else { return }
+        Task {
+            await GKAccessPoint.shared.trigger(gameActivity: activity)
+        }
+    }
+
+    func joinActivity(code: String) {
+        guard authorizeMatchmaking() else { return }
+        let code = code.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
+        guard GKGameActivity.isValidPartyCode(code) else {
+            showError(String(localized: "Enter a valid Game Center party code."))
+            return
+        }
+        Task {
+            do {
+                let definitions = try await GKGameActivityDefinition.loadGameActivityDefinitions(
+                    IDs: [Self.activityID]
+                )
+                guard let definition = definitions.first else {
+                    throw GameCenterError.activityUnavailable
+                }
+                let activity = try GKGameActivity.start(
+                    definition: definition,
+                    partyCode: code
+                )
+                guard await enter(activity: activity) else {
+                    activity.end()
+                    return
+                }
+                presentMatchmaking(for: activity)
+            } catch {
+                showError(error.localizedDescription)
+            }
+        }
+    }
+
     func setAccessPointActive(_ isActive: Bool) {
         let accessPoint = GKAccessPoint.shared
         accessPoint.location = .topLeading
         accessPoint.isActive = isActive && isAuthenticated
+    }
+
+    private func enter(activity: GKGameActivity) async -> Bool {
+        guard activity.activityDefinition.identifier == Self.activityID,
+              let code = activity.partyCode,
+              GKGameActivity.isValidPartyCode(code),
+              let gameModel
+        else {
+            showError(String(localized: "This Game Center activity is unavailable."))
+            return false
+        }
+        if gameModel.table?.joinCode == code {
+            self.activity = activity
+            canShareActivity = true
+            return true
+        }
+        guard authorizeMatchmaking() else { return false }
+        do {
+            let identity = try await identityVerification()
+            guard await gameModel.enterActivity(
+                code: code,
+                displayName: displayName,
+                avatarID: randomAvatarID(),
+                gameCenterIdentity: identity
+            ) else {
+                return false
+            }
+            self.activity?.end()
+            self.activity = activity
+            canShareActivity = true
+            return true
+        } catch {
+            showError(error.localizedDescription)
+            return false
+        }
+    }
+
+    private func presentMatchmaking(for activity: GKGameActivity) {
+        guard gameModel?.isHost == true,
+              let request = activity.makeMatchRequest()
+        else {
+            return
+        }
+        request.inviteMessage = String(localized: "Join my Mini Match game.")
+        guard let viewController = GKMatchmakerViewController(matchRequest: request) else {
+            return
+        }
+        viewController.matchmakingMode = .inviteOnly
+        presentMatchmaking(
+            viewController,
+            createsTable: true,
+            hostPlayerID: GKLocalPlayer.local.gamePlayerID
+        )
+    }
+
+    private func startActivity(partyCode: String) async {
+        guard GKGameActivity.isValidPartyCode(partyCode) else { return }
+        do {
+            let definitions = try await GKGameActivityDefinition.loadGameActivityDefinitions(
+                IDs: [Self.activityID]
+            )
+            guard let definition = definitions.first else { return }
+            activity?.end()
+            activity = try GKGameActivity.start(
+                definition: definition,
+                partyCode: partyCode
+            )
+            canShareActivity = true
+        } catch {
+            // Game Activity discovery is additive; the current match remains playable.
+        }
     }
 
     private func startMatchmaking(with recipients: [GKPlayer]?) {
@@ -132,6 +272,14 @@ final class GameCenterModel: NSObject {
     func endMatch() {
         matchmaking?.viewController.matchmakerDelegate = nil
         matchmaking = nil
+        endControlMatch()
+        activity?.end()
+        activity = nil
+        canShareActivity = false
+        matchPlayerID = nil
+    }
+
+    private func endControlMatch() {
         match?.delegate = nil
         match?.disconnect()
         match = nil
@@ -150,6 +298,11 @@ final class GameCenterModel: NSObject {
             return nil
         }
         let playerID = player.gamePlayerID
+        if matchPlayerID != playerID {
+            pendingAchievementIDs.removeAll()
+            completedAchievementIDs.removeAll()
+            reportingAchievementIDs.removeAll()
+        }
         let items: GameCenterVerificationItems = try await withCheckedThrowingContinuation {
             continuation in
             player.fetchItems(forIdentityVerificationSignature: {
@@ -227,8 +380,13 @@ final class GameCenterModel: NSObject {
         foundMatch.delegate = self
         send(.ready, in: foundMatch)
         if createsTable {
-            Task {
-                await createBackendTable(for: foundMatch)
+            if let code = gameModel?.table?.joinCode {
+                joinCode = code
+                registerLocalPlayer(in: foundMatch)
+            } else {
+                Task {
+                    await createBackendTable(for: foundMatch)
+                }
             }
         }
     }
@@ -248,6 +406,7 @@ final class GameCenterModel: NSObject {
                 return
             }
             joinCode = code
+            await startActivity(partyCode: code)
             guard send(.session(code), in: match) else {
                 await abort(match, notifyPeers: false)
                 return
@@ -279,6 +438,7 @@ final class GameCenterModel: NSObject {
                 await abort(match, notifyPeers: true)
                 return
             }
+            await startActivity(partyCode: code)
             registerLocalPlayer(in: match)
         } catch {
             showError(error.localizedDescription)
@@ -350,8 +510,12 @@ final class GameCenterModel: NSObject {
         case let .joined(playerID):
             await register(backendPlayerID: playerID, gameCenterPlayer: player, in: match)
         case .abort:
-            showError(String(localized: "A player couldn’t join the Game Center match."))
-            await leaveBackendTableAndEndMatch()
+            if gameModel?.screen == .home {
+                showError(String(localized: "A player couldn’t join the Game Center match."))
+                endMatch()
+            } else {
+                endControlMatch()
+            }
         }
     }
 
@@ -421,13 +585,54 @@ final class GameCenterModel: NSObject {
         }
     }
 
+    private func reportAchievements(for table: GameTable, currentPlayerID: String) {
+        let player = GKLocalPlayer.local
+        guard player.isAuthenticated, matchPlayerID == player.gamePlayerID else { return }
+        pendingAchievementIDs.formUnion(GameCenterAchievement.earned(
+            in: table,
+            currentPlayerID: currentPlayerID
+        ).map(\.rawValue))
+        let pending = pendingAchievementIDs
+            .subtracting(completedAchievementIDs)
+            .subtracting(reportingAchievementIDs)
+        guard !pending.isEmpty else { return }
+
+        reportingAchievementIDs.formUnion(pending)
+        let playerID = player.gamePlayerID
+        Task {
+            let achievements = pending.map {
+                let achievement = GKAchievement(identifier: $0)
+                achievement.percentComplete = 100
+                achievement.showsCompletionBanner = true
+                return achievement
+            }
+            do {
+                try await GKAchievement.report(achievements)
+                guard GKLocalPlayer.local.gamePlayerID == playerID else { return }
+                completedAchievementIDs.formUnion(pending)
+                reportingAchievementIDs.subtract(pending)
+                pendingAchievementIDs.subtract(pending)
+            } catch {
+                guard GKLocalPlayer.local.gamePlayerID == playerID else { return }
+                reportingAchievementIDs.subtract(pending)
+            }
+        }
+    }
+
 }
 
 extension GameCenterModel: @preconcurrency GKMatchmakerViewControllerDelegate {
     func matchmakerViewControllerWasCancelled(
         _ viewController: GKMatchmakerViewController
     ) {
+        let shouldLeaveActivity = matchmaking?.createsTable == true
+            && gameModel?.screen == .lobby
         dismissMatchmaking()
+        if shouldLeaveActivity {
+            Task {
+                await leaveBackendTableAndEndMatch()
+            }
+        }
     }
 
     func matchmakerViewController(
@@ -480,10 +685,14 @@ extension GameCenterModel: GKMatchDelegate {
             guard let self, let match = self.match, ObjectIdentifier(match) == matchID else {
                 return
             }
-            if let message {
-                showError(message)
+            if gameModel?.screen == .home {
+                if let message {
+                    showError(message)
+                }
+                endMatch()
+            } else {
+                endControlMatch()
             }
-            await leaveBackendTableAndEndMatch()
         }
     }
 
@@ -500,8 +709,12 @@ extension GameCenterModel: GKMatchDelegate {
             else {
                 return
             }
-            showError(String(localized: "A player disconnected from the Game Center match."))
-            await leaveBackendTableAndEndMatch()
+            if gameModel?.screen == .home {
+                showError(String(localized: "A player disconnected from the Game Center match."))
+                endMatch()
+            } else {
+                endControlMatch()
+            }
         }
     }
 }
@@ -522,6 +735,12 @@ extension GameCenterModel: @preconcurrency GKLocalPlayerListener {
 
     func player(_ player: GKPlayer, didRequestMatchWithRecipients recipientPlayers: [GKPlayer]) {
         startMatchmaking(with: recipientPlayers)
+    }
+
+    func player(_ player: GKPlayer, wantsToPlay activity: GKGameActivity) async -> Bool {
+        guard await enter(activity: activity) else { return false }
+        presentMatchmaking(for: activity)
+        return true
     }
 }
 
@@ -549,15 +768,41 @@ private enum GameCenterMatchMessage: Codable {
 }
 
 private enum GameCenterError: LocalizedError {
+    case activityUnavailable
     case accountChanged
     case invalidIdentity
 
     var errorDescription: String? {
         switch self {
+        case .activityUnavailable:
+            String(localized: "This Game Center activity is unavailable.")
         case .accountChanged:
             String(localized: "The Game Center account changed. Try again.")
         case .invalidIdentity:
             String(localized: "Game Center couldn’t verify this player. Try again.")
         }
+    }
+}
+
+enum GameCenterAchievement: String, CaseIterable {
+    case firstWin = "com.yazdanra.minimatch.achievement.firstWin"
+    case zeroWin = "com.yazdanra.minimatch.achievement.zeroWin"
+    case fourPlayerWin = "com.yazdanra.minimatch.achievement.fourPlayerWin"
+
+    static func earned(in table: GameTable, currentPlayerID: String) -> Set<Self> {
+        guard table.currentRound == nil,
+              let result = table.lastResult,
+              result.winnerPlayerID == currentPlayerID
+        else {
+            return []
+        }
+        var earned: Set<Self> = [.firstWin]
+        if result.selections.first(where: { $0.playerID == currentPlayerID })?.pick == 0 {
+            earned.insert(.zeroWin)
+        }
+        if result.selections.count >= 4 {
+            earned.insert(.fourPlayerWin)
+        }
+        return earned
     }
 }

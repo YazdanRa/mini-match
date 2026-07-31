@@ -5,6 +5,7 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"errors"
+	"math/big"
 	"strings"
 
 	"connectrpc.com/connect"
@@ -30,19 +31,26 @@ func (s *Service) CreateTable(ctx context.Context, request *connect.Request[mini
 	if err != nil {
 		return nil, connect.NewError(connect.CodeUnauthenticated, err)
 	}
+	requestedJoinCode := strings.ToUpper(strings.TrimSpace(request.Msg.GetJoinCode()))
+	if requestedJoinCode != "" && !validPartyCode(requestedJoinCode) {
+		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("invalid join code"))
+	}
 	for range 3 {
 		tableID, err := token(16)
 		if err != nil {
 			return nil, rpcError(err)
 		}
-		joinCode, err := token(4)
-		if err != nil {
-			return nil, rpcError(err)
+		joinCode := requestedJoinCode
+		if joinCode == "" {
+			joinCode, err = partyCode()
+			if err != nil {
+				return nil, rpcError(err)
+			}
 		}
 		table, err := game.NewTable(
 			tableID,
 			request.Msg.GetName(),
-			strings.ToUpper(joinCode),
+			joinCode,
 			actor,
 			request.Msg.GetHostDisplayName(),
 			request.Msg.GetHostAvatar(),
@@ -55,6 +63,9 @@ func (s *Service) CreateTable(ctx context.Context, request *connect.Request[mini
 		}
 		if err := s.tables.Create(ctx, table); err != nil {
 			if errors.Is(err, game.ErrAlreadyExists) {
+				if requestedJoinCode != "" {
+					return nil, connect.NewError(connect.CodeAlreadyExists, err)
+				}
 				continue
 			}
 			return nil, rpcError(err)
@@ -226,6 +237,47 @@ func token(bytes int) (string, error) {
 		return "", err
 	}
 	return hex.EncodeToString(value), nil
+}
+
+func partyCode() (string, error) {
+	const alphabet = "23456789CFGHJMPQRVWX"
+	code := make([]byte, 9)
+	for index := range code {
+		if index == 4 {
+			code[index] = '-'
+			continue
+		}
+		value, err := rand.Int(rand.Reader, big.NewInt(int64(len(alphabet))))
+		if err != nil {
+			return "", err
+		}
+		code[index] = alphabet[value.Int64()]
+	}
+	return string(code), nil
+}
+
+func validPartyCode(code string) bool {
+	parts := strings.Split(code, "-")
+	if len(parts) != 2 || len(parts[0]) != len(parts[1]) ||
+		len(parts[0]) < 2 || len(parts[0]) > 6 {
+		return false
+	}
+	allDigits := true
+	for _, value := range parts[0] + parts[1] {
+		if value < '0' || value > '9' {
+			allDigits = false
+			break
+		}
+	}
+	if allDigits {
+		return true
+	}
+	for _, value := range parts[0] + parts[1] {
+		if !strings.ContainsRune("23456789CFGHJMPQRVWX", value) {
+			return false
+		}
+	}
+	return true
 }
 
 func toProto(table *game.Table) *minimatchv1.Table {
