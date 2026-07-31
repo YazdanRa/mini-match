@@ -25,7 +25,6 @@ final class GameCenterModel: NSObject {
     private var matchPlayerID: String?
     private weak var gameModel: GameModel?
     private var match: GKMatch?
-    private var matchPlayerCount = 0
     private var createsTable = false
     private var hostPlayerID: String?
     private var joinCode: String?
@@ -78,21 +77,53 @@ final class GameCenterModel: NSObject {
     }
 
     func startMatchmaking() {
-        guard isAuthenticated, !isMultiplayerRestricted, match == nil else { return }
+        startMatchmaking(with: nil)
+    }
+
+    func setAccessPointActive(_ isActive: Bool) {
+        let accessPoint = GKAccessPoint.shared
+        accessPoint.location = .topLeading
+        accessPoint.isActive = isActive && isAuthenticated
+    }
+
+    private func startMatchmaking(with recipients: [GKPlayer]?) {
+        guard authorizeMatchmaking() else { return }
         let request = GKMatchRequest()
         request.minPlayers = 2
         request.maxPlayers = GKMatchRequest.maxPlayersAllowedForMatch(of: .peerToPeer)
         request.inviteMessage = String(localized: "Join my Mini Match game.")
+        request.recipients = recipients
         guard let viewController = GKMatchmakerViewController(matchRequest: request) else {
             showError(String(localized: "Game Center matchmaking is unavailable."))
             return
         }
         viewController.matchmakingMode = .inviteOnly
+        presentMatchmaking(
+            viewController,
+            createsTable: true,
+            hostPlayerID: GKLocalPlayer.local.gamePlayerID
+        )
+    }
+
+    private func authorizeMatchmaking() -> Bool {
+        guard gameModel?.screen == .home else { return false }
+        guard restrictionIsResolved, !isMultiplayerRestricted else {
+            showError(String(localized: "Multiplayer is unavailable because of Screen Time settings."))
+            return false
+        }
+        return isAuthenticated && match == nil && matchmaking == nil
+    }
+
+    private func presentMatchmaking(
+        _ viewController: GKMatchmakerViewController,
+        createsTable: Bool,
+        hostPlayerID: String
+    ) {
         viewController.matchmakerDelegate = self
         matchmaking = GameCenterMatchmaking(
             viewController: viewController,
-            createsTable: true,
-            hostPlayerID: GKLocalPlayer.local.gamePlayerID
+            createsTable: createsTable,
+            hostPlayerID: hostPlayerID
         )
     }
 
@@ -107,23 +138,12 @@ final class GameCenterModel: NSObject {
         match?.delegate = nil
         match?.disconnect()
         match = nil
-        matchPlayerCount = 0
         createsTable = false
         hostPlayerID = nil
         joinCode = nil
         isJoiningTable = false
         backendPlayers.removeAll()
         playerImages.removeAll()
-    }
-
-    func showProfile() {
-        guard isAuthenticated else { return }
-        GKAccessPoint.shared.trigger(state: .localPlayerProfile) {}
-    }
-
-    func showLeaderboard() {
-        guard isAuthenticated else { return }
-        GKAccessPoint.shared.trigger(state: .leaderboards) {}
     }
 
     func identityVerification() async throws -> GameCenterIdentityDTO? {
@@ -215,7 +235,6 @@ final class GameCenterModel: NSObject {
         matchmaking?.viewController.matchmakerDelegate = nil
         matchmaking = nil
         match = foundMatch
-        matchPlayerCount = foundMatch.players.count + foundMatch.expectedPlayerCount + 1
         self.createsTable = createsTable
         self.hostPlayerID = hostPlayerID
         foundMatch.delegate = self
@@ -529,12 +548,11 @@ extension GameCenterModel: GKMatchDelegate {
         let matchID = ObjectIdentifier(match)
         Task { @MainActor [weak self] in
             guard let self, let match = self.match,
-                  ObjectIdentifier(match) == matchID,
-                  (gameModel?.table?.players.count ?? 0) < matchPlayerCount
+                  ObjectIdentifier(match) == matchID
             else {
                 return
             }
-            showError(String(localized: "A player disconnected before the match was ready."))
+            showError(String(localized: "A player disconnected from the Game Center match."))
             await leaveBackendTableAndEndMatch()
         }
     }
@@ -542,17 +560,20 @@ extension GameCenterModel: GKMatchDelegate {
 
 extension GameCenterModel: @preconcurrency GKLocalPlayerListener {
     func player(_ player: GKPlayer, didAccept invite: GKInvite) {
-        guard isAuthenticated, match == nil,
-              let viewController = GKMatchmakerViewController(invite: invite)
-        else {
+        guard authorizeMatchmaking() else { return }
+        guard let viewController = GKMatchmakerViewController(invite: invite) else {
+            showError(String(localized: "Game Center matchmaking is unavailable."))
             return
         }
-        viewController.matchmakerDelegate = self
-        matchmaking = GameCenterMatchmaking(
-            viewController: viewController,
+        presentMatchmaking(
+            viewController,
             createsTable: false,
             hostPlayerID: invite.sender.gamePlayerID
         )
+    }
+
+    func player(_ player: GKPlayer, didRequestMatchWithRecipients recipientPlayers: [GKPlayer]) {
+        startMatchmaking(with: recipientPlayers)
     }
 }
 

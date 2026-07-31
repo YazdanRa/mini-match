@@ -12,6 +12,7 @@ struct PlayersSection: View {
             HStack {
                 Text("Players (\(table.players.count))")
                     .font(.headline)
+                    .accessibilityAddTraits(.isHeader)
                 Spacer()
                 Text("\(table.players.filter(\.isLocked).count) locked")
                     .foregroundStyle(MiniMatchColors.blueText)
@@ -38,6 +39,7 @@ struct PlayersSection: View {
                                     }
 
                                 Image(systemName: player.isLocked ? "checkmark.circle.fill" : "ellipsis.circle.fill")
+                                    .font(.system(size: 22))
                                     .foregroundStyle(player.isLocked ? MiniMatchColors.blueText : .secondary)
                                     .background(Circle().fill(MiniMatchColors.background))
                                     .contentTransition(.symbolEffect(.replace))
@@ -65,7 +67,7 @@ struct PlayersSection: View {
                                 .font(.caption)
                                 .foregroundStyle(player.id == table.hostPlayerID ? MiniMatchColors.coralText : .secondary)
                         }
-                        .frame(width: 88)
+                        .frame(minWidth: 88)
                         .accessibilityElement(children: .ignore)
                         .accessibilityLabel(accessibilityLabel(for: player))
                         .transition(.scale(scale: 0.94).combined(with: .opacity))

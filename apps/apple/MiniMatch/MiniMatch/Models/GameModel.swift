@@ -22,7 +22,7 @@ final class GameModel {
     private(set) var errorMessage = ""
     var isShowingError = false
     private(set) var multiplayerIsRestricted = false
-    var pickText = "2"
+    var pickText = ""
     private var lastPresentedRound: UInt32?
 
     init(client: any GameClient) {
@@ -40,6 +40,10 @@ final class GameModel {
 
     var canReveal: Bool {
         isHost && table?.allPlayersLocked == true
+    }
+
+    var canLockPick: Bool {
+        UInt64(pickText) != nil
     }
 
     var completedMatchWin: CompletedMatchWin? {
@@ -214,7 +218,7 @@ final class GameModel {
         result = nil
         lastPresentedRound = nil
         isReconnecting = false
-        pickText = "2"
+        pickText = ""
         screen = .home
     }
 
@@ -228,7 +232,7 @@ final class GameModel {
             myLockedPick = nil
             result = nil
             lastPresentedRound = session.table.lastResult?.roundNumber
-            pickText = "2"
+            pickText = ""
             screen = .lobby
             return true
         } catch {

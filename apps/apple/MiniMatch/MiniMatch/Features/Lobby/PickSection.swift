@@ -8,6 +8,7 @@ struct PickSection: View {
             Text("Enter your number")
                 .font(.title2.bold())
                 .foregroundStyle(MiniMatchColors.ink)
+                .accessibilityAddTraits(.isHeader)
 
             Text("Lowest number picked by only one player wins.")
                 .font(.subheadline)
@@ -27,6 +28,12 @@ struct PickSection: View {
                 }
                 .disabled(model.currentPlayerIsLocked || model.multiplayerIsRestricted)
                 .accessibilityLabel("Your number")
+
+            if !model.pickText.isEmpty && !model.canLockPick {
+                Text("Enter a non-negative whole number.")
+                    .font(.footnote)
+                    .foregroundStyle(.red)
+            }
 
             if model.currentPlayerIsLocked {
                 Label("You’re locked in!", systemImage: "checkmark.circle.fill")
@@ -48,7 +55,11 @@ struct PickSection: View {
                     }
                 }
                 .buttonStyle(PrimaryButtonStyle(color: MiniMatchColors.blue))
-                .disabled(model.isWorking || model.multiplayerIsRestricted)
+                .disabled(
+                    model.isWorking
+                        || model.multiplayerIsRestricted
+                        || !model.canLockPick
+                )
             }
         }
     }

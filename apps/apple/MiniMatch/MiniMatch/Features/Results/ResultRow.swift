@@ -10,7 +10,7 @@ struct ResultRow: View {
                 Spacer()
                 pick
                 status
-                    .frame(width: 116, alignment: .leading)
+                    .fixedSize(horizontal: true, vertical: false)
             }
 
             VStack(alignment: .leading, spacing: 10) {

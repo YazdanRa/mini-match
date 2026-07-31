@@ -6,6 +6,7 @@ struct ContentView: View {
     let gameCenter: GameCenterModel
     let appleSignIn: AppleSignInModel
     @Environment(\.scenePhase) private var scenePhase
+    @State private var isConfirmingLeave = false
 
     var body: some View {
         @Bindable var model = model
@@ -29,7 +30,7 @@ struct ContentView: View {
                         playerImages: gameCenter.playerImages
                     )
                 case .result:
-                    ResultView(model: model)
+                    ResultView(model: model, gameCenter: gameCenter)
                 }
             }
             .navigationBarTitleDisplayMode(.inline)
@@ -37,15 +38,11 @@ struct ContentView: View {
                 if model.screen == .lobby {
                     ToolbarItem(placement: .topBarLeading) {
                         Button {
-                            Task {
-                                await model.leaveTable()
-                                if model.screen == .home {
-                                    gameCenter.endMatch()
-                                }
-                            }
+                            isConfirmingLeave = true
                         } label: {
                             if model.isWorking {
                                 ProgressView()
+                                    .accessibilityLabel("Leaving table")
                             } else {
                                 Label("Leave", systemImage: "chevron.backward")
                             }
@@ -68,6 +65,32 @@ struct ContentView: View {
             }
         }
         .tint(MiniMatchColors.blueText)
+        .confirmationDialog(
+            "Leave this match?",
+            isPresented: $isConfirmingLeave,
+            titleVisibility: .visible
+        ) {
+            Button("Leave match", role: .destructive) {
+                Task {
+                    await model.leaveTable()
+                    if model.screen == .home {
+                        gameCenter.endMatch()
+                    }
+                }
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("You’ll leave the table for the other players.")
+        }
+        .onChange(
+            of: gameCenter.isAuthenticated
+                && model.screen == .home
+                && gameCenter.authentication?.id == nil
+                && gameCenter.matchmaking?.id == nil,
+            initial: true
+        ) { _, shouldActivateAccessPoint in
+            gameCenter.setAccessPointActive(shouldActivateAccessPoint)
+        }
         .onChange(
             of: gameCenter.restrictionIsResolved && !gameCenter.isMultiplayerRestricted,
             initial: true
@@ -88,10 +111,6 @@ struct ContentView: View {
             if screen == .home {
                 gameCenter.endMatch()
             }
-        }
-        .task(id: model.completedMatchWin) {
-            guard let win = model.completedMatchWin else { return }
-            await gameCenter.reportMatchWin(win)
         }
         .task {
             gameCenter.attach(to: model)

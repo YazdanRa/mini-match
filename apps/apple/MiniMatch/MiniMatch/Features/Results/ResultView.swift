@@ -2,6 +2,7 @@ import SwiftUI
 
 struct ResultView: View {
     let model: GameModel
+    let gameCenter: GameCenterModel
     @AccessibilityFocusState private var winnerIsFocused: Bool
     @Environment(\.scenePhase) private var scenePhase
 
@@ -27,6 +28,7 @@ struct ResultView: View {
                         Text("This round")
                             .font(.headline)
                             .foregroundStyle(MiniMatchColors.ink)
+                            .accessibilityAddTraits(.isHeader)
 
                         VStack(spacing: 0) {
                             ForEach(result.rows) { row in
@@ -60,10 +62,17 @@ struct ResultView: View {
             guard scenePhase == .active else { return }
             await model.observeTable()
         }
+        .task(id: model.completedMatchWin) {
+            guard let win = model.completedMatchWin else { return }
+            await gameCenter.reportMatchWin(win)
+        }
     }
 }
 
 #Preview {
-    ResultView(model: GameModel.preview(table: PreviewFixtures.resultTable))
+    ResultView(
+        model: GameModel.preview(table: PreviewFixtures.resultTable),
+        gameCenter: GameCenterModel.preview()
+    )
         .background(MiniMatchColors.background)
 }

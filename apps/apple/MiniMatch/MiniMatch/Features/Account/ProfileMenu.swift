@@ -9,12 +9,6 @@ struct ProfileMenu: View {
     var body: some View {
         Menu {
             Text(gameCenter.displayName)
-            Button("Leaderboard", systemImage: "trophy.fill") {
-                gameCenter.showLeaderboard()
-            }
-            Button("Game Center profile", systemImage: "person.crop.circle") {
-                gameCenter.showProfile()
-            }
             Button("Settings", systemImage: "gearshape") {
                 UIApplication.shared.open(URL(string: UIApplication.openSettingsURLString)!)
             }

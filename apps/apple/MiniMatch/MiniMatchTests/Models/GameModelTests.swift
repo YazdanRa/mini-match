@@ -5,6 +5,27 @@ import Testing
 struct GameModelTests {
     @Test
     @MainActor
+    func pickStartsEmptyAndOnlyAcceptsUInt64Values() async {
+        let model = GameModel(client: PreviewGameClient())
+
+        #expect(model.pickText.isEmpty)
+        #expect(!model.canLockPick)
+
+        model.pickText = "18446744073709551616"
+        #expect(!model.canLockPick)
+
+        model.pickText = "0"
+        #expect(model.canLockPick)
+
+        #expect(await model.createTable(name: "Friday Mini Match", displayName: "Maya"))
+        #expect(model.pickText.isEmpty)
+        model.pickText = "2"
+        model.discardSession()
+        #expect(model.pickText.isEmpty)
+    }
+
+    @Test
+    @MainActor
     func hostCanRevealOnlyAfterLocking() async throws {
         let model = GameModel(client: PreviewGameClient())
 

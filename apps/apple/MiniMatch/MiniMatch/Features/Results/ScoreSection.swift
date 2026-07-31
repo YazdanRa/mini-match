@@ -8,6 +8,7 @@ struct ScoreSection: View {
             Text("Score")
                 .font(.headline)
                 .foregroundStyle(MiniMatchColors.ink)
+                .accessibilityAddTraits(.isHeader)
 
             ScrollView(.horizontal) {
                 HStack(spacing: 22) {
@@ -45,9 +46,15 @@ struct ScoreSection: View {
 
     private func accessibilityLabel(for player: GamePlayer) -> Text {
         if player.id == table.winnerPlayerID {
-            Text("\(player.displayName), \(player.wins) wins, game winner")
+            Text(
+                "\(player.displayName), score: \(player.wins), game winner",
+                comment: "Accessibility score label; the first variable is the player name and the second is the score."
+            )
         } else {
-            Text("\(player.displayName), \(player.wins) wins")
+            Text(
+                "\(player.displayName), score: \(player.wins)",
+                comment: "Accessibility score label; the first variable is the player name and the second is the score."
+            )
         }
     }
 }

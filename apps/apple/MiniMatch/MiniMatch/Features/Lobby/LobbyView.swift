@@ -14,6 +14,7 @@ struct LobbyView: View {
                         Text(table.name)
                             .font(.title.bold())
                             .multilineTextAlignment(.center)
+                            .accessibilityAddTraits(.isHeader)
                         Text("Round \(table.currentRound?.number ?? 1)")
                             .foregroundStyle(.secondary)
                     }
@@ -50,7 +51,8 @@ struct LobbyView: View {
             UIAccessibility.post(
                 notification: .announcement,
                 argument: String(
-                    localized: "\(table.players.count) players. \(table.players.filter(\.isLocked).count) locked in."
+                    localized: "Players: \(table.players.count). Locked in: \(table.players.filter(\.isLocked).count).",
+                    comment: "VoiceOver lobby update; the first variable is the player count and the second is the locked-in player count."
                 )
             )
         }
