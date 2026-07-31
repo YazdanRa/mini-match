@@ -35,15 +35,8 @@ struct WinnerCard: View {
         .background(MiniMatchColors.blue)
         .clipShape(.rect(cornerRadius: 24))
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel(accessibilitySummary)
+        .accessibilityLabel(result.accessibilitySummary)
         .accessibilityAddTraits(.isHeader)
-    }
-
-    private var accessibilitySummary: String {
-        if let winnerName = result.winnerName, let winningPick = result.winningPick {
-            return String(localized: "\(winnerName) wins with \(winningPick)")
-        }
-        return String(localized: "No winner. Every number was duplicated.")
     }
 
     private func pick(_ value: UInt64) -> some View {

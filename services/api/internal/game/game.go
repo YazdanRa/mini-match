@@ -4,11 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math"
 	"strings"
 	"sync"
 )
-
-const WinningScore = 5
 
 const (
 	maxPlayerNameLength = 40
@@ -16,14 +15,15 @@ const (
 )
 
 var (
-	ErrAlreadyExists = errors.New("already exists")
-	ErrAlreadyLocked = errors.New("pick already locked")
-	ErrFinished      = errors.New("table is finished")
-	ErrForbidden     = errors.New("only the host can start the round")
-	ErrInvalid       = errors.New("invalid input")
-	ErrNotFound      = errors.New("not found")
-	ErrNotReady      = errors.New("every player must lock a pick")
-	ErrRoundMismatch = errors.New("round number does not match")
+	ErrAlreadyExists  = errors.New("already exists")
+	ErrAlreadyLocked  = errors.New("pick already locked")
+	ErrForbidden      = errors.New("only the host can start or reveal the round")
+	ErrInvalid        = errors.New("invalid input")
+	ErrNotFound       = errors.New("not found")
+	ErrNotReady       = errors.New("every player must lock a pick")
+	ErrRoundActive    = errors.New("a round is already active")
+	ErrRoundExhausted = errors.New("round sequence exhausted")
+	ErrRoundMismatch  = errors.New("round number does not match")
 )
 
 type RoundPhase uint8
@@ -39,9 +39,8 @@ type Table struct {
 	JoinCode           string
 	HostID             string
 	Players            []*Player
-	CurrentRound       Round
+	CurrentRound       *Round
 	LastResult         *Result
-	WinnerID           string
 	WinnerLifetimeWins uint64
 	Version            uint64
 	EventSequence      uint64
@@ -52,7 +51,6 @@ type Player struct {
 	GameCenterID string
 	Name         string
 	Avatar       string
-	Score        uint32
 	Locked       bool
 	Pick         uint64
 }
@@ -69,8 +67,9 @@ type Result struct {
 }
 
 type Selection struct {
-	PlayerID string
-	Pick     uint64
+	PlayerID    string
+	DisplayName string
+	Pick        uint64
 }
 
 func NewTable(id, name, joinCode, hostID, hostName, hostAvatar string) (*Table, error) {
@@ -92,7 +91,6 @@ func NewTable(id, name, joinCode, hostID, hostName, hostAvatar string) (*Table, 
 		JoinCode:      joinCode,
 		HostID:        hostID,
 		Players:       []*Player{{ID: hostID, Name: hostName, Avatar: avatar}},
-		CurrentRound:  Round{Number: 1, Phase: RoundOpen},
 		Version:       1,
 		EventSequence: 1,
 	}, nil
@@ -107,20 +105,16 @@ func (t *Table) Join(playerID, name, avatarID string) error {
 	if err != nil {
 		return err
 	}
-	if t.WinnerID != "" {
-		return ErrFinished
-	}
 	if t.player(playerID) != nil {
 		return ErrAlreadyExists
 	}
 	t.Players = append(t.Players, &Player{ID: playerID, Name: name, Avatar: avatar})
 	if len(t.Players) == 1 {
 		t.HostID = playerID
-		t.CurrentRound = Round{Number: 1, Phase: RoundOpen}
+		t.CurrentRound = nil
 		t.LastResult = nil
-		t.WinnerID = ""
 	}
-	if t.CurrentRound.Phase == RoundReady {
+	if t.CurrentRound != nil && t.CurrentRound.Phase == RoundReady {
 		t.CurrentRound.Phase = RoundOpen
 	}
 	t.changed()
@@ -128,9 +122,6 @@ func (t *Table) Join(playerID, name, avatarID string) error {
 }
 
 func (t *Table) Leave(playerID string) error {
-	if t.WinnerID != "" {
-		return ErrFinished
-	}
 	for index, player := range t.Players {
 		if player.ID != playerID {
 			continue
@@ -142,16 +133,19 @@ func (t *Table) Leave(playerID string) error {
 				t.HostID = t.Players[0].ID
 			}
 		}
-		t.CurrentRound.Phase = RoundReady
-		for _, remaining := range t.Players {
-			if !remaining.Locked {
-				t.CurrentRound.Phase = RoundOpen
-				break
+		if t.CurrentRound != nil {
+			t.CurrentRound.Phase = RoundReady
+			for _, remaining := range t.Players {
+				if !remaining.Locked {
+					t.CurrentRound.Phase = RoundOpen
+					break
+				}
 			}
 		}
 		if len(t.Players) == 0 {
-			t.CurrentRound = Round{Number: 1, Phase: RoundOpen}
+			t.CurrentRound = nil
 			t.LastResult = nil
+			t.WinnerLifetimeWins = 0
 		}
 		t.changed()
 		return nil
@@ -160,12 +154,12 @@ func (t *Table) Leave(playerID string) error {
 }
 
 func (t *Table) LockPick(playerID string, pick uint64, roundNumber uint32) error {
-	if t.WinnerID != "" {
-		return ErrFinished
-	}
 	player := t.player(playerID)
 	if player == nil {
 		return ErrNotFound
+	}
+	if t.CurrentRound == nil {
+		return ErrNotReady
 	}
 	if roundNumber != t.CurrentRound.Number {
 		return ErrRoundMismatch
@@ -186,15 +180,37 @@ func (t *Table) LockPick(playerID string, pick uint64, roundNumber uint32) error
 	return nil
 }
 
-func (t *Table) StartRound(actorID string, roundNumber uint32) error {
-	if t.WinnerID != "" {
-		return ErrFinished
-	}
+func (t *Table) BeginRound(actorID string) error {
 	if len(t.Players) < 2 {
 		return ErrNotReady
 	}
 	if actorID != t.HostID {
 		return ErrForbidden
+	}
+	if t.CurrentRound != nil {
+		return ErrRoundActive
+	}
+	expectedRound := uint32(1)
+	if t.LastResult != nil {
+		if t.LastResult.RoundNumber == math.MaxUint32 {
+			return ErrRoundExhausted
+		}
+		expectedRound = t.LastResult.RoundNumber + 1
+	}
+	t.CurrentRound = &Round{Number: expectedRound, Phase: RoundOpen}
+	t.changed()
+	return nil
+}
+
+func (t *Table) RevealRound(actorID string, roundNumber uint32) error {
+	if len(t.Players) < 2 {
+		return ErrNotReady
+	}
+	if actorID != t.HostID {
+		return ErrForbidden
+	}
+	if t.CurrentRound == nil {
+		return ErrNotReady
 	}
 	if t.CurrentRound.Number != roundNumber {
 		return ErrRoundMismatch
@@ -215,7 +231,11 @@ func (t *Table) StartRound(actorID string, roundNumber uint32) error {
 	}
 	for _, player := range t.Players {
 		counts[player.Pick]++
-		result.Selections = append(result.Selections, Selection{PlayerID: player.ID, Pick: player.Pick})
+		result.Selections = append(result.Selections, Selection{
+			PlayerID:    player.ID,
+			DisplayName: player.Name,
+			Pick:        player.Pick,
+		})
 	}
 	var (
 		lowest uint64
@@ -230,22 +250,17 @@ func (t *Table) StartRound(actorID string, roundNumber uint32) error {
 		for _, player := range t.Players {
 			if player.Pick == lowest {
 				result.WinnerID = player.ID
-				player.Score++
-				if player.Score == WinningScore {
-					t.WinnerID = player.ID
-				}
 				break
 			}
 		}
 	}
 	t.LastResult = result
+	t.WinnerLifetimeWins = 0
 	for _, player := range t.Players {
 		player.Locked = false
 		player.Pick = 0
 	}
-	if t.WinnerID == "" {
-		t.CurrentRound = Round{Number: roundNumber + 1, Phase: RoundOpen}
-	}
+	t.CurrentRound = nil
 	t.changed()
 	return nil
 }
@@ -273,32 +288,26 @@ func (t *Table) SetGameCenterID(playerID, gameCenterID string) error {
 }
 
 func (t *Table) DeletePlayerProfile(playerID, replacementID string) error {
-	if t.WinnerID == "" {
-		return t.Leave(playerID)
-	}
-	player := t.player(playerID)
-	if player == nil {
-		return ErrNotFound
-	}
-	player.ID = replacementID
-	player.GameCenterID = ""
-	player.Name = "Deleted Player"
-	player.Avatar = "spark"
-	if t.HostID == playerID {
-		t.HostID = replacementID
-	}
-	if t.WinnerID == playerID {
-		t.WinnerID = replacementID
-	}
+	playerIsPresent := t.player(playerID) != nil
+	resultChanged := false
 	if t.LastResult != nil {
 		if t.LastResult.WinnerID == playerID {
 			t.LastResult.WinnerID = replacementID
+			resultChanged = true
 		}
 		for index := range t.LastResult.Selections {
 			if t.LastResult.Selections[index].PlayerID == playerID {
 				t.LastResult.Selections[index].PlayerID = replacementID
+				t.LastResult.Selections[index].DisplayName = ""
+				resultChanged = true
 			}
 		}
+	}
+	if playerIsPresent {
+		return t.Leave(playerID)
+	}
+	if !resultChanged {
+		return ErrNotFound
 	}
 	t.changed()
 	return nil
@@ -345,13 +354,11 @@ type Repository interface {
 type MemoryRepository struct {
 	mu     sync.Mutex
 	tables map[string]*Table
-	wins   map[string]uint64
 }
 
 func NewMemoryRepository() *MemoryRepository {
 	return &MemoryRepository{
 		tables: make(map[string]*Table),
-		wins:   make(map[string]uint64),
 	}
 }
 
@@ -400,12 +407,6 @@ func (r *MemoryRepository) Update(_ context.Context, id string, update func(*Tab
 	if err := update(next); err != nil {
 		return nil, err
 	}
-	if table.WinnerID == "" && next.WinnerID != "" {
-		if winner := next.player(next.WinnerID); winner != nil && winner.GameCenterID != "" {
-			r.wins[winner.GameCenterID]++
-			next.WinnerLifetimeWins = r.wins[winner.GameCenterID]
-		}
-	}
 	r.tables[id] = next
 	return clone(next), nil
 }
@@ -415,11 +416,6 @@ func (r *MemoryRepository) DeleteProfile(_ context.Context, playerID string) err
 	defer r.mu.Unlock()
 	for id, table := range r.tables {
 		next := clone(table)
-		for _, player := range next.Players {
-			if player.ID == playerID && player.GameCenterID != "" {
-				delete(r.wins, player.GameCenterID)
-			}
-		}
 		if err := next.DeletePlayerProfile(playerID, "deleted:"+id); err == nil {
 			r.tables[id] = next
 		}
@@ -429,6 +425,10 @@ func (r *MemoryRepository) DeleteProfile(_ context.Context, playerID string) err
 
 func clone(table *Table) *Table {
 	copy := *table
+	if table.CurrentRound != nil {
+		round := *table.CurrentRound
+		copy.CurrentRound = &round
+	}
 	copy.Players = make([]*Player, len(table.Players))
 	for i, player := range table.Players {
 		playerCopy := *player

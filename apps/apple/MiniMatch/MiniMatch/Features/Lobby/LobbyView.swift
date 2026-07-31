@@ -15,15 +15,21 @@ struct LobbyView: View {
                             .font(.title.bold())
                             .multilineTextAlignment(.center)
                             .accessibilityAddTraits(.isHeader)
-                        Text("Round \(table.currentRound?.number ?? 1)")
-                            .foregroundStyle(.secondary)
+                        if let round = table.currentRound {
+                            Text("Round \(round.number)")
+                                .foregroundStyle(.secondary)
+                        } else {
+                            Text("Lobby")
+                                .foregroundStyle(.secondary)
+                        }
                     }
                     .foregroundStyle(MiniMatchColors.ink)
 
                     PlayersSection(
                         table: table,
                         currentPlayerID: model.currentPlayerID,
-                        playerImages: playerImages
+                        playerImages: playerImages,
+                        roundIsActive: table.currentRound != nil
                     )
 
                     if model.isReconnecting {
@@ -32,10 +38,17 @@ struct LobbyView: View {
                             .foregroundStyle(.secondary)
                     }
 
-                    PickSection(model: model)
+                    if table.currentRound != nil {
+                        PickSection(model: model)
+                    } else if let result = model.result {
+                        RoundResultSection(result: result)
+                    }
 
                     if model.isHost {
                         HostActionSection(model: model)
+                    } else if table.currentRound == nil {
+                        Label("Waiting for the host to start a round", systemImage: "hourglass")
+                            .foregroundStyle(.secondary)
                     }
                 }
             }
@@ -47,7 +60,7 @@ struct LobbyView: View {
             await model.observeTable()
         }
         .onChange(of: model.table?.eventSequence) {
-            guard let table = model.table else { return }
+            guard let table = model.table, table.currentRound != nil else { return }
             UIAccessibility.post(
                 notification: .announcement,
                 argument: String(
@@ -55,6 +68,10 @@ struct LobbyView: View {
                     comment: "VoiceOver lobby update; the first variable is the player count and the second is the locked-in player count."
                 )
             )
+        }
+        .onChange(of: model.table?.lastResult?.roundNumber) {
+            guard let result = model.result else { return }
+            UIAccessibility.post(notification: .announcement, argument: result.accessibilitySummary)
         }
     }
 }

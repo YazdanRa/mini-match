@@ -12,8 +12,14 @@ service MiniMatchService {
   rpc JoinTable(JoinTableRequest) returns (JoinTableResponse);
   rpc LeaveTable(LeaveTableRequest) returns (LeaveTableResponse);
   rpc LockPick(LockPickRequest) returns (LockPickResponse);
-  // Reveals the named round and opens the next unless the match is won.
-  rpc StartRound(StartRoundRequest) returns (StartRoundResponse);
+  // Deprecated reveal alias retained for wire compatibility.
+  rpc StartRound(StartRoundRequest) returns (StartRoundResponse) {
+    option deprecated = true;
+  }
+  // Opens the next server-numbered round from the lobby.
+  rpc BeginRound(BeginRoundRequest) returns (BeginRoundResponse);
+  // Reveals the named round and returns the table to the lobby.
+  rpc RevealRound(RevealRoundRequest) returns (RevealRoundResponse);
   rpc GetTable(GetTableRequest) returns (GetTableResponse);
   rpc DeleteProfile(DeleteProfileRequest) returns (DeleteProfileResponse);
 }
@@ -80,6 +86,25 @@ message StartRoundResponse {
   Table table = 1;
 }
 
+message BeginRoundRequest {
+  string table_id = 1;
+  string host_player_id = 2;
+}
+
+message BeginRoundResponse {
+  Table table = 1;
+}
+
+message RevealRoundRequest {
+  string table_id = 1;
+  string host_player_id = 2;
+  uint32 round_number = 3;
+}
+
+message RevealRoundResponse {
+  Table table = 1;
+}
+
 message GetTableRequest {
   string table_id = 1;
 }
@@ -99,22 +124,27 @@ message Table {
   string host_player_id = 4;
   repeated Player players = 5;
   TableState state = 6;
+  // Absent while everyone is waiting in the lobby.
   Round current_round = 7;
   // Present only after reveal; unrevealed picks never appear in Table.
   RoundResult last_result = 8;
-  uint32 wins_to_finish = 9;
+  // Deprecated: rounds are independent and tables no longer have a winning score.
+  uint32 wins_to_finish = 9 [deprecated = true];
   // Monotonic revision for ordering safe table snapshots.
   uint64 state_version = 10;
   // Monotonic cursor of the latest safe event projected to Firestore.
   uint64 event_sequence = 11;
-  optional string winner_player_id = 12;
-  optional uint64 winner_lifetime_wins = 13;
+  // Deprecated: tables no longer finish; use last_result.winner_player_id.
+  optional string winner_player_id = 12 [deprecated = true];
+  // Deprecated: completed-match totals are no longer reported.
+  optional uint64 winner_lifetime_wins = 13 [deprecated = true];
 }
 
 message Player {
   string id = 1;
   string display_name = 2;
-  uint32 wins = 3;
+  // Deprecated: rounds do not accumulate a per-table score.
+  uint32 wins = 3 [deprecated = true];
   bool locked = 4;
   string avatar = 5;
 }
@@ -133,6 +163,8 @@ message RoundResult {
 message Selection {
   string player_id = 1;
   Pick pick = 2;
+  // Snapshot captured at reveal so completed results survive player departure.
+  string display_name = 3;
 }
 
 // uint64 rejects negative picks at the transport boundary.
@@ -143,7 +175,7 @@ message Pick {
 enum TableState {
   TABLE_STATE_UNSPECIFIED = 0;
   TABLE_STATE_ACTIVE = 1;
-  TABLE_STATE_FINISHED = 2;
+  TABLE_STATE_FINISHED = 2 [deprecated = true];
 }
 
 enum RoundPhase {

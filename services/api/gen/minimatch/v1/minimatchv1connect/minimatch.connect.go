@@ -48,6 +48,12 @@ const (
 	// MiniMatchServiceStartRoundProcedure is the fully-qualified name of the MiniMatchService's
 	// StartRound RPC.
 	MiniMatchServiceStartRoundProcedure = "/minimatch.v1.MiniMatchService/StartRound"
+	// MiniMatchServiceBeginRoundProcedure is the fully-qualified name of the MiniMatchService's
+	// BeginRound RPC.
+	MiniMatchServiceBeginRoundProcedure = "/minimatch.v1.MiniMatchService/BeginRound"
+	// MiniMatchServiceRevealRoundProcedure is the fully-qualified name of the MiniMatchService's
+	// RevealRound RPC.
+	MiniMatchServiceRevealRoundProcedure = "/minimatch.v1.MiniMatchService/RevealRound"
 	// MiniMatchServiceGetTableProcedure is the fully-qualified name of the MiniMatchService's GetTable
 	// RPC.
 	MiniMatchServiceGetTableProcedure = "/minimatch.v1.MiniMatchService/GetTable"
@@ -62,8 +68,14 @@ type MiniMatchServiceClient interface {
 	JoinTable(context.Context, *connect.Request[v1.JoinTableRequest]) (*connect.Response[v1.JoinTableResponse], error)
 	LeaveTable(context.Context, *connect.Request[v1.LeaveTableRequest]) (*connect.Response[v1.LeaveTableResponse], error)
 	LockPick(context.Context, *connect.Request[v1.LockPickRequest]) (*connect.Response[v1.LockPickResponse], error)
-	// Reveals the named round and opens the next unless the match is won.
+	// Deprecated reveal alias retained for wire compatibility.
+	//
+	// Deprecated: do not use.
 	StartRound(context.Context, *connect.Request[v1.StartRoundRequest]) (*connect.Response[v1.StartRoundResponse], error)
+	// Opens the next server-numbered round from the lobby.
+	BeginRound(context.Context, *connect.Request[v1.BeginRoundRequest]) (*connect.Response[v1.BeginRoundResponse], error)
+	// Reveals the named round and returns the table to the lobby.
+	RevealRound(context.Context, *connect.Request[v1.RevealRoundRequest]) (*connect.Response[v1.RevealRoundResponse], error)
 	GetTable(context.Context, *connect.Request[v1.GetTableRequest]) (*connect.Response[v1.GetTableResponse], error)
 	DeleteProfile(context.Context, *connect.Request[v1.DeleteProfileRequest]) (*connect.Response[v1.DeleteProfileResponse], error)
 }
@@ -109,6 +121,18 @@ func NewMiniMatchServiceClient(httpClient connect.HTTPClient, baseURL string, op
 			connect.WithSchema(miniMatchServiceMethods.ByName("StartRound")),
 			connect.WithClientOptions(opts...),
 		),
+		beginRound: connect.NewClient[v1.BeginRoundRequest, v1.BeginRoundResponse](
+			httpClient,
+			baseURL+MiniMatchServiceBeginRoundProcedure,
+			connect.WithSchema(miniMatchServiceMethods.ByName("BeginRound")),
+			connect.WithClientOptions(opts...),
+		),
+		revealRound: connect.NewClient[v1.RevealRoundRequest, v1.RevealRoundResponse](
+			httpClient,
+			baseURL+MiniMatchServiceRevealRoundProcedure,
+			connect.WithSchema(miniMatchServiceMethods.ByName("RevealRound")),
+			connect.WithClientOptions(opts...),
+		),
 		getTable: connect.NewClient[v1.GetTableRequest, v1.GetTableResponse](
 			httpClient,
 			baseURL+MiniMatchServiceGetTableProcedure,
@@ -131,6 +155,8 @@ type miniMatchServiceClient struct {
 	leaveTable    *connect.Client[v1.LeaveTableRequest, v1.LeaveTableResponse]
 	lockPick      *connect.Client[v1.LockPickRequest, v1.LockPickResponse]
 	startRound    *connect.Client[v1.StartRoundRequest, v1.StartRoundResponse]
+	beginRound    *connect.Client[v1.BeginRoundRequest, v1.BeginRoundResponse]
+	revealRound   *connect.Client[v1.RevealRoundRequest, v1.RevealRoundResponse]
 	getTable      *connect.Client[v1.GetTableRequest, v1.GetTableResponse]
 	deleteProfile *connect.Client[v1.DeleteProfileRequest, v1.DeleteProfileResponse]
 }
@@ -156,8 +182,20 @@ func (c *miniMatchServiceClient) LockPick(ctx context.Context, req *connect.Requ
 }
 
 // StartRound calls minimatch.v1.MiniMatchService.StartRound.
+//
+// Deprecated: do not use.
 func (c *miniMatchServiceClient) StartRound(ctx context.Context, req *connect.Request[v1.StartRoundRequest]) (*connect.Response[v1.StartRoundResponse], error) {
 	return c.startRound.CallUnary(ctx, req)
+}
+
+// BeginRound calls minimatch.v1.MiniMatchService.BeginRound.
+func (c *miniMatchServiceClient) BeginRound(ctx context.Context, req *connect.Request[v1.BeginRoundRequest]) (*connect.Response[v1.BeginRoundResponse], error) {
+	return c.beginRound.CallUnary(ctx, req)
+}
+
+// RevealRound calls minimatch.v1.MiniMatchService.RevealRound.
+func (c *miniMatchServiceClient) RevealRound(ctx context.Context, req *connect.Request[v1.RevealRoundRequest]) (*connect.Response[v1.RevealRoundResponse], error) {
+	return c.revealRound.CallUnary(ctx, req)
 }
 
 // GetTable calls minimatch.v1.MiniMatchService.GetTable.
@@ -176,8 +214,14 @@ type MiniMatchServiceHandler interface {
 	JoinTable(context.Context, *connect.Request[v1.JoinTableRequest]) (*connect.Response[v1.JoinTableResponse], error)
 	LeaveTable(context.Context, *connect.Request[v1.LeaveTableRequest]) (*connect.Response[v1.LeaveTableResponse], error)
 	LockPick(context.Context, *connect.Request[v1.LockPickRequest]) (*connect.Response[v1.LockPickResponse], error)
-	// Reveals the named round and opens the next unless the match is won.
+	// Deprecated reveal alias retained for wire compatibility.
+	//
+	// Deprecated: do not use.
 	StartRound(context.Context, *connect.Request[v1.StartRoundRequest]) (*connect.Response[v1.StartRoundResponse], error)
+	// Opens the next server-numbered round from the lobby.
+	BeginRound(context.Context, *connect.Request[v1.BeginRoundRequest]) (*connect.Response[v1.BeginRoundResponse], error)
+	// Reveals the named round and returns the table to the lobby.
+	RevealRound(context.Context, *connect.Request[v1.RevealRoundRequest]) (*connect.Response[v1.RevealRoundResponse], error)
 	GetTable(context.Context, *connect.Request[v1.GetTableRequest]) (*connect.Response[v1.GetTableResponse], error)
 	DeleteProfile(context.Context, *connect.Request[v1.DeleteProfileRequest]) (*connect.Response[v1.DeleteProfileResponse], error)
 }
@@ -219,6 +263,18 @@ func NewMiniMatchServiceHandler(svc MiniMatchServiceHandler, opts ...connect.Han
 		connect.WithSchema(miniMatchServiceMethods.ByName("StartRound")),
 		connect.WithHandlerOptions(opts...),
 	)
+	miniMatchServiceBeginRoundHandler := connect.NewUnaryHandler(
+		MiniMatchServiceBeginRoundProcedure,
+		svc.BeginRound,
+		connect.WithSchema(miniMatchServiceMethods.ByName("BeginRound")),
+		connect.WithHandlerOptions(opts...),
+	)
+	miniMatchServiceRevealRoundHandler := connect.NewUnaryHandler(
+		MiniMatchServiceRevealRoundProcedure,
+		svc.RevealRound,
+		connect.WithSchema(miniMatchServiceMethods.ByName("RevealRound")),
+		connect.WithHandlerOptions(opts...),
+	)
 	miniMatchServiceGetTableHandler := connect.NewUnaryHandler(
 		MiniMatchServiceGetTableProcedure,
 		svc.GetTable,
@@ -243,6 +299,10 @@ func NewMiniMatchServiceHandler(svc MiniMatchServiceHandler, opts ...connect.Han
 			miniMatchServiceLockPickHandler.ServeHTTP(w, r)
 		case MiniMatchServiceStartRoundProcedure:
 			miniMatchServiceStartRoundHandler.ServeHTTP(w, r)
+		case MiniMatchServiceBeginRoundProcedure:
+			miniMatchServiceBeginRoundHandler.ServeHTTP(w, r)
+		case MiniMatchServiceRevealRoundProcedure:
+			miniMatchServiceRevealRoundHandler.ServeHTTP(w, r)
 		case MiniMatchServiceGetTableProcedure:
 			miniMatchServiceGetTableHandler.ServeHTTP(w, r)
 		case MiniMatchServiceDeleteProfileProcedure:
@@ -274,6 +334,14 @@ func (UnimplementedMiniMatchServiceHandler) LockPick(context.Context, *connect.R
 
 func (UnimplementedMiniMatchServiceHandler) StartRound(context.Context, *connect.Request[v1.StartRoundRequest]) (*connect.Response[v1.StartRoundResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("minimatch.v1.MiniMatchService.StartRound is not implemented"))
+}
+
+func (UnimplementedMiniMatchServiceHandler) BeginRound(context.Context, *connect.Request[v1.BeginRoundRequest]) (*connect.Response[v1.BeginRoundResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("minimatch.v1.MiniMatchService.BeginRound is not implemented"))
+}
+
+func (UnimplementedMiniMatchServiceHandler) RevealRound(context.Context, *connect.Request[v1.RevealRoundRequest]) (*connect.Response[v1.RevealRoundResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("minimatch.v1.MiniMatchService.RevealRound is not implemented"))
 }
 
 func (UnimplementedMiniMatchServiceHandler) GetTable(context.Context, *connect.Request[v1.GetTableRequest]) (*connect.Response[v1.GetTableResponse], error) {

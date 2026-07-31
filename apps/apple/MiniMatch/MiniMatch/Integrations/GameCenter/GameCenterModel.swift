@@ -17,8 +17,6 @@ struct GameCenterMatchmaking: Identifiable {
 @MainActor
 @Observable
 final class GameCenterModel: NSObject {
-    static let winsLeaderboardID = "com.yazdanra.minimatch.wins"
-
     private let isEnabled: Bool
     private var started = false
     private var listenerIsRegistered = false
@@ -62,7 +60,6 @@ final class GameCenterModel: NSObject {
                 if self.isAuthenticated {
                     self.registerListener()
                     await self.refreshProfile()
-                    await self.syncWins()
                 } else {
                     self.endMatch()
                     self.displayName = ""
@@ -190,15 +187,6 @@ final class GameCenterModel: NSObject {
         )
     }
 
-    func reportMatchWin(_ win: CompletedMatchWin) async {
-        guard let playerID = matchPlayerID else { return }
-        setPendingWins(max(pendingWins(for: playerID) ?? 0, win.lifetimeWins), for: playerID)
-        if GKLocalPlayer.local.isAuthenticated,
-           GKLocalPlayer.local.gamePlayerID == playerID {
-            await syncWins()
-        }
-    }
-
     func dismissAuthentication() {
         authentication = nil
         refreshRestrictions()
@@ -217,7 +205,6 @@ final class GameCenterModel: NSObject {
         }
         Task {
             await refreshProfile()
-            await syncWins()
         }
     }
 
@@ -416,18 +403,6 @@ final class GameCenterModel: NSObject {
         isShowingError = true
     }
 
-    private func pendingWins(for playerID: String) -> UInt64? {
-        UserDefaults.standard.string(forKey: pendingWinsKey(for: playerID)).flatMap(UInt64.init)
-    }
-
-    private func setPendingWins(_ wins: UInt64?, for playerID: String) {
-        UserDefaults.standard.set(wins.map(String.init), forKey: pendingWinsKey(for: playerID))
-    }
-
-    private func pendingWinsKey(for playerID: String) -> String {
-        "GameCenterPendingLifetimeWins.\(playerID)"
-    }
-
     private func refreshProfile() async {
         let player = GKLocalPlayer.local
         guard player.isAuthenticated else { return }
@@ -446,33 +421,6 @@ final class GameCenterModel: NSObject {
         }
     }
 
-    private func syncWins() async {
-        let player = GKLocalPlayer.local
-        guard player.isAuthenticated else { return }
-        let playerID = player.gamePlayerID
-        guard let wins = pendingWins(for: playerID),
-              let score = Int(exactly: wins)
-        else {
-            return
-        }
-        do {
-            try await GKLeaderboard.submitScore(
-                score,
-                context: 0,
-                player: player,
-                leaderboardIDs: [Self.winsLeaderboardID]
-            )
-            guard GKLocalPlayer.local.isAuthenticated,
-                  GKLocalPlayer.local.gamePlayerID == playerID,
-                  pendingWins(for: playerID) == wins
-            else {
-                return
-            }
-            setPendingWins(nil, for: playerID)
-        } catch {
-            // GameKit submission retries the next time authentication or a win refreshes.
-        }
-    }
 }
 
 extension GameCenterModel: @preconcurrency GKMatchmakerViewControllerDelegate {

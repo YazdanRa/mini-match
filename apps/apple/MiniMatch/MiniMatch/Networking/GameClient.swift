@@ -20,6 +20,10 @@ protocol GameClient: Sendable {
         roundNumber: UInt32,
         pick: UInt64
     ) async throws -> GameTable
+    func startRound(
+        tableID: String,
+        hostPlayerID: String
+    ) async throws -> GameTable
     func revealRound(
         tableID: String,
         hostPlayerID: String,

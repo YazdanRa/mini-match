@@ -37,6 +37,7 @@ struct MiniMatchApp: App {
 
                     _ = await model.createTable(name: "Friday Mini Match", displayName: "Maya")
                     if arguments.contains("--preview-result") {
+                        await model.startRound()
                         model.pickText = "2"
                         await model.lockPick()
                         await model.revealRound()

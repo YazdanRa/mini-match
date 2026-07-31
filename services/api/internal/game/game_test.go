@@ -3,6 +3,7 @@ package game
 import (
 	"context"
 	"errors"
+	"math"
 	"strings"
 	"testing"
 )
@@ -20,14 +21,20 @@ func TestTableRules(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	if err := table.LockPick("maya", 2, 1); err != nil {
-		t.Fatal(err)
+	if table.CurrentRound != nil {
+		t.Fatal("new table did not start in the lobby")
 	}
-	if !errors.Is(table.StartRound("zoe", 1), ErrForbidden) {
+	if !errors.Is(table.BeginRound("zoe"), ErrForbidden) {
 		t.Fatal("non-host started the round")
 	}
-	if !errors.Is(table.StartRound("maya", 1), ErrNotReady) {
-		t.Fatal("round started before every player locked")
+	if err := table.BeginRound("maya"); err != nil {
+		t.Fatal(err)
+	}
+	if !errors.Is(table.BeginRound("maya"), ErrRoundActive) {
+		t.Fatal("host started a second round while one was active")
+	}
+	if err := table.LockPick("maya", 2, 1); err != nil {
+		t.Fatal(err)
 	}
 	if err := table.LockPick("zoe", 2, 1); err != nil {
 		t.Fatal(err)
@@ -38,17 +45,17 @@ func TestTableRules(t *testing.T) {
 	if table.CurrentRound.Phase != RoundReady {
 		t.Fatal("round did not become ready after every player locked")
 	}
-	if err := table.StartRound("maya", 1); err != nil {
+	if !errors.Is(table.RevealRound("zoe", 1), ErrForbidden) {
+		t.Fatal("non-host revealed the round")
+	}
+	if err := table.RevealRound("maya", 1); err != nil {
 		t.Fatal(err)
 	}
 	if got := table.LastResult.WinnerID; got != "liam" {
 		t.Fatalf("winner = %q, want liam", got)
 	}
-	if got := table.player("liam").Score; got != 1 {
-		t.Fatalf("score = %d, want 1", got)
-	}
-	if table.CurrentRound.Number != 2 {
-		t.Fatalf("current round = %d, want 2", table.CurrentRound.Number)
+	if table.CurrentRound != nil {
+		t.Fatal("revealed round did not return to the lobby")
 	}
 	for _, player := range table.Players {
 		if player.Locked {
@@ -56,14 +63,17 @@ func TestTableRules(t *testing.T) {
 		}
 	}
 	version := table.Version
-	if err := table.LockPick("maya", 0, 1); !errors.Is(err, ErrRoundMismatch) {
-		t.Fatalf("stale lock error = %v, want ErrRoundMismatch", err)
+	if err := table.LockPick("maya", 0, 1); !errors.Is(err, ErrNotReady) {
+		t.Fatalf("lobby lock error = %v, want ErrNotReady", err)
 	}
 	if table.player("maya").Locked || table.Version != version {
 		t.Fatal("stale lock changed table state")
 	}
 
-	for round := 2; round <= WinningScore; round++ {
+	for round := 2; round <= 6; round++ {
+		if err := table.BeginRound("maya"); err != nil {
+			t.Fatalf("round %d start: %v", round, err)
+		}
 		for _, id := range []string{"maya", "zoe", "liam"} {
 			pick := uint64(1)
 			if id == "liam" {
@@ -73,31 +83,48 @@ func TestTableRules(t *testing.T) {
 				t.Fatalf("round %d lock: %v", round, err)
 			}
 		}
-		if err := table.StartRound("maya", uint32(round)); err != nil {
+		if err := table.RevealRound("maya", uint32(round)); err != nil {
 			t.Fatalf("round %d reveal: %v", round, err)
 		}
 	}
-	if table.WinnerID != "liam" {
-		t.Fatalf("table winner = %q, want liam", table.WinnerID)
+	if got := table.LastResult.RoundNumber; got != 6 {
+		t.Fatalf("last result round = %d, want 6", got)
 	}
-	if got := table.LastResult.RoundNumber; got != WinningScore {
-		t.Fatalf("last result round = %d, want %d", got, WinningScore)
-	}
-	if !errors.Is(table.LockPick("maya", 0, WinningScore+1), ErrFinished) {
-		t.Fatal("finished table accepted another pick")
+	if err := table.BeginRound("maya"); err != nil {
+		t.Fatalf("table did not allow an independent seventh round: %v", err)
 	}
 }
 
-func TestSoloPlayerCannotStartRound(t *testing.T) {
+func TestSoloPlayerCannotBeginRound(t *testing.T) {
 	table, err := NewTable("table", "Friday", "ABC123", "maya", "Maya", "fox")
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := table.LockPick("maya", 2, 1); err != nil {
-		t.Fatal(err)
-	}
-	if !errors.Is(table.StartRound("maya", 1), ErrNotReady) {
+	if !errors.Is(table.BeginRound("maya"), ErrNotReady) {
 		t.Fatal("solo player started the round")
+	}
+}
+
+func TestRevealedResultKeepsPlayerNamesAfterLeave(t *testing.T) {
+	table, _ := NewTable("table", "Friday", "ABC123", "maya", "Maya", "")
+	_ = table.Join("liam", "Liam", "")
+	_ = table.BeginRound("maya")
+	_ = table.LockPick("maya", 2, 1)
+	_ = table.LockPick("liam", 5, 1)
+	_ = table.RevealRound("maya", 1)
+	_ = table.Leave("liam")
+
+	if got := table.LastResult.Selections[1].DisplayName; got != "Liam" {
+		t.Fatalf("departed player name = %q, want Liam", got)
+	}
+}
+
+func TestRoundNumberCannotWrap(t *testing.T) {
+	table, _ := NewTable("table", "Friday", "ABC123", "maya", "Maya", "")
+	_ = table.Join("zoe", "Zoe", "")
+	table.LastResult = &Result{RoundNumber: math.MaxUint32}
+	if err := table.BeginRound("maya"); !errors.Is(err, ErrRoundExhausted) {
+		t.Fatalf("wrapped start error = %v, want ErrRoundExhausted", err)
 	}
 }
 
@@ -142,12 +169,13 @@ func TestNoUniquePickHasNoWinner(t *testing.T) {
 	_ = table.Join("zoe", "Zoe", "")
 	_ = table.Join("liam", "Liam", "")
 	_ = table.Join("noah", "Noah", "")
+	_ = table.BeginRound("maya")
 	for id, pick := range map[string]uint64{"maya": 2, "zoe": 2, "liam": 5, "noah": 5} {
 		if err := table.LockPick(id, pick, 1); err != nil {
 			t.Fatal(err)
 		}
 	}
-	if err := table.StartRound("maya", 1); err != nil {
+	if err := table.RevealRound("maya", 1); err != nil {
 		t.Fatal(err)
 	}
 	if table.LastResult.WinnerID != "" {
@@ -159,6 +187,7 @@ func TestLeaveRemovesPlayerAndPromotesHost(t *testing.T) {
 	table, _ := NewTable("table", "Friday", "ABC123", "maya", "Maya", "fox")
 	_ = table.Join("zoe", "Zoe", "owl")
 	_ = table.Join("liam", "Liam", "frog")
+	_ = table.BeginRound("maya")
 	_ = table.LockPick("zoe", 2, 1)
 	_ = table.LockPick("liam", 5, 1)
 
@@ -168,7 +197,7 @@ func TestLeaveRemovesPlayerAndPromotesHost(t *testing.T) {
 	if table.HostID != "zoe" || len(table.Players) != 2 || table.CurrentRound.Phase != RoundReady {
 		t.Fatalf("leave result = host %q, %d players, phase %v", table.HostID, len(table.Players), table.CurrentRound.Phase)
 	}
-	if err := table.StartRound("zoe", 1); err != nil {
+	if err := table.RevealRound("zoe", 1); err != nil {
 		t.Fatalf("promoted host could not reveal: %v", err)
 	}
 
@@ -179,7 +208,7 @@ func TestLeaveRemovesPlayerAndPromotesHost(t *testing.T) {
 	if err := empty.Join("noah", "Noah", "cat"); err != nil {
 		t.Fatal(err)
 	}
-	if empty.HostID != "noah" || empty.CurrentRound.Number != 1 {
+	if empty.HostID != "noah" || empty.CurrentRound != nil {
 		t.Fatal("first player to rejoin an empty table did not become host")
 	}
 }
@@ -193,6 +222,7 @@ func TestMemoryRepositoryUpdateIsAtomic(t *testing.T) {
 	}
 	if _, err := repository.Update(ctx, table.ID, func(next *Table) error {
 		next.Name = "changed"
+		next.CurrentRound = &Round{Number: 99, Phase: RoundReady}
 		return ErrInvalid
 	}); !errors.Is(err, ErrInvalid) {
 		t.Fatalf("update error = %v, want ErrInvalid", err)
@@ -201,83 +231,46 @@ func TestMemoryRepositoryUpdateIsAtomic(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if stored.Name != "Friday" {
-		t.Fatalf("failed update changed stored table to %q", stored.Name)
+	if stored.Name != "Friday" || stored.CurrentRound != nil {
+		t.Fatal("failed update changed stored table")
 	}
 }
 
-func TestMemoryRepositoryCountsEachCompletedMatchOnce(t *testing.T) {
-	ctx := context.Background()
-	repository := NewMemoryRepository()
-	for index, id := range []string{"table-1", "table-2"} {
-		want := uint64(index + 1)
-		table, _ := NewTable(id, "Friday", []string{"ABC123", "DEF456"}[index], "maya", "Maya", "")
-		table.Players[0].GameCenterID = "game-center-maya"
-		if err := repository.Create(ctx, table); err != nil {
-			t.Fatal(err)
-		}
-		finished, err := repository.Update(ctx, id, func(next *Table) error {
-			next.WinnerID = "maya"
-			return nil
-		})
-		if err != nil {
-			t.Fatal(err)
-		}
-		if finished.WinnerLifetimeWins != want {
-			t.Fatalf("table %d lifetime wins = %d, want %d", index+1, finished.WinnerLifetimeWins, want)
-		}
-		repeated, err := repository.Update(ctx, id, func(*Table) error { return nil })
-		if err != nil {
-			t.Fatal(err)
-		}
-		if repeated.WinnerLifetimeWins != want {
-			t.Fatalf("repeated update lifetime wins = %d, want %d", repeated.WinnerLifetimeWins, want)
-		}
-	}
-	if err := repository.DeleteProfile(ctx, "maya"); err != nil {
-		t.Fatal(err)
-	}
-	table, _ := NewTable("table-3", "Friday", "GHI789", "maya", "Maya", "")
-	table.Players[0].GameCenterID = "game-center-maya"
-	if err := repository.Create(ctx, table); err != nil {
-		t.Fatal(err)
-	}
-	finished, err := repository.Update(ctx, table.ID, func(next *Table) error {
-		next.WinnerID = "maya"
-		return nil
-	})
-	if err != nil {
-		t.Fatal(err)
-	}
-	if finished.WinnerLifetimeWins != 1 {
-		t.Fatalf("lifetime wins after profile deletion = %d, want 1", finished.WinnerLifetimeWins)
-	}
-}
-
-func TestDeletePlayerProfileRemovesActiveAndAnonymizesFinishedTables(t *testing.T) {
-	active, _ := NewTable("active", "Friday", "ACTIVE", "maya", "Maya", "fox")
-	if err := active.DeletePlayerProfile("maya", "deleted:active"); err != nil {
-		t.Fatal(err)
-	}
-	if active.HasPlayer("maya") {
-		t.Fatal("active profile was not removed")
-	}
-
-	finished, _ := NewTable("finished", "Friday", "FINISH", "maya", "Maya", "fox")
-	finished.WinnerID = "maya"
-	finished.LastResult = &Result{
+func TestDeletePlayerProfileRemovesPlayerAndAnonymizesLastResult(t *testing.T) {
+	table, _ := NewTable("table", "Friday", "ACTIVE", "maya", "Maya", "fox")
+	_ = table.Join("zoe", "Zoe", "owl")
+	table.LastResult = &Result{
 		WinnerID:   "maya",
-		Selections: []Selection{{PlayerID: "maya", Pick: 2}},
+		Selections: []Selection{{PlayerID: "maya", DisplayName: "Maya", Pick: 2}},
 	}
-	if err := finished.DeletePlayerProfile("maya", "deleted:finished"); err != nil {
+	if err := table.DeletePlayerProfile("maya", "deleted:table"); err != nil {
 		t.Fatal(err)
 	}
-	if player := finished.player("deleted:finished"); player == nil ||
-		player.Name != "Deleted Player" ||
-		player.GameCenterID != "" ||
-		finished.WinnerID != "deleted:finished" ||
-		finished.LastResult.WinnerID != "deleted:finished" ||
-		finished.LastResult.Selections[0].PlayerID != "deleted:finished" {
-		t.Fatal("finished profile references were not anonymized")
+	if table.HasPlayer("maya") {
+		t.Fatal("profile was not removed")
+	}
+	if table.LastResult.WinnerID != "deleted:table" ||
+		table.LastResult.Selections[0].PlayerID != "deleted:table" ||
+		table.LastResult.Selections[0].DisplayName != "" {
+		t.Fatal("last result kept the deleted player ID")
+	}
+}
+
+func TestDeletePlayerProfileAnonymizesResultAfterLeave(t *testing.T) {
+	table, _ := NewTable("table", "Friday", "ACTIVE", "maya", "Maya", "fox")
+	_ = table.Join("zoe", "Zoe", "owl")
+	table.LastResult = &Result{
+		WinnerID:   "maya",
+		Selections: []Selection{{PlayerID: "maya", DisplayName: "Maya", Pick: 2}},
+	}
+	_ = table.Leave("maya")
+
+	if err := table.DeletePlayerProfile("maya", "deleted:table"); err != nil {
+		t.Fatal(err)
+	}
+	if table.LastResult.WinnerID != "deleted:table" ||
+		table.LastResult.Selections[0].PlayerID != "deleted:table" ||
+		table.LastResult.Selections[0].DisplayName != "" {
+		t.Fatal("departed player remained identifiable in the last result")
 	}
 }

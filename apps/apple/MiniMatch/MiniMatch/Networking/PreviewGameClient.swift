@@ -49,7 +49,6 @@ actor PreviewGameClient: GameClient {
                 id: currentPlayerID,
                 displayName: displayName,
                 avatarID: avatarID,
-                wins: 0,
                 isLocked: false
             ),
             addedTo: joined
@@ -104,6 +103,24 @@ actor PreviewGameClient: GameClient {
         return table
     }
 
+    func startRound(tableID: String, hostPlayerID: String) async throws -> GameTable {
+        guard var table,
+              table.id == tableID,
+              table.hostPlayerID == hostPlayerID,
+              table.currentRound == nil,
+              table.players.count >= 2
+        else {
+            throw GameClientError.server(String(localized: "The table is not ready."))
+        }
+        let roundNumber = (table.lastResult?.roundNumber ?? 0) + 1
+        table.currentRound = GameRound(number: roundNumber, phase: .acceptingPicks)
+        table.stateVersion += 1
+        table.eventSequence += 1
+        localPick = nil
+        self.table = table
+        return table
+    }
+
     func revealRound(
         tableID: String,
         hostPlayerID: String,
@@ -124,6 +141,7 @@ actor PreviewGameClient: GameClient {
         let selections = table.players.map { player in
             GameSelection(
                 playerID: player.id,
+                displayName: player.displayName,
                 pick: player.id == winnerID ? winnerPick : localPick
             )
         }
@@ -134,18 +152,8 @@ actor PreviewGameClient: GameClient {
         )
         for index in table.players.indices {
             table.players[index].isLocked = false
-            if table.players[index].id == winnerID {
-                table.players[index].wins += 1
-            }
         }
-        if table.players.first(where: { $0.id == winnerID })?.wins == table.winsToFinish {
-            table.state = .finished
-            table.currentRound = nil
-            table.winnerPlayerID = winnerID
-            table.winnerLifetimeWins = 1
-        } else {
-            table.currentRound = GameRound(number: roundNumber + 1, phase: .acceptingPicks)
-        }
+        table.currentRound = nil
         table.stateVersion += 1
         table.eventSequence += 1
         self.table = table
@@ -174,14 +182,10 @@ actor PreviewGameClient: GameClient {
             joinCode: code.uppercased(),
             hostPlayerID: table.hostPlayerID,
             players: table.players,
-            state: table.state,
             currentRound: table.currentRound,
             lastResult: table.lastResult,
-            winsToFinish: table.winsToFinish,
             stateVersion: table.stateVersion,
-            eventSequence: table.eventSequence,
-            winnerPlayerID: table.winnerPlayerID,
-            winnerLifetimeWins: table.winnerLifetimeWins
+            eventSequence: table.eventSequence
         )
     }
 
@@ -192,14 +196,10 @@ actor PreviewGameClient: GameClient {
             joinCode: table.joinCode,
             hostPlayerID: hostID,
             players: table.players,
-            state: table.state,
             currentRound: table.currentRound,
             lastResult: table.lastResult,
-            winsToFinish: table.winsToFinish,
             stateVersion: table.stateVersion,
-            eventSequence: table.eventSequence,
-            winnerPlayerID: table.winnerPlayerID,
-            winnerLifetimeWins: table.winnerLifetimeWins
+            eventSequence: table.eventSequence
         )
     }
 }
@@ -227,8 +227,6 @@ enum PreviewFixtures {
 
     static var resultTable: GameTable {
         var table = lobbyTable
-        table.players[2].wins = 1
-        table.currentRound = GameRound(number: 2, phase: .acceptingPicks)
         table.lastResult = roundResult
         return table
     }
@@ -247,9 +245,9 @@ enum PreviewFixtures {
     private static let roundResult = GameRoundResult(
         roundNumber: 1,
         selections: [
-            GameSelection(playerID: currentPlayerID, pick: 2),
-            GameSelection(playerID: "zoe", pick: 2),
-            GameSelection(playerID: "liam", pick: 5),
+            GameSelection(playerID: currentPlayerID, displayName: "Maya", pick: 2),
+            GameSelection(playerID: "zoe", displayName: "Zoe", pick: 2),
+            GameSelection(playerID: "liam", displayName: "Liam", pick: 5),
         ],
         winnerPlayerID: "liam"
     )
@@ -270,19 +268,15 @@ enum PreviewFixtures {
                     id: hostID,
                     displayName: hostName,
                     avatarID: hostAvatarID,
-                    wins: 0,
                     isLocked: false
                 ),
-                GamePlayer(id: "zoe", displayName: "Zoe", avatarID: "owl", wins: 0, isLocked: false),
-                GamePlayer(id: "liam", displayName: "Liam", avatarID: "frog", wins: 0, isLocked: false),
+                GamePlayer(id: "zoe", displayName: "Zoe", avatarID: "owl", isLocked: false),
+                GamePlayer(id: "liam", displayName: "Liam", avatarID: "frog", isLocked: false),
             ],
-            state: .active,
-            currentRound: GameRound(number: 1, phase: .acceptingPicks),
+            currentRound: nil,
             lastResult: nil,
-            winsToFinish: 5,
             stateVersion: 1,
-            eventSequence: 1,
-            winnerPlayerID: nil
+            eventSequence: 1
         )
     }
 }

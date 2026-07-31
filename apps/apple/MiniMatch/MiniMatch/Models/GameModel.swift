@@ -7,7 +7,6 @@ final class GameModel {
     enum Screen: Equatable {
         case home
         case lobby
-        case result
     }
 
     private let client: any GameClient
@@ -16,14 +15,12 @@ final class GameModel {
     private(set) var table: GameTable?
     private(set) var currentPlayerID: String?
     private(set) var myLockedPick: UInt64?
-    private(set) var result: ResultPresentation?
     private(set) var isWorking = false
     private(set) var isReconnecting = false
     private(set) var errorMessage = ""
     var isShowingError = false
     private(set) var multiplayerIsRestricted = false
     var pickText = ""
-    private var lastPresentedRound: UInt32?
 
     init(client: any GameClient) {
         self.client = client
@@ -42,12 +39,19 @@ final class GameModel {
         isHost && table?.allPlayersLocked == true
     }
 
+    var canStartRound: Bool {
+        isHost && table?.currentRound == nil && (table?.players.count ?? 0) >= 2
+    }
+
     var canLockPick: Bool {
         UInt64(pickText) != nil
     }
 
-    var completedMatchWin: CompletedMatchWin? {
-        table?.completedMatchWin(for: currentPlayerID)
+    var result: ResultPresentation? {
+        guard let table, table.currentRound == nil, let lastResult = table.lastResult else {
+            return nil
+        }
+        return ResultPresentation(table: table, result: lastResult)
     }
 
     @discardableResult
@@ -127,6 +131,25 @@ final class GameModel {
         }
     }
 
+    func startRound() async {
+        guard !multiplayerIsRestricted else {
+            showError(String(localized: "Multiplayer is unavailable because of Screen Time settings."))
+            return
+        }
+        guard let table, let currentPlayerID else {
+            showError(String(localized: "The table is not ready."))
+            return
+        }
+
+        await perform {
+            let updated = try await client.startRound(
+                tableID: table.id,
+                hostPlayerID: currentPlayerID
+            )
+            apply(updated)
+        }
+    }
+
     func revealRound() async {
         guard !multiplayerIsRestricted else {
             showError(String(localized: "Multiplayer is unavailable because of Screen Time settings."))
@@ -180,23 +203,8 @@ final class GameModel {
         }
     }
 
-    func nextRound() {
-        guard table?.state == .active else {
-            resetSession()
-            return
-        }
-        result = nil
-        myLockedPick = nil
-        pickText = ""
-        screen = .lobby
-    }
-
     func leaveTable() async {
         guard let table, let currentPlayerID else {
-            resetSession()
-            return
-        }
-        if table.state == .finished {
             resetSession()
             return
         }
@@ -215,8 +223,6 @@ final class GameModel {
         table = nil
         currentPlayerID = nil
         myLockedPick = nil
-        result = nil
-        lastPresentedRound = nil
         isReconnecting = false
         pickText = ""
         screen = .home
@@ -230,8 +236,6 @@ final class GameModel {
             table = session.table
             currentPlayerID = session.playerID
             myLockedPick = nil
-            result = nil
-            lastPresentedRound = session.table.lastResult?.roundNumber
             pickText = ""
             screen = .lobby
             return true
@@ -264,26 +268,16 @@ final class GameModel {
         isShowingError = true
     }
 
-    private func presentResult(from table: GameTable, for roundNumber: UInt32) {
-        guard let lastResult = table.lastResult, lastResult.roundNumber == roundNumber else {
-            return
-        }
-        result = ResultPresentation(table: table, result: lastResult)
-        lastPresentedRound = roundNumber
-        screen = .result
-    }
-
     private func apply(_ updated: GameTable) {
         guard updated.id == table?.id, updated.stateVersion >= (table?.stateVersion ?? 0) else {
             return
         }
+        let previousRoundNumber = table?.currentRound?.number
         table = updated
-        guard let roundNumber = updated.lastResult?.roundNumber,
-              roundNumber != lastPresentedRound
-        else {
-            return
+        if updated.currentRound?.number != previousRoundNumber {
+            myLockedPick = nil
+            pickText = ""
         }
-        presentResult(from: updated, for: roundNumber)
     }
 }
 
@@ -299,13 +293,7 @@ extension GameModel {
 
         model.table = table
         model.currentPlayerID = PreviewFixtures.currentPlayerID
-        model.lastPresentedRound = table.lastResult?.roundNumber
-        if let result = table.lastResult {
-            model.result = ResultPresentation(table: table, result: result)
-            model.screen = .result
-        } else {
-            model.screen = .lobby
-        }
+        model.screen = .lobby
         return model
     }
 }

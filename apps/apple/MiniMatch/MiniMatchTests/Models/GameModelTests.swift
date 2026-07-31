@@ -31,7 +31,11 @@ struct GameModelTests {
 
         #expect(await model.createTable(name: "Friday Mini Match", displayName: "Maya"))
         #expect(model.screen == .lobby)
+        #expect(model.canStartRound)
         #expect(!model.canReveal)
+
+        await model.startRound()
+        #expect(model.table?.currentRound?.number == 1)
 
         model.pickText = "-1"
         await model.lockPick()
@@ -47,40 +51,35 @@ struct GameModelTests {
 
         await model.revealRound()
 
-        #expect(model.screen == .result)
+        #expect(model.screen == .lobby)
         #expect(model.result?.winnerName == "Liam")
         #expect(model.result?.winningPick == 5)
         #expect(model.result?.rows.filter { $0.status == .duplicate }.count == 2)
-        #expect(model.table?.players.first { $0.id == "liam" }?.wins == 1)
-        #expect(model.table?.currentRound?.number == 2)
-
-        for _ in 2...5 {
-            model.nextRound()
-            model.pickText = "2"
-            await model.lockPick()
-            await model.revealRound()
-        }
-
-        #expect(model.table?.state == .finished)
-        #expect(model.table?.winnerPlayerID == "liam")
         #expect(model.table?.currentRound == nil)
+        #expect(model.canStartRound)
 
-        model.nextRound()
-        #expect(model.screen == .home)
+        await model.startRound()
+        #expect(model.table?.currentRound?.number == 2)
+        #expect(model.result == nil)
     }
 
     @Test
     @MainActor
     func joinedPlayerReceivesPreviewReveal() async {
-        let model = GameModel(client: PreviewGameClient())
+        let client = PreviewGameClient()
+        let model = GameModel(client: client)
 
         #expect(await model.joinTable(code: "7X2G9K", displayName: "Maya"))
         #expect(!model.isHost)
+        let table = try! #require(model.table)
+        _ = try! await client.startRound(tableID: table.id, hostPlayerID: table.hostPlayerID)
+        await model.refreshTable()
 
         model.pickText = "2"
         await model.lockPick()
 
-        #expect(model.screen == .result)
+        #expect(model.screen == .lobby)
+        #expect(model.table?.currentRound == nil)
         #expect(model.result?.winnerName == "Liam")
         #expect(model.result?.winningPick == 5)
     }
@@ -97,6 +96,11 @@ struct GameModelTests {
             avatarID: "fox"
         ))
         let table = try #require(model.table)
+        _ = try await client.startRound(
+            tableID: table.id,
+            hostPlayerID: try #require(model.currentPlayerID)
+        )
+        await model.refreshTable()
         _ = try await client.lockPick(
             tableID: table.id,
             playerID: try #require(model.currentPlayerID),
@@ -114,11 +118,17 @@ struct GameModelTests {
             roundNumber: 1
         )
         await model.refreshTable()
-        #expect(model.screen == .result)
-
-        model.nextRound()
-        await model.refreshTable()
         #expect(model.screen == .lobby)
+        #expect(model.table?.currentRound == nil)
+        #expect(model.result?.winnerName == "Liam")
+
+        _ = try await client.startRound(
+            tableID: table.id,
+            hostPlayerID: try #require(model.currentPlayerID)
+        )
+        await model.refreshTable()
+        #expect(model.table?.currentRound?.number == 2)
+        #expect(model.result == nil)
     }
 
     @Test

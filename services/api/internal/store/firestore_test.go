@@ -13,10 +13,13 @@ func TestFirestoreDocumentsKeepPicksPrivateAndPreserveUint64(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := table.LockPick("maya", math.MaxUint64, 1); err != nil {
+	if err := table.Join("liam", "Liam", "owl"); err != nil {
 		t.Fatal(err)
 	}
-	if err := table.Join("liam", "Liam", "owl"); err != nil {
+	if err := table.BeginRound("maya"); err != nil {
+		t.Fatal(err)
+	}
+	if err := table.LockPick("maya", math.MaxUint64, 1); err != nil {
 		t.Fatal(err)
 	}
 	table.Version = math.MaxUint64
@@ -66,11 +69,48 @@ func TestFirestoreDocumentsKeepPicksPrivateAndPreserveUint64(t *testing.T) {
 	if err := table.LockPick("liam", 1, 1); err != nil {
 		t.Fatal(err)
 	}
-	if err := table.StartRound("maya", 1); err != nil {
+	if err := table.RevealRound("maya", 1); err != nil {
 		t.Fatal(err)
 	}
 	public = publicDocument(table)
+	if public.CurrentRound != nil || public.State != "active" ||
+		public.WinsToFinish != 0 || public.WinnerPlayerID != "" {
+		t.Fatal("revealed round did not project the scoreless lobby state")
+	}
 	if got := public.LastResult.Selections[0].Pick; got != "18446744073709551615" {
 		t.Fatalf("revealed pick = %q", got)
+	}
+	if got := public.ResultPlayerIDs; !reflect.DeepEqual(got, []string{"maya", "liam"}) {
+		t.Fatalf("result player IDs = %#v", got)
+	}
+}
+
+func TestLegacyFinishedDocumentReturnsToLobby(t *testing.T) {
+	document := tableDocument{
+		Name:         "Friday",
+		JoinCode:     "ABC123",
+		HostID:       "maya",
+		CurrentRound: &roundDocument{Number: 5, Phase: "ready_to_reveal"},
+		LastResult:   &resultDocument{RoundNumber: 5, WinnerID: "maya"},
+		WinnerID:     "maya",
+		Players: []playerDocument{
+			{ID: "maya", Name: "Maya", Locked: true, Pick: "2"},
+			{ID: "zoe", Name: "Zoe", Locked: true, Pick: "5"},
+		},
+		Version:       "10",
+		EventSequence: "10",
+	}
+	table, err := decodeDocument("table", document)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if table.CurrentRound != nil || table.Players[0].Locked || table.Players[0].Pick != 0 {
+		t.Fatal("legacy finished table did not migrate to a clean lobby")
+	}
+	if err := table.BeginRound("maya"); err != nil {
+		t.Fatalf("legacy table could not begin its next round: %v", err)
+	}
+	if table.CurrentRound.Number != 6 {
+		t.Fatalf("legacy next round = %d, want 6", table.CurrentRound.Number)
 	}
 }

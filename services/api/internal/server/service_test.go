@@ -102,6 +102,12 @@ func TestConnectAndGRPCKeepPicksPrivateUntilReveal(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	if _, err := connectClient.BeginRound(ctx, authenticated(&minimatchv1.BeginRoundRequest{
+		TableId:      tableID,
+		HostPlayerId: created.Msg.PlayerId,
+	}, "host-token")); err != nil {
+		t.Fatal(err)
+	}
 	if _, err := connectClient.LockPick(ctx, authenticated(&minimatchv1.LockPickRequest{
 		TableId:     tableID,
 		PlayerId:    joined.Msg.PlayerId,
@@ -147,7 +153,7 @@ func TestConnectAndGRPCKeepPicksPrivateUntilReveal(t *testing.T) {
 	}, "player-token")); err != nil {
 		t.Fatal(err)
 	}
-	revealed, err := connectClient.StartRound(ctx, authenticated(&minimatchv1.StartRoundRequest{
+	revealed, err := connectClient.RevealRound(ctx, authenticated(&minimatchv1.RevealRoundRequest{
 		TableId:      tableID,
 		HostPlayerId: created.Msg.PlayerId,
 		RoundNumber:  1,
@@ -160,6 +166,45 @@ func TestConnectAndGRPCKeepPicksPrivateUntilReveal(t *testing.T) {
 	}
 	if got := revealed.Msg.Table.LastResult.GetWinnerPlayerId(); got != created.Msg.PlayerId {
 		t.Fatalf("winner = %q, want host", got)
+	}
+	if revealed.Msg.Table.CurrentRound != nil ||
+		revealed.Msg.Table.State != minimatchv1.TableState_TABLE_STATE_ACTIVE ||
+		revealed.Msg.Table.WinsToFinish != 0 ||
+		revealed.Msg.Table.WinnerPlayerId != nil ||
+		revealed.Msg.Table.Players[0].Wins != 0 {
+		t.Fatal("reveal did not return a scoreless active lobby")
+	}
+
+	if _, err := grpcClient.BeginRound(ctx, authenticated(&minimatchv1.BeginRoundRequest{
+		TableId:      tableID,
+		HostPlayerId: created.Msg.PlayerId,
+	}, "host-token")); err != nil {
+		t.Fatal(err)
+	}
+	for _, pick := range []struct {
+		playerID string
+		value    uint64
+		token    string
+	}{{created.Msg.PlayerId, 2, "host-token"}, {joined.Msg.PlayerId, 5, "player-token"}} {
+		if _, err := connectClient.LockPick(ctx, authenticated(&minimatchv1.LockPickRequest{
+			TableId:     tableID,
+			PlayerId:    pick.playerID,
+			Pick:        &minimatchv1.Pick{Value: pick.value},
+			RoundNumber: 2,
+		}, pick.token)); err != nil {
+			t.Fatal(err)
+		}
+	}
+	legacy, err := connectClient.StartRound(ctx, authenticated(&minimatchv1.StartRoundRequest{
+		TableId:      tableID,
+		HostPlayerId: created.Msg.PlayerId,
+		RoundNumber:  2,
+	}, "host-token"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if legacy.Msg.Table.CurrentRound != nil || legacy.Msg.Table.LastResult.GetRoundNumber() != 2 {
+		t.Fatal("legacy StartRound did not reveal the active round")
 	}
 }
 

@@ -85,40 +85,6 @@
         }
       }
     },
-    "%@, score: %u" : {
-      "comment" : "Accessibility score label; the first variable is the player name and the second is the score.",
-      "localizations" : {
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$@, puntuación: %2$u"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$@, score : %2$u"
-          }
-        }
-      }
-    },
-    "%@, score: %u, game winner" : {
-      "comment" : "Accessibility score label; the first variable is the player name and the second is the score.",
-      "localizations" : {
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$@, puntuación: %2$u, ganador de la partida"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$@, score : %2$u, vainqueur de la partie"
-          }
-        }
-      }
-    },
     "%@, selected %llu, %@" : {
       "localizations" : {
         "en" : {
@@ -337,18 +303,24 @@
         }
       }
     },
-    "Back to home" : {
+    "Available to the host when at least two players are in the lobby" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Available to the host when at least two players are in the lobby"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Volver al inicio"
+            "value" : "Disponible para el anfitrión cuando hay al menos dos jugadores en la sala"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Retour à l’accueil"
+            "value" : "Disponible pour l’hôte lorsqu’au moins deux joueurs sont dans le salon"
           }
         }
       }
@@ -641,22 +613,6 @@
         }
       }
     },
-    "First to %u wins" : {
-      "localizations" : {
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gana quien llegue primero a %u"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Le premier à %u victoires gagne"
-          }
-        }
-      }
-    },
     "Fox" : {
       "localizations" : {
         "es" : {
@@ -753,22 +709,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Profil Game Center"
-          }
-        }
-      }
-    },
-    "Game winner" : {
-      "localizations" : {
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ganador de la partida"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vainqueur de la partie"
           }
         }
       }
@@ -938,6 +878,28 @@
         }
       }
     },
+    "Lobby" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Lobby"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sala"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Salon"
+          }
+        }
+      }
+    },
     "Lock my number" : {
       "localizations" : {
         "es" : {
@@ -1082,22 +1044,6 @@
         }
       }
     },
-    "Next round" : {
-      "localizations" : {
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Siguiente ronda"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Manche suivante"
-          }
-        }
-      }
-    },
     "No winner" : {
       "localizations" : {
         "es" : {
@@ -1211,6 +1157,7 @@
       }
     },
     "Pick a number. Lowest unique number wins." : {
+      "extractionState" : "stale",
       "localizations" : {
         "es" : {
           "stringUnit" : {
@@ -1371,22 +1318,6 @@
         }
       }
     },
-    "Score" : {
-      "localizations" : {
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Puntuación"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Score"
-          }
-        }
-      }
-    },
     "selected" : {
       "localizations" : {
         "es" : {
@@ -1497,6 +1428,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Étincelle"
+          }
+        }
+      }
+    },
+    "Start round" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Start round"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Iniciar ronda"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Démarrer la manche"
+          }
+        }
+      }
+    },
+    "Starting…" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Starting…"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Iniciando…"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Démarrage…"
           }
         }
       }
@@ -1689,6 +1664,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Unique"
+          }
+        }
+      }
+    },
+    "Waiting for another player" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Waiting for another player"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esperando a otro jugador"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En attente d’un autre joueur"
+          }
+        }
+      }
+    },
+    "Waiting for the host to start a round" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Waiting for the host to start a round"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esperando a que el anfitrión inicie una ronda"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En attente que l’hôte démarre une manche"
           }
         }
       }

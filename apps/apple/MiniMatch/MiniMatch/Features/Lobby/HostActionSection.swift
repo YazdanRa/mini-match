@@ -4,14 +4,35 @@ struct HostActionSection: View {
     let model: GameModel
 
     var body: some View {
+        let isWaiting = model.table?.currentRound == nil
+        let isEnabled = isWaiting ? model.canStartRound : model.canReveal
+        let accessibilityHint: LocalizedStringResource = isWaiting
+            ? "Available to the host when at least two players are in the lobby"
+            : "Available only to the host after every player locks a number"
+
         Button {
             Task {
-                await model.revealRound()
+                if isWaiting {
+                    await model.startRound()
+                } else {
+                    await model.revealRound()
+                }
             }
         } label: {
             if model.isWorking {
-                ProgressView("Revealing…")
-                    .tint(.white)
+                if isWaiting {
+                    ProgressView("Starting…")
+                        .tint(.white)
+                } else {
+                    ProgressView("Revealing…")
+                        .tint(.white)
+                }
+            } else if isWaiting {
+                if model.canStartRound {
+                    Label("Start round", systemImage: "play.fill")
+                } else {
+                    Label("Waiting for another player", systemImage: "person.badge.clock")
+                }
             } else {
                 Label(
                     model.canReveal ? "Reveal round" : "Everyone must lock first",
@@ -20,10 +41,12 @@ struct HostActionSection: View {
             }
         }
         .buttonStyle(PrimaryButtonStyle(
-            color: model.canReveal ? MiniMatchColors.coral : Color.secondary.opacity(0.35)
+            color: isEnabled ? MiniMatchColors.coral : Color.secondary.opacity(0.35)
         ))
-        .disabled(!model.canReveal || model.isWorking || model.multiplayerIsRestricted)
-        .accessibilityHint("Available only to the host after every player locks a number")
+        .disabled(
+            !isEnabled || model.isWorking || model.multiplayerIsRestricted
+        )
+        .accessibilityHint(accessibilityHint)
     }
 }
 

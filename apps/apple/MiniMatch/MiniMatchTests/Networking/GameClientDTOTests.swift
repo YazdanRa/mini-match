@@ -15,17 +15,14 @@ struct GameClientDTOTests {
             {"id": "maya", "displayName": "Maya"},
             {"id": "liam", "displayName": "Liam", "avatar": "frog"}
           ],
-          "state": "TABLE_STATE_ACTIVE",
           "currentRound": {
             "number": 1,
             "phase": "ROUND_PHASE_ACCEPTING_PICKS"
           },
           "lastResult": {
             "roundNumber": 1,
-            "selections": [{"playerId": "maya", "pick": {}}]
-          },
-          "winsToFinish": 5,
-          "winnerLifetimeWins": "12"
+            "selections": [{"playerId": "maya", "displayName": "Maya", "pick": {}}]
+          }
         }
         """
 
@@ -36,21 +33,19 @@ struct GameClientDTOTests {
                 id: "maya",
                 displayName: "Maya",
                 avatarID: "spark",
-                wins: 0,
                 isLocked: false
             ),
             GamePlayer(
                 id: "liam",
                 displayName: "Liam",
                 avatarID: "frog",
-                wins: 0,
                 isLocked: false
             ),
         ])
         #expect(table.stateVersion == 0)
         #expect(table.eventSequence == 0)
         #expect(table.lastResult?.selections.first?.pick == 0)
-        #expect(table.winnerLifetimeWins == 12)
+        #expect(table.lastResult?.selections.first?.displayName == "Maya")
     }
 
     @Test

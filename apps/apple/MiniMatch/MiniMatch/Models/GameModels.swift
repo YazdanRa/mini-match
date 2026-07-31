@@ -39,50 +39,25 @@ struct GameSession: Equatable, Sendable {
 }
 
 struct GameTable: Equatable, Sendable {
-    enum State: Equatable, Sendable {
-        case active
-        case finished
-    }
-
     let id: String
     let name: String
     let joinCode: String
     let hostPlayerID: String
     var players: [GamePlayer]
-    var state: State
     var currentRound: GameRound?
     var lastResult: GameRoundResult?
-    let winsToFinish: UInt32
     var stateVersion: UInt64
     var eventSequence: UInt64
-    var winnerPlayerID: String?
-    var winnerLifetimeWins: UInt64? = nil
 
     var allPlayersLocked: Bool {
         players.count >= 2 && players.allSatisfy(\.isLocked)
     }
-
-    func completedMatchWin(for playerID: String?) -> CompletedMatchWin? {
-        guard state == .finished,
-              winnerPlayerID == playerID,
-              let winnerLifetimeWins
-        else {
-            return nil
-        }
-        return CompletedMatchWin(matchID: id, lifetimeWins: winnerLifetimeWins)
-    }
-}
-
-struct CompletedMatchWin: Equatable, Sendable {
-    let matchID: String
-    let lifetimeWins: UInt64
 }
 
 struct GamePlayer: Identifiable, Equatable, Sendable {
     let id: String
     let displayName: String
     let avatarID: String
-    var wins: UInt32
     var isLocked: Bool
 
     var avatarGlyph: String {
@@ -110,6 +85,7 @@ struct GameSelection: Identifiable, Equatable, Sendable {
     var id: String { playerID }
 
     let playerID: String
+    let displayName: String
     let pick: UInt64
 }
 
@@ -139,7 +115,13 @@ struct ResultPresentation: Equatable, Sendable {
         }
         let names = Dictionary(uniqueKeysWithValues: table.players.map { ($0.id, $0.displayName) })
 
-        winnerName = result.winnerPlayerID.flatMap { names[$0] }
+        let resultNames = Dictionary(uniqueKeysWithValues: result.selections.compactMap {
+            $0.displayName.isEmpty ? nil : ($0.playerID, $0.displayName)
+        })
+
+        winnerName = result.winnerPlayerID.map {
+            resultNames[$0] ?? names[$0] ?? String(localized: "Player")
+        }
         winningPick = result.selections.first { $0.playerID == result.winnerPlayerID }?.pick
         rows = result.selections.map { selection in
             let status: Row.Status
@@ -152,10 +134,19 @@ struct ResultPresentation: Equatable, Sendable {
             }
             return Row(
                 playerID: selection.playerID,
-                displayName: names[selection.playerID, default: String(localized: "Player")],
+                displayName: selection.displayName.isEmpty
+                    ? names[selection.playerID, default: String(localized: "Player")]
+                    : selection.displayName,
                 pick: selection.pick,
                 status: status
             )
         }
+    }
+
+    var accessibilitySummary: String {
+        if let winnerName, let winningPick {
+            return String(localized: "\(winnerName) wins with \(winningPick)")
+        }
+        return String(localized: "No winner. Every number was duplicated.")
     }
 }

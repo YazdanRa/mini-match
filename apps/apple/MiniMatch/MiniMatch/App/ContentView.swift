@@ -29,8 +29,6 @@ struct ContentView: View {
                         model: model,
                         playerImages: gameCenter.playerImages
                     )
-                case .result:
-                    ResultView(model: model, gameCenter: gameCenter)
                 }
             }
             .navigationBarTitleDisplayMode(.inline)

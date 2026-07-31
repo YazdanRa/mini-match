@@ -5,6 +5,7 @@ struct PlayersSection: View {
     let table: GameTable
     let currentPlayerID: String?
     let playerImages: [String: UIImage]
+    let roundIsActive: Bool
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
@@ -14,8 +15,10 @@ struct PlayersSection: View {
                     .font(.headline)
                     .accessibilityAddTraits(.isHeader)
                 Spacer()
-                Text("\(table.players.filter(\.isLocked).count) locked")
-                    .foregroundStyle(MiniMatchColors.blueText)
+                if roundIsActive {
+                    Text("\(table.players.filter(\.isLocked).count) locked")
+                        .foregroundStyle(MiniMatchColors.blueText)
+                }
             }
 
             ScrollView(.horizontal) {
@@ -38,15 +41,17 @@ struct PlayersSection: View {
                                         }
                                     }
 
-                                Image(systemName: player.isLocked ? "checkmark.circle.fill" : "ellipsis.circle.fill")
-                                    .font(.system(size: 22))
-                                    .foregroundStyle(player.isLocked ? MiniMatchColors.blueText : .secondary)
-                                    .background(Circle().fill(MiniMatchColors.background))
-                                    .contentTransition(.symbolEffect(.replace))
-                                    .animation(
-                                        reduceMotion ? nil : .snappy(duration: 0.2),
-                                        value: player.isLocked
-                                    )
+                                if roundIsActive {
+                                    Image(systemName: player.isLocked ? "checkmark.circle.fill" : "ellipsis.circle.fill")
+                                        .font(.system(size: 22))
+                                        .foregroundStyle(player.isLocked ? MiniMatchColors.blueText : .secondary)
+                                        .background(Circle().fill(MiniMatchColors.background))
+                                        .contentTransition(.symbolEffect(.replace))
+                                        .animation(
+                                            reduceMotion ? nil : .snappy(duration: 0.2),
+                                            value: player.isLocked
+                                        )
+                                }
                             }
 
                             Text(player.displayName)
@@ -91,9 +96,11 @@ struct PlayersSection: View {
         if player.id == table.hostPlayerID {
             details.append(String(localized: "Host"))
         }
-        details.append(
-            player.isLocked ? String(localized: "Locked") : String(localized: "Not locked")
-        )
+        if roundIsActive {
+            details.append(
+                player.isLocked ? String(localized: "Locked") : String(localized: "Not locked")
+            )
+        }
         if playerImages[player.id] != nil {
             return Text("\(player.displayName), Game Center profile photo, \(details.formatted())")
         }
@@ -106,7 +113,8 @@ struct PlayersSection: View {
     PlayersSection(
         table: PreviewFixtures.lobbyTable,
         currentPlayerID: PreviewFixtures.currentPlayerID,
-        playerImages: [:]
+        playerImages: [:],
+        roundIsActive: false
     )
     .padding()
 }

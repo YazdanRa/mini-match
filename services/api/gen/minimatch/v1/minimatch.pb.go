@@ -26,7 +26,8 @@ type TableState int32
 const (
 	TableState_TABLE_STATE_UNSPECIFIED TableState = 0
 	TableState_TABLE_STATE_ACTIVE      TableState = 1
-	TableState_TABLE_STATE_FINISHED    TableState = 2
+	// Deprecated: Marked as deprecated in minimatch/v1/minimatch.proto.
+	TableState_TABLE_STATE_FINISHED TableState = 2
 )
 
 // Enum value maps for TableState.
@@ -747,6 +748,206 @@ func (x *StartRoundResponse) GetTable() *Table {
 	return nil
 }
 
+type BeginRoundRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	TableId       string                 `protobuf:"bytes,1,opt,name=table_id,json=tableId,proto3" json:"table_id,omitempty"`
+	HostPlayerId  string                 `protobuf:"bytes,2,opt,name=host_player_id,json=hostPlayerId,proto3" json:"host_player_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *BeginRoundRequest) Reset() {
+	*x = BeginRoundRequest{}
+	mi := &file_minimatch_v1_minimatch_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *BeginRoundRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*BeginRoundRequest) ProtoMessage() {}
+
+func (x *BeginRoundRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_minimatch_v1_minimatch_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use BeginRoundRequest.ProtoReflect.Descriptor instead.
+func (*BeginRoundRequest) Descriptor() ([]byte, []int) {
+	return file_minimatch_v1_minimatch_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *BeginRoundRequest) GetTableId() string {
+	if x != nil {
+		return x.TableId
+	}
+	return ""
+}
+
+func (x *BeginRoundRequest) GetHostPlayerId() string {
+	if x != nil {
+		return x.HostPlayerId
+	}
+	return ""
+}
+
+type BeginRoundResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Table         *Table                 `protobuf:"bytes,1,opt,name=table,proto3" json:"table,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *BeginRoundResponse) Reset() {
+	*x = BeginRoundResponse{}
+	mi := &file_minimatch_v1_minimatch_proto_msgTypes[12]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *BeginRoundResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*BeginRoundResponse) ProtoMessage() {}
+
+func (x *BeginRoundResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_minimatch_v1_minimatch_proto_msgTypes[12]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use BeginRoundResponse.ProtoReflect.Descriptor instead.
+func (*BeginRoundResponse) Descriptor() ([]byte, []int) {
+	return file_minimatch_v1_minimatch_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *BeginRoundResponse) GetTable() *Table {
+	if x != nil {
+		return x.Table
+	}
+	return nil
+}
+
+type RevealRoundRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	TableId       string                 `protobuf:"bytes,1,opt,name=table_id,json=tableId,proto3" json:"table_id,omitempty"`
+	HostPlayerId  string                 `protobuf:"bytes,2,opt,name=host_player_id,json=hostPlayerId,proto3" json:"host_player_id,omitempty"`
+	RoundNumber   uint32                 `protobuf:"varint,3,opt,name=round_number,json=roundNumber,proto3" json:"round_number,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RevealRoundRequest) Reset() {
+	*x = RevealRoundRequest{}
+	mi := &file_minimatch_v1_minimatch_proto_msgTypes[13]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RevealRoundRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RevealRoundRequest) ProtoMessage() {}
+
+func (x *RevealRoundRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_minimatch_v1_minimatch_proto_msgTypes[13]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RevealRoundRequest.ProtoReflect.Descriptor instead.
+func (*RevealRoundRequest) Descriptor() ([]byte, []int) {
+	return file_minimatch_v1_minimatch_proto_rawDescGZIP(), []int{13}
+}
+
+func (x *RevealRoundRequest) GetTableId() string {
+	if x != nil {
+		return x.TableId
+	}
+	return ""
+}
+
+func (x *RevealRoundRequest) GetHostPlayerId() string {
+	if x != nil {
+		return x.HostPlayerId
+	}
+	return ""
+}
+
+func (x *RevealRoundRequest) GetRoundNumber() uint32 {
+	if x != nil {
+		return x.RoundNumber
+	}
+	return 0
+}
+
+type RevealRoundResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Table         *Table                 `protobuf:"bytes,1,opt,name=table,proto3" json:"table,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RevealRoundResponse) Reset() {
+	*x = RevealRoundResponse{}
+	mi := &file_minimatch_v1_minimatch_proto_msgTypes[14]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RevealRoundResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RevealRoundResponse) ProtoMessage() {}
+
+func (x *RevealRoundResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_minimatch_v1_minimatch_proto_msgTypes[14]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RevealRoundResponse.ProtoReflect.Descriptor instead.
+func (*RevealRoundResponse) Descriptor() ([]byte, []int) {
+	return file_minimatch_v1_minimatch_proto_rawDescGZIP(), []int{14}
+}
+
+func (x *RevealRoundResponse) GetTable() *Table {
+	if x != nil {
+		return x.Table
+	}
+	return nil
+}
+
 type GetTableRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	TableId       string                 `protobuf:"bytes,1,opt,name=table_id,json=tableId,proto3" json:"table_id,omitempty"`
@@ -756,7 +957,7 @@ type GetTableRequest struct {
 
 func (x *GetTableRequest) Reset() {
 	*x = GetTableRequest{}
-	mi := &file_minimatch_v1_minimatch_proto_msgTypes[11]
+	mi := &file_minimatch_v1_minimatch_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -768,7 +969,7 @@ func (x *GetTableRequest) String() string {
 func (*GetTableRequest) ProtoMessage() {}
 
 func (x *GetTableRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_minimatch_v1_minimatch_proto_msgTypes[11]
+	mi := &file_minimatch_v1_minimatch_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -781,7 +982,7 @@ func (x *GetTableRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetTableRequest.ProtoReflect.Descriptor instead.
 func (*GetTableRequest) Descriptor() ([]byte, []int) {
-	return file_minimatch_v1_minimatch_proto_rawDescGZIP(), []int{11}
+	return file_minimatch_v1_minimatch_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *GetTableRequest) GetTableId() string {
@@ -800,7 +1001,7 @@ type GetTableResponse struct {
 
 func (x *GetTableResponse) Reset() {
 	*x = GetTableResponse{}
-	mi := &file_minimatch_v1_minimatch_proto_msgTypes[12]
+	mi := &file_minimatch_v1_minimatch_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -812,7 +1013,7 @@ func (x *GetTableResponse) String() string {
 func (*GetTableResponse) ProtoMessage() {}
 
 func (x *GetTableResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_minimatch_v1_minimatch_proto_msgTypes[12]
+	mi := &file_minimatch_v1_minimatch_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -825,7 +1026,7 @@ func (x *GetTableResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetTableResponse.ProtoReflect.Descriptor instead.
 func (*GetTableResponse) Descriptor() ([]byte, []int) {
-	return file_minimatch_v1_minimatch_proto_rawDescGZIP(), []int{12}
+	return file_minimatch_v1_minimatch_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *GetTableResponse) GetTable() *Table {
@@ -843,7 +1044,7 @@ type DeleteProfileRequest struct {
 
 func (x *DeleteProfileRequest) Reset() {
 	*x = DeleteProfileRequest{}
-	mi := &file_minimatch_v1_minimatch_proto_msgTypes[13]
+	mi := &file_minimatch_v1_minimatch_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -855,7 +1056,7 @@ func (x *DeleteProfileRequest) String() string {
 func (*DeleteProfileRequest) ProtoMessage() {}
 
 func (x *DeleteProfileRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_minimatch_v1_minimatch_proto_msgTypes[13]
+	mi := &file_minimatch_v1_minimatch_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -868,7 +1069,7 @@ func (x *DeleteProfileRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteProfileRequest.ProtoReflect.Descriptor instead.
 func (*DeleteProfileRequest) Descriptor() ([]byte, []int) {
-	return file_minimatch_v1_minimatch_proto_rawDescGZIP(), []int{13}
+	return file_minimatch_v1_minimatch_proto_rawDescGZIP(), []int{17}
 }
 
 type DeleteProfileResponse struct {
@@ -879,7 +1080,7 @@ type DeleteProfileResponse struct {
 
 func (x *DeleteProfileResponse) Reset() {
 	*x = DeleteProfileResponse{}
-	mi := &file_minimatch_v1_minimatch_proto_msgTypes[14]
+	mi := &file_minimatch_v1_minimatch_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -891,7 +1092,7 @@ func (x *DeleteProfileResponse) String() string {
 func (*DeleteProfileResponse) ProtoMessage() {}
 
 func (x *DeleteProfileResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_minimatch_v1_minimatch_proto_msgTypes[14]
+	mi := &file_minimatch_v1_minimatch_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -904,7 +1105,7 @@ func (x *DeleteProfileResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteProfileResponse.ProtoReflect.Descriptor instead.
 func (*DeleteProfileResponse) Descriptor() ([]byte, []int) {
-	return file_minimatch_v1_minimatch_proto_rawDescGZIP(), []int{14}
+	return file_minimatch_v1_minimatch_proto_rawDescGZIP(), []int{18}
 }
 
 type Table struct {
@@ -915,15 +1116,25 @@ type Table struct {
 	HostPlayerId string                 `protobuf:"bytes,4,opt,name=host_player_id,json=hostPlayerId,proto3" json:"host_player_id,omitempty"`
 	Players      []*Player              `protobuf:"bytes,5,rep,name=players,proto3" json:"players,omitempty"`
 	State        TableState             `protobuf:"varint,6,opt,name=state,proto3,enum=minimatch.v1.TableState" json:"state,omitempty"`
-	CurrentRound *Round                 `protobuf:"bytes,7,opt,name=current_round,json=currentRound,proto3" json:"current_round,omitempty"`
+	// Absent while everyone is waiting in the lobby.
+	CurrentRound *Round `protobuf:"bytes,7,opt,name=current_round,json=currentRound,proto3" json:"current_round,omitempty"`
 	// Present only after reveal; unrevealed picks never appear in Table.
-	LastResult   *RoundResult `protobuf:"bytes,8,opt,name=last_result,json=lastResult,proto3" json:"last_result,omitempty"`
-	WinsToFinish uint32       `protobuf:"varint,9,opt,name=wins_to_finish,json=winsToFinish,proto3" json:"wins_to_finish,omitempty"`
+	LastResult *RoundResult `protobuf:"bytes,8,opt,name=last_result,json=lastResult,proto3" json:"last_result,omitempty"`
+	// Deprecated: rounds are independent and tables no longer have a winning score.
+	//
+	// Deprecated: Marked as deprecated in minimatch/v1/minimatch.proto.
+	WinsToFinish uint32 `protobuf:"varint,9,opt,name=wins_to_finish,json=winsToFinish,proto3" json:"wins_to_finish,omitempty"`
 	// Monotonic revision for ordering safe table snapshots.
 	StateVersion uint64 `protobuf:"varint,10,opt,name=state_version,json=stateVersion,proto3" json:"state_version,omitempty"`
 	// Monotonic cursor of the latest safe event projected to Firestore.
-	EventSequence      uint64  `protobuf:"varint,11,opt,name=event_sequence,json=eventSequence,proto3" json:"event_sequence,omitempty"`
-	WinnerPlayerId     *string `protobuf:"bytes,12,opt,name=winner_player_id,json=winnerPlayerId,proto3,oneof" json:"winner_player_id,omitempty"`
+	EventSequence uint64 `protobuf:"varint,11,opt,name=event_sequence,json=eventSequence,proto3" json:"event_sequence,omitempty"`
+	// Deprecated: tables no longer finish; use last_result.winner_player_id.
+	//
+	// Deprecated: Marked as deprecated in minimatch/v1/minimatch.proto.
+	WinnerPlayerId *string `protobuf:"bytes,12,opt,name=winner_player_id,json=winnerPlayerId,proto3,oneof" json:"winner_player_id,omitempty"`
+	// Deprecated: completed-match totals are no longer reported.
+	//
+	// Deprecated: Marked as deprecated in minimatch/v1/minimatch.proto.
 	WinnerLifetimeWins *uint64 `protobuf:"varint,13,opt,name=winner_lifetime_wins,json=winnerLifetimeWins,proto3,oneof" json:"winner_lifetime_wins,omitempty"`
 	unknownFields      protoimpl.UnknownFields
 	sizeCache          protoimpl.SizeCache
@@ -931,7 +1142,7 @@ type Table struct {
 
 func (x *Table) Reset() {
 	*x = Table{}
-	mi := &file_minimatch_v1_minimatch_proto_msgTypes[15]
+	mi := &file_minimatch_v1_minimatch_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -943,7 +1154,7 @@ func (x *Table) String() string {
 func (*Table) ProtoMessage() {}
 
 func (x *Table) ProtoReflect() protoreflect.Message {
-	mi := &file_minimatch_v1_minimatch_proto_msgTypes[15]
+	mi := &file_minimatch_v1_minimatch_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -956,7 +1167,7 @@ func (x *Table) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Table.ProtoReflect.Descriptor instead.
 func (*Table) Descriptor() ([]byte, []int) {
-	return file_minimatch_v1_minimatch_proto_rawDescGZIP(), []int{15}
+	return file_minimatch_v1_minimatch_proto_rawDescGZIP(), []int{19}
 }
 
 func (x *Table) GetId() string {
@@ -1015,6 +1226,7 @@ func (x *Table) GetLastResult() *RoundResult {
 	return nil
 }
 
+// Deprecated: Marked as deprecated in minimatch/v1/minimatch.proto.
 func (x *Table) GetWinsToFinish() uint32 {
 	if x != nil {
 		return x.WinsToFinish
@@ -1036,6 +1248,7 @@ func (x *Table) GetEventSequence() uint64 {
 	return 0
 }
 
+// Deprecated: Marked as deprecated in minimatch/v1/minimatch.proto.
 func (x *Table) GetWinnerPlayerId() string {
 	if x != nil && x.WinnerPlayerId != nil {
 		return *x.WinnerPlayerId
@@ -1043,6 +1256,7 @@ func (x *Table) GetWinnerPlayerId() string {
 	return ""
 }
 
+// Deprecated: Marked as deprecated in minimatch/v1/minimatch.proto.
 func (x *Table) GetWinnerLifetimeWins() uint64 {
 	if x != nil && x.WinnerLifetimeWins != nil {
 		return *x.WinnerLifetimeWins
@@ -1051,19 +1265,22 @@ func (x *Table) GetWinnerLifetimeWins() uint64 {
 }
 
 type Player struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	DisplayName   string                 `protobuf:"bytes,2,opt,name=display_name,json=displayName,proto3" json:"display_name,omitempty"`
-	Wins          uint32                 `protobuf:"varint,3,opt,name=wins,proto3" json:"wins,omitempty"`
-	Locked        bool                   `protobuf:"varint,4,opt,name=locked,proto3" json:"locked,omitempty"`
-	Avatar        string                 `protobuf:"bytes,5,opt,name=avatar,proto3" json:"avatar,omitempty"`
+	state       protoimpl.MessageState `protogen:"open.v1"`
+	Id          string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	DisplayName string                 `protobuf:"bytes,2,opt,name=display_name,json=displayName,proto3" json:"display_name,omitempty"`
+	// Deprecated: rounds do not accumulate a per-table score.
+	//
+	// Deprecated: Marked as deprecated in minimatch/v1/minimatch.proto.
+	Wins          uint32 `protobuf:"varint,3,opt,name=wins,proto3" json:"wins,omitempty"`
+	Locked        bool   `protobuf:"varint,4,opt,name=locked,proto3" json:"locked,omitempty"`
+	Avatar        string `protobuf:"bytes,5,opt,name=avatar,proto3" json:"avatar,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *Player) Reset() {
 	*x = Player{}
-	mi := &file_minimatch_v1_minimatch_proto_msgTypes[16]
+	mi := &file_minimatch_v1_minimatch_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1075,7 +1292,7 @@ func (x *Player) String() string {
 func (*Player) ProtoMessage() {}
 
 func (x *Player) ProtoReflect() protoreflect.Message {
-	mi := &file_minimatch_v1_minimatch_proto_msgTypes[16]
+	mi := &file_minimatch_v1_minimatch_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1088,7 +1305,7 @@ func (x *Player) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Player.ProtoReflect.Descriptor instead.
 func (*Player) Descriptor() ([]byte, []int) {
-	return file_minimatch_v1_minimatch_proto_rawDescGZIP(), []int{16}
+	return file_minimatch_v1_minimatch_proto_rawDescGZIP(), []int{20}
 }
 
 func (x *Player) GetId() string {
@@ -1105,6 +1322,7 @@ func (x *Player) GetDisplayName() string {
 	return ""
 }
 
+// Deprecated: Marked as deprecated in minimatch/v1/minimatch.proto.
 func (x *Player) GetWins() uint32 {
 	if x != nil {
 		return x.Wins
@@ -1136,7 +1354,7 @@ type Round struct {
 
 func (x *Round) Reset() {
 	*x = Round{}
-	mi := &file_minimatch_v1_minimatch_proto_msgTypes[17]
+	mi := &file_minimatch_v1_minimatch_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1148,7 +1366,7 @@ func (x *Round) String() string {
 func (*Round) ProtoMessage() {}
 
 func (x *Round) ProtoReflect() protoreflect.Message {
-	mi := &file_minimatch_v1_minimatch_proto_msgTypes[17]
+	mi := &file_minimatch_v1_minimatch_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1161,7 +1379,7 @@ func (x *Round) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Round.ProtoReflect.Descriptor instead.
 func (*Round) Descriptor() ([]byte, []int) {
-	return file_minimatch_v1_minimatch_proto_rawDescGZIP(), []int{17}
+	return file_minimatch_v1_minimatch_proto_rawDescGZIP(), []int{21}
 }
 
 func (x *Round) GetNumber() uint32 {
@@ -1189,7 +1407,7 @@ type RoundResult struct {
 
 func (x *RoundResult) Reset() {
 	*x = RoundResult{}
-	mi := &file_minimatch_v1_minimatch_proto_msgTypes[18]
+	mi := &file_minimatch_v1_minimatch_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1201,7 +1419,7 @@ func (x *RoundResult) String() string {
 func (*RoundResult) ProtoMessage() {}
 
 func (x *RoundResult) ProtoReflect() protoreflect.Message {
-	mi := &file_minimatch_v1_minimatch_proto_msgTypes[18]
+	mi := &file_minimatch_v1_minimatch_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1214,7 +1432,7 @@ func (x *RoundResult) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RoundResult.ProtoReflect.Descriptor instead.
 func (*RoundResult) Descriptor() ([]byte, []int) {
-	return file_minimatch_v1_minimatch_proto_rawDescGZIP(), []int{18}
+	return file_minimatch_v1_minimatch_proto_rawDescGZIP(), []int{22}
 }
 
 func (x *RoundResult) GetRoundNumber() uint32 {
@@ -1239,16 +1457,18 @@ func (x *RoundResult) GetWinnerPlayerId() string {
 }
 
 type Selection struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	PlayerId      string                 `protobuf:"bytes,1,opt,name=player_id,json=playerId,proto3" json:"player_id,omitempty"`
-	Pick          *Pick                  `protobuf:"bytes,2,opt,name=pick,proto3" json:"pick,omitempty"`
+	state    protoimpl.MessageState `protogen:"open.v1"`
+	PlayerId string                 `protobuf:"bytes,1,opt,name=player_id,json=playerId,proto3" json:"player_id,omitempty"`
+	Pick     *Pick                  `protobuf:"bytes,2,opt,name=pick,proto3" json:"pick,omitempty"`
+	// Snapshot captured at reveal so completed results survive player departure.
+	DisplayName   string `protobuf:"bytes,3,opt,name=display_name,json=displayName,proto3" json:"display_name,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *Selection) Reset() {
 	*x = Selection{}
-	mi := &file_minimatch_v1_minimatch_proto_msgTypes[19]
+	mi := &file_minimatch_v1_minimatch_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1260,7 +1480,7 @@ func (x *Selection) String() string {
 func (*Selection) ProtoMessage() {}
 
 func (x *Selection) ProtoReflect() protoreflect.Message {
-	mi := &file_minimatch_v1_minimatch_proto_msgTypes[19]
+	mi := &file_minimatch_v1_minimatch_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1273,7 +1493,7 @@ func (x *Selection) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Selection.ProtoReflect.Descriptor instead.
 func (*Selection) Descriptor() ([]byte, []int) {
-	return file_minimatch_v1_minimatch_proto_rawDescGZIP(), []int{19}
+	return file_minimatch_v1_minimatch_proto_rawDescGZIP(), []int{23}
 }
 
 func (x *Selection) GetPlayerId() string {
@@ -1290,6 +1510,13 @@ func (x *Selection) GetPick() *Pick {
 	return nil
 }
 
+func (x *Selection) GetDisplayName() string {
+	if x != nil {
+		return x.DisplayName
+	}
+	return ""
+}
+
 // uint64 rejects negative picks at the transport boundary.
 type Pick struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
@@ -1300,7 +1527,7 @@ type Pick struct {
 
 func (x *Pick) Reset() {
 	*x = Pick{}
-	mi := &file_minimatch_v1_minimatch_proto_msgTypes[20]
+	mi := &file_minimatch_v1_minimatch_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1312,7 +1539,7 @@ func (x *Pick) String() string {
 func (*Pick) ProtoMessage() {}
 
 func (x *Pick) ProtoReflect() protoreflect.Message {
-	mi := &file_minimatch_v1_minimatch_proto_msgTypes[20]
+	mi := &file_minimatch_v1_minimatch_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1325,7 +1552,7 @@ func (x *Pick) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Pick.ProtoReflect.Descriptor instead.
 func (*Pick) Descriptor() ([]byte, []int) {
-	return file_minimatch_v1_minimatch_proto_rawDescGZIP(), []int{20}
+	return file_minimatch_v1_minimatch_proto_rawDescGZIP(), []int{24}
 }
 
 func (x *Pick) GetValue() uint64 {
@@ -1380,13 +1607,24 @@ const file_minimatch_v1_minimatch_proto_rawDesc = "" +
 	"\x0ehost_player_id\x18\x02 \x01(\tR\fhostPlayerId\x12!\n" +
 	"\fround_number\x18\x03 \x01(\rR\vroundNumber\"?\n" +
 	"\x12StartRoundResponse\x12)\n" +
+	"\x05table\x18\x01 \x01(\v2\x13.minimatch.v1.TableR\x05table\"T\n" +
+	"\x11BeginRoundRequest\x12\x19\n" +
+	"\btable_id\x18\x01 \x01(\tR\atableId\x12$\n" +
+	"\x0ehost_player_id\x18\x02 \x01(\tR\fhostPlayerId\"?\n" +
+	"\x12BeginRoundResponse\x12)\n" +
+	"\x05table\x18\x01 \x01(\v2\x13.minimatch.v1.TableR\x05table\"x\n" +
+	"\x12RevealRoundRequest\x12\x19\n" +
+	"\btable_id\x18\x01 \x01(\tR\atableId\x12$\n" +
+	"\x0ehost_player_id\x18\x02 \x01(\tR\fhostPlayerId\x12!\n" +
+	"\fround_number\x18\x03 \x01(\rR\vroundNumber\"@\n" +
+	"\x13RevealRoundResponse\x12)\n" +
 	"\x05table\x18\x01 \x01(\v2\x13.minimatch.v1.TableR\x05table\",\n" +
 	"\x0fGetTableRequest\x12\x19\n" +
 	"\btable_id\x18\x01 \x01(\tR\atableId\"=\n" +
 	"\x10GetTableResponse\x12)\n" +
 	"\x05table\x18\x01 \x01(\v2\x13.minimatch.v1.TableR\x05table\"\x16\n" +
 	"\x14DeleteProfileRequest\"\x17\n" +
-	"\x15DeleteProfileResponse\"\xca\x04\n" +
+	"\x15DeleteProfileResponse\"\xd6\x04\n" +
 	"\x05Table\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x1b\n" +
@@ -1396,19 +1634,19 @@ const file_minimatch_v1_minimatch_proto_rawDesc = "" +
 	"\x05state\x18\x06 \x01(\x0e2\x18.minimatch.v1.TableStateR\x05state\x128\n" +
 	"\rcurrent_round\x18\a \x01(\v2\x13.minimatch.v1.RoundR\fcurrentRound\x12:\n" +
 	"\vlast_result\x18\b \x01(\v2\x19.minimatch.v1.RoundResultR\n" +
-	"lastResult\x12$\n" +
-	"\x0ewins_to_finish\x18\t \x01(\rR\fwinsToFinish\x12#\n" +
+	"lastResult\x12(\n" +
+	"\x0ewins_to_finish\x18\t \x01(\rB\x02\x18\x01R\fwinsToFinish\x12#\n" +
 	"\rstate_version\x18\n" +
 	" \x01(\x04R\fstateVersion\x12%\n" +
-	"\x0eevent_sequence\x18\v \x01(\x04R\reventSequence\x12-\n" +
-	"\x10winner_player_id\x18\f \x01(\tH\x00R\x0ewinnerPlayerId\x88\x01\x01\x125\n" +
-	"\x14winner_lifetime_wins\x18\r \x01(\x04H\x01R\x12winnerLifetimeWins\x88\x01\x01B\x13\n" +
+	"\x0eevent_sequence\x18\v \x01(\x04R\reventSequence\x121\n" +
+	"\x10winner_player_id\x18\f \x01(\tB\x02\x18\x01H\x00R\x0ewinnerPlayerId\x88\x01\x01\x129\n" +
+	"\x14winner_lifetime_wins\x18\r \x01(\x04B\x02\x18\x01H\x01R\x12winnerLifetimeWins\x88\x01\x01B\x13\n" +
 	"\x11_winner_player_idB\x17\n" +
-	"\x15_winner_lifetime_wins\"\x7f\n" +
+	"\x15_winner_lifetime_wins\"\x83\x01\n" +
 	"\x06Player\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12!\n" +
-	"\fdisplay_name\x18\x02 \x01(\tR\vdisplayName\x12\x12\n" +
-	"\x04wins\x18\x03 \x01(\rR\x04wins\x12\x16\n" +
+	"\fdisplay_name\x18\x02 \x01(\tR\vdisplayName\x12\x16\n" +
+	"\x04wins\x18\x03 \x01(\rB\x02\x18\x01R\x04wins\x12\x16\n" +
 	"\x06locked\x18\x04 \x01(\bR\x06locked\x12\x16\n" +
 	"\x06avatar\x18\x05 \x01(\tR\x06avatar\"O\n" +
 	"\x05Round\x12\x16\n" +
@@ -1420,30 +1658,34 @@ const file_minimatch_v1_minimatch_proto_rawDesc = "" +
 	"selections\x18\x02 \x03(\v2\x17.minimatch.v1.SelectionR\n" +
 	"selections\x12-\n" +
 	"\x10winner_player_id\x18\x03 \x01(\tH\x00R\x0ewinnerPlayerId\x88\x01\x01B\x13\n" +
-	"\x11_winner_player_id\"P\n" +
+	"\x11_winner_player_id\"s\n" +
 	"\tSelection\x12\x1b\n" +
 	"\tplayer_id\x18\x01 \x01(\tR\bplayerId\x12&\n" +
-	"\x04pick\x18\x02 \x01(\v2\x12.minimatch.v1.PickR\x04pick\"\x1c\n" +
+	"\x04pick\x18\x02 \x01(\v2\x12.minimatch.v1.PickR\x04pick\x12!\n" +
+	"\fdisplay_name\x18\x03 \x01(\tR\vdisplayName\"\x1c\n" +
 	"\x04Pick\x12\x14\n" +
-	"\x05value\x18\x01 \x01(\x04R\x05value*[\n" +
+	"\x05value\x18\x01 \x01(\x04R\x05value*_\n" +
 	"\n" +
 	"TableState\x12\x1b\n" +
 	"\x17TABLE_STATE_UNSPECIFIED\x10\x00\x12\x16\n" +
-	"\x12TABLE_STATE_ACTIVE\x10\x01\x12\x18\n" +
-	"\x14TABLE_STATE_FINISHED\x10\x02*k\n" +
+	"\x12TABLE_STATE_ACTIVE\x10\x01\x12\x1c\n" +
+	"\x14TABLE_STATE_FINISHED\x10\x02\x1a\x02\b\x01*k\n" +
 	"\n" +
 	"RoundPhase\x12\x1b\n" +
 	"\x17ROUND_PHASE_UNSPECIFIED\x10\x00\x12\x1f\n" +
 	"\x1bROUND_PHASE_ACCEPTING_PICKS\x10\x01\x12\x1f\n" +
-	"\x1bROUND_PHASE_READY_TO_REVEAL\x10\x022\xc6\x04\n" +
+	"\x1bROUND_PHASE_READY_TO_REVEAL\x10\x022\xf0\x05\n" +
 	"\x10MiniMatchService\x12R\n" +
 	"\vCreateTable\x12 .minimatch.v1.CreateTableRequest\x1a!.minimatch.v1.CreateTableResponse\x12L\n" +
 	"\tJoinTable\x12\x1e.minimatch.v1.JoinTableRequest\x1a\x1f.minimatch.v1.JoinTableResponse\x12O\n" +
 	"\n" +
 	"LeaveTable\x12\x1f.minimatch.v1.LeaveTableRequest\x1a .minimatch.v1.LeaveTableResponse\x12I\n" +
-	"\bLockPick\x12\x1d.minimatch.v1.LockPickRequest\x1a\x1e.minimatch.v1.LockPickResponse\x12O\n" +
+	"\bLockPick\x12\x1d.minimatch.v1.LockPickRequest\x1a\x1e.minimatch.v1.LockPickResponse\x12T\n" +
 	"\n" +
-	"StartRound\x12\x1f.minimatch.v1.StartRoundRequest\x1a .minimatch.v1.StartRoundResponse\x12I\n" +
+	"StartRound\x12\x1f.minimatch.v1.StartRoundRequest\x1a .minimatch.v1.StartRoundResponse\"\x03\x88\x02\x01\x12O\n" +
+	"\n" +
+	"BeginRound\x12\x1f.minimatch.v1.BeginRoundRequest\x1a .minimatch.v1.BeginRoundResponse\x12R\n" +
+	"\vRevealRound\x12 .minimatch.v1.RevealRoundRequest\x1a!.minimatch.v1.RevealRoundResponse\x12I\n" +
 	"\bGetTable\x12\x1d.minimatch.v1.GetTableRequest\x1a\x1e.minimatch.v1.GetTableResponse\x12X\n" +
 	"\rDeleteProfile\x12\".minimatch.v1.DeleteProfileRequest\x1a#.minimatch.v1.DeleteProfileResponseBg\n" +
 	"\x14app.minimatch.api.v1P\x01ZHgithub.com/YazdanRa/mini-match/services/api/gen/minimatch/v1;minimatchv1\xba\x02\x02MMb\x06proto3"
@@ -1461,7 +1703,7 @@ func file_minimatch_v1_minimatch_proto_rawDescGZIP() []byte {
 }
 
 var file_minimatch_v1_minimatch_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
-var file_minimatch_v1_minimatch_proto_msgTypes = make([]protoimpl.MessageInfo, 21)
+var file_minimatch_v1_minimatch_proto_msgTypes = make([]protoimpl.MessageInfo, 25)
 var file_minimatch_v1_minimatch_proto_goTypes = []any{
 	(TableState)(0),               // 0: minimatch.v1.TableState
 	(RoundPhase)(0),               // 1: minimatch.v1.RoundPhase
@@ -1476,53 +1718,63 @@ var file_minimatch_v1_minimatch_proto_goTypes = []any{
 	(*LockPickResponse)(nil),      // 10: minimatch.v1.LockPickResponse
 	(*StartRoundRequest)(nil),     // 11: minimatch.v1.StartRoundRequest
 	(*StartRoundResponse)(nil),    // 12: minimatch.v1.StartRoundResponse
-	(*GetTableRequest)(nil),       // 13: minimatch.v1.GetTableRequest
-	(*GetTableResponse)(nil),      // 14: minimatch.v1.GetTableResponse
-	(*DeleteProfileRequest)(nil),  // 15: minimatch.v1.DeleteProfileRequest
-	(*DeleteProfileResponse)(nil), // 16: minimatch.v1.DeleteProfileResponse
-	(*Table)(nil),                 // 17: minimatch.v1.Table
-	(*Player)(nil),                // 18: minimatch.v1.Player
-	(*Round)(nil),                 // 19: minimatch.v1.Round
-	(*RoundResult)(nil),           // 20: minimatch.v1.RoundResult
-	(*Selection)(nil),             // 21: minimatch.v1.Selection
-	(*Pick)(nil),                  // 22: minimatch.v1.Pick
+	(*BeginRoundRequest)(nil),     // 13: minimatch.v1.BeginRoundRequest
+	(*BeginRoundResponse)(nil),    // 14: minimatch.v1.BeginRoundResponse
+	(*RevealRoundRequest)(nil),    // 15: minimatch.v1.RevealRoundRequest
+	(*RevealRoundResponse)(nil),   // 16: minimatch.v1.RevealRoundResponse
+	(*GetTableRequest)(nil),       // 17: minimatch.v1.GetTableRequest
+	(*GetTableResponse)(nil),      // 18: minimatch.v1.GetTableResponse
+	(*DeleteProfileRequest)(nil),  // 19: minimatch.v1.DeleteProfileRequest
+	(*DeleteProfileResponse)(nil), // 20: minimatch.v1.DeleteProfileResponse
+	(*Table)(nil),                 // 21: minimatch.v1.Table
+	(*Player)(nil),                // 22: minimatch.v1.Player
+	(*Round)(nil),                 // 23: minimatch.v1.Round
+	(*RoundResult)(nil),           // 24: minimatch.v1.RoundResult
+	(*Selection)(nil),             // 25: minimatch.v1.Selection
+	(*Pick)(nil),                  // 26: minimatch.v1.Pick
 }
 var file_minimatch_v1_minimatch_proto_depIdxs = []int32{
 	5,  // 0: minimatch.v1.CreateTableRequest.game_center_identity:type_name -> minimatch.v1.GameCenterIdentity
-	17, // 1: minimatch.v1.CreateTableResponse.table:type_name -> minimatch.v1.Table
+	21, // 1: minimatch.v1.CreateTableResponse.table:type_name -> minimatch.v1.Table
 	5,  // 2: minimatch.v1.JoinTableRequest.game_center_identity:type_name -> minimatch.v1.GameCenterIdentity
-	17, // 3: minimatch.v1.JoinTableResponse.table:type_name -> minimatch.v1.Table
-	17, // 4: minimatch.v1.LeaveTableResponse.table:type_name -> minimatch.v1.Table
-	22, // 5: minimatch.v1.LockPickRequest.pick:type_name -> minimatch.v1.Pick
-	17, // 6: minimatch.v1.LockPickResponse.table:type_name -> minimatch.v1.Table
-	17, // 7: minimatch.v1.StartRoundResponse.table:type_name -> minimatch.v1.Table
-	17, // 8: minimatch.v1.GetTableResponse.table:type_name -> minimatch.v1.Table
-	18, // 9: minimatch.v1.Table.players:type_name -> minimatch.v1.Player
-	0,  // 10: minimatch.v1.Table.state:type_name -> minimatch.v1.TableState
-	19, // 11: minimatch.v1.Table.current_round:type_name -> minimatch.v1.Round
-	20, // 12: minimatch.v1.Table.last_result:type_name -> minimatch.v1.RoundResult
-	1,  // 13: minimatch.v1.Round.phase:type_name -> minimatch.v1.RoundPhase
-	21, // 14: minimatch.v1.RoundResult.selections:type_name -> minimatch.v1.Selection
-	22, // 15: minimatch.v1.Selection.pick:type_name -> minimatch.v1.Pick
-	2,  // 16: minimatch.v1.MiniMatchService.CreateTable:input_type -> minimatch.v1.CreateTableRequest
-	4,  // 17: minimatch.v1.MiniMatchService.JoinTable:input_type -> minimatch.v1.JoinTableRequest
-	7,  // 18: minimatch.v1.MiniMatchService.LeaveTable:input_type -> minimatch.v1.LeaveTableRequest
-	9,  // 19: minimatch.v1.MiniMatchService.LockPick:input_type -> minimatch.v1.LockPickRequest
-	11, // 20: minimatch.v1.MiniMatchService.StartRound:input_type -> minimatch.v1.StartRoundRequest
-	13, // 21: minimatch.v1.MiniMatchService.GetTable:input_type -> minimatch.v1.GetTableRequest
-	15, // 22: minimatch.v1.MiniMatchService.DeleteProfile:input_type -> minimatch.v1.DeleteProfileRequest
-	3,  // 23: minimatch.v1.MiniMatchService.CreateTable:output_type -> minimatch.v1.CreateTableResponse
-	6,  // 24: minimatch.v1.MiniMatchService.JoinTable:output_type -> minimatch.v1.JoinTableResponse
-	8,  // 25: minimatch.v1.MiniMatchService.LeaveTable:output_type -> minimatch.v1.LeaveTableResponse
-	10, // 26: minimatch.v1.MiniMatchService.LockPick:output_type -> minimatch.v1.LockPickResponse
-	12, // 27: minimatch.v1.MiniMatchService.StartRound:output_type -> minimatch.v1.StartRoundResponse
-	14, // 28: minimatch.v1.MiniMatchService.GetTable:output_type -> minimatch.v1.GetTableResponse
-	16, // 29: minimatch.v1.MiniMatchService.DeleteProfile:output_type -> minimatch.v1.DeleteProfileResponse
-	23, // [23:30] is the sub-list for method output_type
-	16, // [16:23] is the sub-list for method input_type
-	16, // [16:16] is the sub-list for extension type_name
-	16, // [16:16] is the sub-list for extension extendee
-	0,  // [0:16] is the sub-list for field type_name
+	21, // 3: minimatch.v1.JoinTableResponse.table:type_name -> minimatch.v1.Table
+	21, // 4: minimatch.v1.LeaveTableResponse.table:type_name -> minimatch.v1.Table
+	26, // 5: minimatch.v1.LockPickRequest.pick:type_name -> minimatch.v1.Pick
+	21, // 6: minimatch.v1.LockPickResponse.table:type_name -> minimatch.v1.Table
+	21, // 7: minimatch.v1.StartRoundResponse.table:type_name -> minimatch.v1.Table
+	21, // 8: minimatch.v1.BeginRoundResponse.table:type_name -> minimatch.v1.Table
+	21, // 9: minimatch.v1.RevealRoundResponse.table:type_name -> minimatch.v1.Table
+	21, // 10: minimatch.v1.GetTableResponse.table:type_name -> minimatch.v1.Table
+	22, // 11: minimatch.v1.Table.players:type_name -> minimatch.v1.Player
+	0,  // 12: minimatch.v1.Table.state:type_name -> minimatch.v1.TableState
+	23, // 13: minimatch.v1.Table.current_round:type_name -> minimatch.v1.Round
+	24, // 14: minimatch.v1.Table.last_result:type_name -> minimatch.v1.RoundResult
+	1,  // 15: minimatch.v1.Round.phase:type_name -> minimatch.v1.RoundPhase
+	25, // 16: minimatch.v1.RoundResult.selections:type_name -> minimatch.v1.Selection
+	26, // 17: minimatch.v1.Selection.pick:type_name -> minimatch.v1.Pick
+	2,  // 18: minimatch.v1.MiniMatchService.CreateTable:input_type -> minimatch.v1.CreateTableRequest
+	4,  // 19: minimatch.v1.MiniMatchService.JoinTable:input_type -> minimatch.v1.JoinTableRequest
+	7,  // 20: minimatch.v1.MiniMatchService.LeaveTable:input_type -> minimatch.v1.LeaveTableRequest
+	9,  // 21: minimatch.v1.MiniMatchService.LockPick:input_type -> minimatch.v1.LockPickRequest
+	11, // 22: minimatch.v1.MiniMatchService.StartRound:input_type -> minimatch.v1.StartRoundRequest
+	13, // 23: minimatch.v1.MiniMatchService.BeginRound:input_type -> minimatch.v1.BeginRoundRequest
+	15, // 24: minimatch.v1.MiniMatchService.RevealRound:input_type -> minimatch.v1.RevealRoundRequest
+	17, // 25: minimatch.v1.MiniMatchService.GetTable:input_type -> minimatch.v1.GetTableRequest
+	19, // 26: minimatch.v1.MiniMatchService.DeleteProfile:input_type -> minimatch.v1.DeleteProfileRequest
+	3,  // 27: minimatch.v1.MiniMatchService.CreateTable:output_type -> minimatch.v1.CreateTableResponse
+	6,  // 28: minimatch.v1.MiniMatchService.JoinTable:output_type -> minimatch.v1.JoinTableResponse
+	8,  // 29: minimatch.v1.MiniMatchService.LeaveTable:output_type -> minimatch.v1.LeaveTableResponse
+	10, // 30: minimatch.v1.MiniMatchService.LockPick:output_type -> minimatch.v1.LockPickResponse
+	12, // 31: minimatch.v1.MiniMatchService.StartRound:output_type -> minimatch.v1.StartRoundResponse
+	14, // 32: minimatch.v1.MiniMatchService.BeginRound:output_type -> minimatch.v1.BeginRoundResponse
+	16, // 33: minimatch.v1.MiniMatchService.RevealRound:output_type -> minimatch.v1.RevealRoundResponse
+	18, // 34: minimatch.v1.MiniMatchService.GetTable:output_type -> minimatch.v1.GetTableResponse
+	20, // 35: minimatch.v1.MiniMatchService.DeleteProfile:output_type -> minimatch.v1.DeleteProfileResponse
+	27, // [27:36] is the sub-list for method output_type
+	18, // [18:27] is the sub-list for method input_type
+	18, // [18:18] is the sub-list for extension type_name
+	18, // [18:18] is the sub-list for extension extendee
+	0,  // [0:18] is the sub-list for field type_name
 }
 
 func init() { file_minimatch_v1_minimatch_proto_init() }
@@ -1530,15 +1782,15 @@ func file_minimatch_v1_minimatch_proto_init() {
 	if File_minimatch_v1_minimatch_proto != nil {
 		return
 	}
-	file_minimatch_v1_minimatch_proto_msgTypes[15].OneofWrappers = []any{}
-	file_minimatch_v1_minimatch_proto_msgTypes[18].OneofWrappers = []any{}
+	file_minimatch_v1_minimatch_proto_msgTypes[19].OneofWrappers = []any{}
+	file_minimatch_v1_minimatch_proto_msgTypes[22].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_minimatch_v1_minimatch_proto_rawDesc), len(file_minimatch_v1_minimatch_proto_rawDesc)),
 			NumEnums:      2,
-			NumMessages:   21,
+			NumMessages:   25,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

@@ -141,12 +141,46 @@ func (s *Service) StartRound(ctx context.Context, request *connect.Request[minim
 		return nil, connect.NewError(connect.CodePermissionDenied, errors.New("host player ID does not match authenticated user"))
 	}
 	table, err := s.tables.Update(ctx, request.Msg.GetTableId(), func(table *game.Table) error {
-		return table.StartRound(actor, request.Msg.GetRoundNumber())
+		return table.RevealRound(actor, request.Msg.GetRoundNumber())
 	})
 	if err != nil {
 		return nil, rpcError(err)
 	}
 	return connect.NewResponse(&minimatchv1.StartRoundResponse{Table: toProto(table)}), nil
+}
+
+func (s *Service) BeginRound(ctx context.Context, request *connect.Request[minimatchv1.BeginRoundRequest]) (*connect.Response[minimatchv1.BeginRoundResponse], error) {
+	actor, err := actorID(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if request.Msg.GetHostPlayerId() != "" && request.Msg.GetHostPlayerId() != actor {
+		return nil, connect.NewError(connect.CodePermissionDenied, errors.New("host player ID does not match authenticated user"))
+	}
+	table, err := s.tables.Update(ctx, request.Msg.GetTableId(), func(table *game.Table) error {
+		return table.BeginRound(actor)
+	})
+	if err != nil {
+		return nil, rpcError(err)
+	}
+	return connect.NewResponse(&minimatchv1.BeginRoundResponse{Table: toProto(table)}), nil
+}
+
+func (s *Service) RevealRound(ctx context.Context, request *connect.Request[minimatchv1.RevealRoundRequest]) (*connect.Response[minimatchv1.RevealRoundResponse], error) {
+	actor, err := actorID(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if request.Msg.GetHostPlayerId() != "" && request.Msg.GetHostPlayerId() != actor {
+		return nil, connect.NewError(connect.CodePermissionDenied, errors.New("host player ID does not match authenticated user"))
+	}
+	table, err := s.tables.Update(ctx, request.Msg.GetTableId(), func(table *game.Table) error {
+		return table.RevealRound(actor, request.Msg.GetRoundNumber())
+	})
+	if err != nil {
+		return nil, rpcError(err)
+	}
+	return connect.NewResponse(&minimatchv1.RevealRoundResponse{Table: toProto(table)}), nil
 }
 
 func (s *Service) GetTable(ctx context.Context, request *connect.Request[minimatchv1.GetTableRequest]) (*connect.Response[minimatchv1.GetTableResponse], error) {
@@ -195,24 +229,15 @@ func token(bytes int) (string, error) {
 }
 
 func toProto(table *game.Table) *minimatchv1.Table {
-	state := minimatchv1.TableState_TABLE_STATE_ACTIVE
-	var winnerID *string
-	if table.WinnerID != "" {
-		state = minimatchv1.TableState_TABLE_STATE_FINISHED
-		winner := table.WinnerID
-		winnerID = &winner
-	}
 	response := &minimatchv1.Table{
-		Id:             table.ID,
-		Name:           table.Name,
-		JoinCode:       table.JoinCode,
-		HostPlayerId:   table.HostID,
-		State:          state,
-		WinsToFinish:   game.WinningScore,
-		StateVersion:   table.Version,
-		EventSequence:  table.EventSequence,
-		WinnerPlayerId: winnerID,
-		Players:        make([]*minimatchv1.Player, 0, len(table.Players)),
+		Id:            table.ID,
+		Name:          table.Name,
+		JoinCode:      table.JoinCode,
+		HostPlayerId:  table.HostID,
+		State:         minimatchv1.TableState_TABLE_STATE_ACTIVE,
+		StateVersion:  table.Version,
+		EventSequence: table.EventSequence,
+		Players:       make([]*minimatchv1.Player, 0, len(table.Players)),
 	}
 	if table.WinnerLifetimeWins > 0 {
 		wins := table.WinnerLifetimeWins
@@ -223,11 +248,10 @@ func toProto(table *game.Table) *minimatchv1.Table {
 			Id:          player.ID,
 			DisplayName: player.Name,
 			Avatar:      player.Avatar,
-			Wins:        player.Score,
 			Locked:      player.Locked,
 		})
 	}
-	if table.WinnerID == "" {
+	if table.CurrentRound != nil {
 		response.CurrentRound = &minimatchv1.Round{Number: table.CurrentRound.Number}
 		switch table.CurrentRound.Phase {
 		case game.RoundOpen:
@@ -247,8 +271,9 @@ func toProto(table *game.Table) *minimatchv1.Table {
 		}
 		for _, selection := range table.LastResult.Selections {
 			response.LastResult.Selections = append(response.LastResult.Selections, &minimatchv1.Selection{
-				PlayerId: selection.PlayerID,
-				Pick:     &minimatchv1.Pick{Value: selection.Pick},
+				PlayerId:    selection.PlayerID,
+				Pick:        &minimatchv1.Pick{Value: selection.Pick},
+				DisplayName: selection.DisplayName,
 			})
 		}
 	}
@@ -267,10 +292,12 @@ func rpcError(err error) error {
 	case errors.Is(err, game.ErrForbidden):
 		code = connect.CodePermissionDenied
 	case errors.Is(err, game.ErrAlreadyLocked),
-		errors.Is(err, game.ErrFinished),
 		errors.Is(err, game.ErrNotReady),
+		errors.Is(err, game.ErrRoundActive),
 		errors.Is(err, game.ErrRoundMismatch):
 		code = connect.CodeFailedPrecondition
+	case errors.Is(err, game.ErrRoundExhausted):
+		code = connect.CodeResourceExhausted
 	}
 	return connect.NewError(code, err)
 }

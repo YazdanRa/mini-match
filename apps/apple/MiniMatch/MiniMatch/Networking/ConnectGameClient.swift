@@ -77,12 +77,20 @@ struct ConnectGameClient: GameClient {
         roundNumber: UInt32
     ) async throws -> GameTable {
         let response: TableResponse = try await call(
-            "StartRound",
-            body: StartRoundRequest(
+            "RevealRound",
+            body: RevealRoundRequest(
                 tableId: tableID,
                 hostPlayerId: hostPlayerID,
                 roundNumber: roundNumber
             )
+        )
+        return try response.table.model()
+    }
+
+    func startRound(tableID: String, hostPlayerID: String) async throws -> GameTable {
+        let response: TableResponse = try await call(
+            "BeginRound",
+            body: BeginRoundRequest(tableId: tableID, hostPlayerId: hostPlayerID)
         )
         return try response.table.model()
     }

@@ -15,45 +15,65 @@ struct GameTableTests {
                     id: "maya",
                     displayName: "Maya",
                     avatarID: "fox",
-                    wins: 0,
                     isLocked: true
                 ),
             ],
-            state: .active,
             currentRound: nil,
             lastResult: nil,
-            winsToFinish: 5,
             stateVersion: 1,
-            eventSequence: 1,
-            winnerPlayerID: nil
+            eventSequence: 1
         )
 
         #expect(!table.allPlayersLocked)
     }
 
     @Test
-    func completedMatchWinIsReportedOnlyForItsWinner() {
+    func resultUsesSnapshottedNameAfterPlayerLeaves() {
+        let result = GameRoundResult(
+            roundNumber: 1,
+            selections: [
+                GameSelection(playerID: "liam", displayName: "Liam", pick: 5),
+            ],
+            winnerPlayerID: "liam"
+        )
         let table = GameTable(
             id: "table-1",
-            name: "Friday Mini Match",
+            name: "Mini Match",
             joinCode: "7X2G9K",
             hostPlayerID: "maya",
             players: [],
-            state: .finished,
             currentRound: nil,
-            lastResult: nil,
-            winsToFinish: 5,
-            stateVersion: 10,
-            eventSequence: 10,
-            winnerPlayerID: "maya",
-            winnerLifetimeWins: 7
+            lastResult: result,
+            stateVersion: 1,
+            eventSequence: 1
         )
 
-        #expect(table.completedMatchWin(for: "maya") == CompletedMatchWin(
-            matchID: "table-1",
-            lifetimeWins: 7
-        ))
-        #expect(table.completedMatchWin(for: "liam") == nil)
-        #expect(table.completedMatchWin(for: nil) == nil)
+        #expect(ResultPresentation(table: table, result: result).winnerName == "Liam")
+    }
+
+    @Test
+    func anonymizedWinnerRemainsAWinner() {
+        let result = GameRoundResult(
+            roundNumber: 1,
+            selections: [
+                GameSelection(playerID: "deleted:table", displayName: "", pick: 5),
+            ],
+            winnerPlayerID: "deleted:table"
+        )
+        let table = GameTable(
+            id: "table-1",
+            name: "Mini Match",
+            joinCode: "7X2G9K",
+            hostPlayerID: "maya",
+            players: [],
+            currentRound: nil,
+            lastResult: result,
+            stateVersion: 1,
+            eventSequence: 1
+        )
+
+        let presentation = ResultPresentation(table: table, result: result)
+        #expect(presentation.winnerName == String(localized: "Player"))
+        #expect(presentation.winningPick == 5)
     }
 }

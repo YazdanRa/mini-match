@@ -27,8 +27,7 @@
 		000000000000000000002009 /* PickSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000001009 /* PickSection.swift */; };
 		00000000000000000000200A /* PlayersSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00000000000000000000100A /* PlayersSection.swift */; };
 		00000000000000000000200B /* ResultRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00000000000000000000100B /* ResultRow.swift */; };
-		00000000000000000000200C /* ResultView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00000000000000000000100C /* ResultView.swift */; };
-		00000000000000000000200D /* ScoreSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00000000000000000000100D /* ScoreSection.swift */; };
+		00000000000000000000200C /* RoundResultSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00000000000000000000100C /* RoundResultSection.swift */; };
 		00000000000000000000200E /* WinnerCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00000000000000000000100E /* WinnerCard.swift */; };
 		00000000000000000000200F /* ConnectGameClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00000000000000000000100F /* ConnectGameClient.swift */; };
 		000000000000000000002010 /* GameClientDTOs.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000001010 /* GameClientDTOs.swift */; };
@@ -78,8 +77,7 @@
 		000000000000000000001009 /* PickSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PickSection.swift; sourceTree = "<group>"; };
 		00000000000000000000100A /* PlayersSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayersSection.swift; sourceTree = "<group>"; };
 		00000000000000000000100B /* ResultRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResultRow.swift; sourceTree = "<group>"; };
-		00000000000000000000100C /* ResultView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResultView.swift; sourceTree = "<group>"; };
-		00000000000000000000100D /* ScoreSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScoreSection.swift; sourceTree = "<group>"; };
+		00000000000000000000100C /* RoundResultSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoundResultSection.swift; sourceTree = "<group>"; };
 		00000000000000000000100E /* WinnerCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WinnerCard.swift; sourceTree = "<group>"; };
 		00000000000000000000100F /* ConnectGameClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectGameClient.swift; sourceTree = "<group>"; };
 		000000000000000000001010 /* GameClientDTOs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameClientDTOs.swift; sourceTree = "<group>"; };
@@ -175,8 +173,7 @@
 			isa = PBXGroup;
 			children = (
 				00000000000000000000100B /* ResultRow.swift */,
-				00000000000000000000100C /* ResultView.swift */,
-				00000000000000000000100D /* ScoreSection.swift */,
+				00000000000000000000100C /* RoundResultSection.swift */,
 				00000000000000000000100E /* WinnerCard.swift */,
 			);
 			path = Results;
@@ -438,8 +435,7 @@
 				000000000000000000002009 /* PickSection.swift in Sources */,
 				00000000000000000000200A /* PlayersSection.swift in Sources */,
 				00000000000000000000200B /* ResultRow.swift in Sources */,
-				00000000000000000000200C /* ResultView.swift in Sources */,
-				00000000000000000000200D /* ScoreSection.swift in Sources */,
+				00000000000000000000200C /* RoundResultSection.swift in Sources */,
 				00000000000000000000200E /* WinnerCard.swift in Sources */,
 				1E0DF12FEFC34F8790E06E50 /* AppleSignInModel.swift in Sources */,
 				00000000000000000000201A /* GameCenterAuthenticationView.swift in Sources */,
