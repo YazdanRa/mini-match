@@ -2,7 +2,7 @@ import SwiftUI
 
 struct BrandHeader: View {
     var compact = false
-    @ScaledMetric(relativeTo: .largeTitle) private var heroFontSize = 64
+    @ScaledMetric(relativeTo: .largeTitle) private var heroFontSize = 78
 
     var body: some View {
         VStack(spacing: compact ? -6 : -10) {
@@ -14,6 +14,8 @@ struct BrandHeader: View {
         .font(compact ? .title : .system(size: heroFontSize))
         .fontWeight(.black)
         .fontDesign(.rounded)
+        .lineLimit(1)
+        .minimumScaleFactor(0.5)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("Mini Match")
     }
