@@ -525,18 +525,18 @@
         }
       }
     },
-    "Duplicate — not unique" : {
+    "Duplicate" : {
       "localizations" : {
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Repetido — no es único"
+            "value" : "Repetido"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Doublon — non unique"
+            "value" : "Doublon"
           }
         }
       }
@@ -991,22 +991,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Le plus petit nombre choisi par un seul joueur gagne."
-          }
-        }
-      }
-    },
-    "Lowest unique — winner" : {
-      "localizations" : {
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Número único más bajo — ganador"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Plus petit nombre unique — gagnant"
           }
         }
       }
@@ -1711,6 +1695,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Unique"
+          }
+        }
+      }
+    },
+    "Winner" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ganador"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gagnant"
           }
         }
       }
