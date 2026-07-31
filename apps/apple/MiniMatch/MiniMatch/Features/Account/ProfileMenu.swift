@@ -16,10 +16,6 @@ struct ProfileMenu: View {
                 appleSignIn.signOut()
             }
             .disabled(!canManageAccount)
-            Button("Delete profile", systemImage: "trash", role: .destructive) {
-                appleSignIn.isConfirmingDeletion = true
-            }
-            .disabled(!canManageAccount)
             if !canManageAccount {
                 Text("Return home to manage this profile.")
             }
