@@ -315,6 +315,7 @@ final class GameModel {
         else {
             return false
         }
+        let generation = sessionGeneration
         if let savedPlayerID = saved.gameCenterPlayerID,
            savedPlayerID != gameCenterPlayerID {
             sessionStore.clear()
@@ -324,14 +325,16 @@ final class GameModel {
         defer { isWorking = false }
         do {
             let restored = try await client.getTable(id: saved.tableID)
-            guard screen == .home, !multiplayerIsRestricted, sessionStore.load() == saved,
-                  identityIsCurrent()
-            else {
-                sessionStore.clear()
+            guard sessionGeneration == generation else { return false }
+            guard screen == .home, !multiplayerIsRestricted, identityIsCurrent() else {
+                clearSavedSession(ifMatching: saved)
+                return false
+            }
+            guard sessionStore.load() == saved else {
                 return false
             }
             guard restored.players.contains(where: { $0.id == saved.playerID }) else {
-                sessionStore.clear()
+                clearSavedSession(ifMatching: saved)
                 return false
             }
             sessionGeneration += 1
@@ -346,9 +349,11 @@ final class GameModel {
         } catch is CancellationError {
             return false
         } catch let error as GameClientError where error.endsTableSession {
-            sessionStore.clear()
+            guard sessionGeneration == generation else { return false }
+            clearSavedSession(ifMatching: saved)
             return false
         } catch {
+            guard sessionGeneration == generation else { return false }
             isReconnecting = true
             return false
         }
@@ -398,6 +403,11 @@ final class GameModel {
         isReconnecting = false
         pickText = ""
         screen = .home
+        sessionStore.clear()
+    }
+
+    private func clearSavedSession(ifMatching saved: SavedGameSession) {
+        guard sessionStore.load() == saved else { return }
         sessionStore.clear()
     }
 

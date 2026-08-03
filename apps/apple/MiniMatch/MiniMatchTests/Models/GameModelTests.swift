@@ -265,6 +265,77 @@ struct GameModelTests {
 
     @Test
     @MainActor
+    func staleRestorationPreservesAReplacementSession() async throws {
+        let client = LifecycleTestGameClient(delaysGetTable: true)
+        let store = VolatileGameSessionStore()
+        let original = GameModel(client: client, sessionStore: store)
+
+        #expect(await original.createTable(name: "Original", displayName: "Maya"))
+
+        let restored = GameModel(client: client, sessionStore: store)
+        let restoration = Task { await restored.restoreSession() }
+        await client.waitUntilGetTableIsPending()
+
+        #expect(await restored.createTable(name: "Replacement", displayName: "Maya"))
+        let replacement = try #require(store.load())
+        await client.resumeGetTable()
+
+        #expect(await restoration.value == false)
+        #expect(restored.table?.name == "Replacement")
+        #expect(store.load() == replacement)
+    }
+
+    @Test
+    @MainActor
+    func staleRestorationFailureDoesNotReconnectAReplacementSession() async throws {
+        let client = LifecycleTestGameClient(
+            getTableError: .server("offline"),
+            delaysGetTable: true
+        )
+        let store = VolatileGameSessionStore()
+        let original = GameModel(client: client, sessionStore: store)
+
+        #expect(await original.createTable(name: "Original", displayName: "Maya"))
+
+        let restored = GameModel(client: client, sessionStore: store)
+        let restoration = Task { await restored.restoreSession() }
+        await client.waitUntilGetTableIsPending()
+
+        #expect(await restored.createTable(name: "Replacement", displayName: "Maya"))
+        let replacement = try #require(store.load())
+        await client.resumeGetTable()
+
+        #expect(await restoration.value == false)
+        #expect(restored.table?.name == "Replacement")
+        #expect(!restored.isReconnecting)
+        #expect(store.load() == replacement)
+    }
+
+    @Test
+    @MainActor
+    func authenticationFailureKeepsTheSavedSessionReconnectable() async throws {
+        let client = LifecycleTestGameClient(getTableError: .unauthenticated)
+        let store = VolatileGameSessionStore()
+        let model = GameModel(client: client, sessionStore: store)
+
+        #expect(await model.createTable(name: "Friday Mini Match", displayName: "Maya"))
+        let saved = try #require(store.load())
+
+        await model.refreshTable()
+
+        #expect(model.screen == .lobby)
+        #expect(model.table != nil)
+        #expect(model.isReconnecting)
+        #expect(store.load() == saved)
+
+        let restored = GameModel(client: client, sessionStore: store)
+        #expect(await restored.restoreSession() == false)
+        #expect(restored.isReconnecting)
+        #expect(store.load() == saved)
+    }
+
+    @Test
+    @MainActor
     func delayedMutationResponseCannotOverwriteAReplacementSession() async {
         let client = LifecycleTestGameClient()
         let model = GameModel(client: client, sessionStore: VolatileGameSessionStore())
@@ -359,10 +430,19 @@ struct GameModelTests {
 private actor LifecycleTestGameClient: GameClient {
     private let base = PreviewGameClient()
     private let leaveError: GameClientError?
+    private let getTableError: GameClientError?
+    private let delaysGetTable: Bool
     private var startRoundContinuation: CheckedContinuation<Void, Never>?
+    private var getTableContinuation: CheckedContinuation<Void, Never>?
 
-    init(leaveError: GameClientError? = nil) {
+    init(
+        leaveError: GameClientError? = nil,
+        getTableError: GameClientError? = nil,
+        delaysGetTable: Bool = false
+    ) {
         self.leaveError = leaveError
+        self.getTableError = getTableError
+        self.delaysGetTable = delaysGetTable
     }
 
     func waitUntilStartRoundIsPending() async {
@@ -374,6 +454,17 @@ private actor LifecycleTestGameClient: GameClient {
     func resumeStartRound() {
         startRoundContinuation?.resume()
         startRoundContinuation = nil
+    }
+
+    func waitUntilGetTableIsPending() async {
+        while getTableContinuation == nil {
+            await Task.yield()
+        }
+    }
+
+    func resumeGetTable() {
+        getTableContinuation?.resume()
+        getTableContinuation = nil
     }
 
     func createTable(
@@ -445,7 +536,17 @@ private actor LifecycleTestGameClient: GameClient {
     }
 
     func getTable(id: String) async throws -> GameTable {
-        try await base.getTable(id: id)
+        if let getTableError {
+            if delaysGetTable {
+                await withCheckedContinuation { getTableContinuation = $0 }
+            }
+            throw getTableError
+        }
+        let table = try await base.getTable(id: id)
+        if delaysGetTable {
+            await withCheckedContinuation { getTableContinuation = $0 }
+        }
+        return table
     }
 
     func deleteProfile() async throws {

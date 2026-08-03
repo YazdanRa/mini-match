@@ -61,7 +61,7 @@ enum GameClientError: Error, LocalizedError, Sendable {
 
     var endsTableSession: Bool {
         switch self {
-        case .notFound, .permissionDenied, .unauthenticated:
+        case .notFound, .permissionDenied:
             true
         default:
             false
