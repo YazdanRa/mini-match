@@ -58,6 +58,7 @@ jobs:
             --project "${{ vars.GCP_PROJECT_ID }}" \
             --region "${{ vars.GCP_REGION }}" \
             --service-account "${{ vars.CLOUD_RUN_RUNTIME_SERVICE_ACCOUNT }}" \
+            --build-service-account "${{ vars.CLOUD_RUN_BUILD_SERVICE_ACCOUNT }}" \
             --update-env-vars "GOOGLE_CLOUD_PROJECT=${{ vars.GCP_PROJECT_ID }}" \
             --use-http2 \
             --quiet
@@ -81,8 +82,10 @@ jobs:
             --header 'Content-Type: application/json' \
             --data '{}' \
             "${{ steps.service.outputs.url }}/minimatch.v1.MiniMatchService/GetTable")"
-          if [[ "$status" != "401" ]]; then
+          body="$(cat "$response_file")"
+          expected='{"code":"unauthenticated","message":"missing bearer token"}'
+          if [[ "$status" != "401" || "$body" != "$expected" ]]; then
             cat "$response_file"
-            echo "Expected an unauthenticated request to return HTTP 401, got ${status}." >&2
+            echo "Expected the unauthenticated Firebase boundary response; got HTTP ${status}." >&2
             exit 1
           fi
