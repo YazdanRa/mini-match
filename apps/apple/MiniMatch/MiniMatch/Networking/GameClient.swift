@@ -38,6 +38,8 @@ enum GameClientError: Error, LocalizedError, Sendable {
     case invalidResponse
     case notFound
     case alreadyExists
+    case permissionDenied
+    case unauthenticated
     case server(String)
 
     var errorDescription: String? {
@@ -48,8 +50,21 @@ enum GameClientError: Error, LocalizedError, Sendable {
             String(localized: "Table not found.")
         case .alreadyExists:
             String(localized: "That table already exists.")
+        case .permissionDenied:
+            String(localized: "You don’t have permission to do that.")
+        case .unauthenticated:
+            String(localized: "Sign in and try again.")
         case let .server(message):
             message
+        }
+    }
+
+    var endsTableSession: Bool {
+        switch self {
+        case .notFound, .permissionDenied, .unauthenticated:
+            true
+        default:
+            false
         }
     }
 }

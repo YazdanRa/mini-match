@@ -59,4 +59,41 @@ struct GameClientDTOTests {
                 == String(localized: "The request failed.")
         )
     }
+
+    @Test
+    func finalPlayerLeaveResponseDecodesAtTheIgnoredTransportBoundary() async throws {
+        let json = """
+        {
+          "table": {
+            "id": "table-1",
+            "name": "Friday Mini Match",
+            "joinCode": "7X2G9K",
+            "state": "TABLE_STATE_ACTIVE",
+            "stateVersion": "2",
+            "eventSequence": "2"
+          }
+        }
+        """
+
+        let baseURL = try #require(URL(string: "https://example.com"))
+        let client = ConnectGameClient(
+            baseURL: baseURL,
+            authorizationToken: { "test-token" },
+            send: { request in
+                guard let url = request.url,
+                      let response = HTTPURLResponse(
+                          url: url,
+                          statusCode: 200,
+                          httpVersion: nil,
+                          headerFields: nil
+                      )
+                else {
+                    throw GameClientError.invalidResponse
+                }
+                return (Data(json.utf8), response)
+            }
+        )
+
+        try await client.leaveTable(tableID: "table-1", playerID: "maya")
+    }
 }

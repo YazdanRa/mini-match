@@ -7,6 +7,7 @@ import (
 	"math"
 	"strings"
 	"sync"
+	"time"
 )
 
 const (
@@ -47,12 +48,13 @@ type Table struct {
 }
 
 type Player struct {
-	ID           string
-	GameCenterID string
-	Name         string
-	Avatar       string
-	Locked       bool
-	Pick         uint64
+	ID                string
+	GameCenterID      string
+	Name              string
+	Avatar            string
+	Locked            bool
+	Pick              uint64
+	PresenceExpiresAt time.Time
 }
 
 type Round struct {
@@ -105,8 +107,13 @@ func (t *Table) Join(playerID, name, avatarID string) error {
 	if err != nil {
 		return err
 	}
-	if t.player(playerID) != nil {
-		return ErrAlreadyExists
+	if player := t.player(playerID); player != nil {
+		if player.Name != name || player.Avatar != avatar {
+			player.Name = name
+			player.Avatar = avatar
+			t.changed()
+		}
+		return nil
 	}
 	t.Players = append(t.Players, &Player{ID: playerID, Name: name, Avatar: avatar})
 	if len(t.Players) == 1 {
@@ -133,7 +140,13 @@ func (t *Table) Leave(playerID string) error {
 				t.HostID = t.Players[0].ID
 			}
 		}
-		if t.CurrentRound != nil {
+		if t.CurrentRound != nil && len(t.Players) < 2 {
+			t.CurrentRound = nil
+			for _, remaining := range t.Players {
+				remaining.Locked = false
+				remaining.Pick = 0
+			}
+		} else if t.CurrentRound != nil {
 			t.CurrentRound.Phase = RoundReady
 			for _, remaining := range t.Players {
 				if !remaining.Locked {
@@ -151,6 +164,41 @@ func (t *Table) Leave(playerID string) error {
 		return nil
 	}
 	return ErrNotFound
+}
+
+func (t *Table) PresenceUpdateNeeded(playerID string, now time.Time, duration time.Duration) bool {
+	player := t.player(playerID)
+	if player == nil || player.PresenceExpiresAt.IsZero() ||
+		!player.PresenceExpiresAt.After(now.Add(duration/2)) {
+		return player != nil
+	}
+	for _, current := range t.Players {
+		if current.PresenceExpiresAt.IsZero() || !current.PresenceExpiresAt.After(now) {
+			return true
+		}
+	}
+	return false
+}
+
+func (t *Table) RefreshPresence(playerID string, now time.Time, duration time.Duration) error {
+	if duration <= 0 || t.player(playerID) == nil {
+		return ErrNotFound
+	}
+	expiresAt := now.Add(duration)
+	for _, player := range t.Players {
+		if player.ID == playerID || player.PresenceExpiresAt.IsZero() {
+			player.PresenceExpiresAt = expiresAt
+		}
+	}
+	for index := len(t.Players) - 1; index >= 0; index-- {
+		player := t.Players[index]
+		if player.ID != playerID && !player.PresenceExpiresAt.After(now) {
+			if err := t.Leave(player.ID); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }
 
 func (t *Table) LockPick(playerID string, pick uint64, roundNumber uint32) error {

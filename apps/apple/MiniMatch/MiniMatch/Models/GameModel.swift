@@ -1,6 +1,51 @@
 import Foundation
 import Observation
 
+struct SavedGameSession: Codable, Equatable {
+    let tableID: String
+    let playerID: String
+    let gameCenterPlayerID: String?
+}
+
+@MainActor
+protocol GameSessionPersisting: AnyObject {
+    func load() -> SavedGameSession?
+    func save(_ session: SavedGameSession)
+    func clear()
+}
+
+@MainActor
+final class UserDefaultsGameSessionStore: GameSessionPersisting {
+    private let defaults: UserDefaults
+    private let key: String
+
+    init(defaults: UserDefaults = .standard, key: String = "activeGameSession") {
+        self.defaults = defaults
+        self.key = key
+    }
+
+    func load() -> SavedGameSession? {
+        defaults.data(forKey: key).flatMap { try? JSONDecoder().decode(SavedGameSession.self, from: $0) }
+    }
+
+    func save(_ session: SavedGameSession) {
+        defaults.set(try? JSONEncoder().encode(session), forKey: key)
+    }
+
+    func clear() {
+        defaults.removeObject(forKey: key)
+    }
+}
+
+@MainActor
+final class VolatileGameSessionStore: GameSessionPersisting {
+    private var session: SavedGameSession?
+
+    func load() -> SavedGameSession? { session }
+    func save(_ session: SavedGameSession) { self.session = session }
+    func clear() { session = nil }
+}
+
 @MainActor
 @Observable
 final class GameModel {
@@ -10,8 +55,10 @@ final class GameModel {
     }
 
     private let client: any GameClient
+    private let sessionStore: any GameSessionPersisting
     @ObservationIgnored var roundResultHandler: ((GameTable, String) -> Void)?
     @ObservationIgnored private var lastNotifiedResultID: String?
+    @ObservationIgnored private var sessionGeneration = 0
 
     private(set) var screen: Screen = .home
     private(set) var table: GameTable?
@@ -24,8 +71,12 @@ final class GameModel {
     private(set) var multiplayerIsRestricted = false
     var pickText = ""
 
-    init(client: any GameClient) {
+    init(
+        client: any GameClient,
+        sessionStore: any GameSessionPersisting = UserDefaultsGameSessionStore()
+    ) {
         self.client = client
+        self.sessionStore = sessionStore
     }
 
     var isHost: Bool {
@@ -72,7 +123,7 @@ final class GameModel {
             showError(String(localized: "Enter a table name and your name."))
             return false
         }
-        return await loadSession {
+        return await loadSession(gameCenterPlayerID: gameCenterIdentity?.teamPlayerId) {
             try await client.createTable(
                 name: name,
                 displayName: displayName,
@@ -94,7 +145,7 @@ final class GameModel {
             showError(String(localized: "Multiplayer is unavailable because of Screen Time settings."))
             return false
         }
-        return await loadSession {
+        return await loadSession(gameCenterPlayerID: gameCenterIdentity?.teamPlayerId) {
             do {
                 return try await client.joinTable(
                     code: code,
@@ -138,7 +189,7 @@ final class GameModel {
             showError(String(localized: "Enter a table code and your name."))
             return false
         }
-        return await loadSession {
+        return await loadSession(gameCenterPlayerID: gameCenterIdentity?.teamPlayerId) {
             try await client.joinTable(
                 code: code.uppercased(),
                 displayName: displayName,
@@ -161,6 +212,7 @@ final class GameModel {
             showError(String(localized: "Enter a non-negative whole number."))
             return
         }
+        let generation = sessionGeneration
 
         await perform {
             let updated = try await client.lockPick(
@@ -169,7 +221,7 @@ final class GameModel {
                 roundNumber: roundNumber,
                 pick: pick
             )
-            guard self.table?.id == table.id else { return }
+            guard self.table?.id == table.id, sessionGeneration == generation else { return }
             apply(updated)
             myLockedPick = pick
         }
@@ -184,12 +236,14 @@ final class GameModel {
             showError(String(localized: "The table is not ready."))
             return
         }
+        let generation = sessionGeneration
 
         await perform {
             let updated = try await client.startRound(
                 tableID: table.id,
                 hostPlayerID: currentPlayerID
             )
+            guard self.table?.id == table.id, sessionGeneration == generation else { return }
             apply(updated)
         }
     }
@@ -206,6 +260,7 @@ final class GameModel {
             showError(String(localized: "The table is not ready."))
             return
         }
+        let generation = sessionGeneration
 
         await perform {
             let updated = try await client.revealRound(
@@ -213,6 +268,7 @@ final class GameModel {
                 hostPlayerID: currentPlayerID,
                 roundNumber: roundNumber
             )
+            guard self.table?.id == table.id, sessionGeneration == generation else { return }
             apply(updated)
         }
     }
@@ -230,13 +286,71 @@ final class GameModel {
 
     func refreshTable() async {
         guard let table else { return }
+        let tableID = table.id
+        let generation = sessionGeneration
         do {
-            apply(try await client.getTable(id: table.id))
+            let updated = try await client.getTable(id: table.id)
+            guard self.table?.id == tableID, sessionGeneration == generation else { return }
+            apply(updated)
             isReconnecting = false
         } catch is CancellationError {
             return
+        } catch let error as GameClientError where error.endsTableSession {
+            guard self.table?.id == tableID, sessionGeneration == generation else { return }
+            resetSession()
+            showError(error.localizedDescription)
+        } catch {
+            guard self.table?.id == tableID, sessionGeneration == generation else { return }
+            isReconnecting = true
+        }
+    }
+
+    @discardableResult
+    func restoreSession(
+        gameCenterPlayerID: String? = nil,
+        identityIsCurrent: () -> Bool = { true }
+    ) async -> Bool {
+        guard screen == .home, !multiplayerIsRestricted, !isWorking,
+              let saved = sessionStore.load()
+        else {
+            return false
+        }
+        if let savedPlayerID = saved.gameCenterPlayerID,
+           savedPlayerID != gameCenterPlayerID {
+            sessionStore.clear()
+            return false
+        }
+        isWorking = true
+        defer { isWorking = false }
+        do {
+            let restored = try await client.getTable(id: saved.tableID)
+            guard screen == .home, !multiplayerIsRestricted, sessionStore.load() == saved,
+                  identityIsCurrent()
+            else {
+                sessionStore.clear()
+                return false
+            }
+            guard restored.players.contains(where: { $0.id == saved.playerID }) else {
+                sessionStore.clear()
+                return false
+            }
+            sessionGeneration += 1
+            table = restored
+            currentPlayerID = saved.playerID
+            myLockedPick = nil
+            pickText = ""
+            isReconnecting = false
+            screen = .lobby
+            notifyRoundResult()
+            return true
+        } catch is CancellationError {
+            return false
+        } catch let error as GameClientError where error.endsTableSession {
+            sessionStore.clear()
+            return false
         } catch {
             isReconnecting = true
+            return false
         }
     }
 
@@ -244,6 +358,9 @@ final class GameModel {
         multiplayerIsRestricted = restricted
         if restricted, screen != .home {
             await leaveTable()
+            if screen != .home {
+                resetSession()
+            }
         }
     }
 
@@ -252,10 +369,20 @@ final class GameModel {
             resetSession()
             return
         }
-        await perform {
+        let tableID = table.id
+        let generation = sessionGeneration
+        isWorking = true
+        defer { isWorking = false }
+        do {
             try await client.leaveTable(tableID: table.id, playerID: currentPlayerID)
-            guard self.table?.id == table.id else { return }
+            guard self.table?.id == table.id, sessionGeneration == generation else { return }
             resetSession()
+        } catch let error as GameClientError where error.endsTableSession {
+            guard self.table?.id == tableID, sessionGeneration == generation else { return }
+            resetSession()
+        } catch {
+            guard self.table?.id == tableID, sessionGeneration == generation else { return }
+            showError(error.localizedDescription)
         }
     }
 
@@ -264,21 +391,32 @@ final class GameModel {
     }
 
     private func resetSession() {
+        sessionGeneration += 1
         table = nil
         currentPlayerID = nil
         myLockedPick = nil
         isReconnecting = false
         pickText = ""
         screen = .home
+        sessionStore.clear()
     }
 
-    private func loadSession(_ operation: () async throws -> GameSession) async -> Bool {
+    private func loadSession(
+        gameCenterPlayerID: String?,
+        _ operation: () async throws -> GameSession
+    ) async -> Bool {
         isWorking = true
         defer { isWorking = false }
         do {
             let session = try await operation()
+            sessionGeneration += 1
             table = session.table
             currentPlayerID = session.playerID
+            sessionStore.save(SavedGameSession(
+                tableID: session.table.id,
+                playerID: session.playerID,
+                gameCenterPlayerID: gameCenterPlayerID
+            ))
             myLockedPick = nil
             pickText = ""
             screen = .lobby
@@ -292,12 +430,13 @@ final class GameModel {
 
     private func perform(_ operation: () async throws -> Void) async {
         let sessionID = table?.id
+        let generation = sessionGeneration
         isWorking = true
         defer { isWorking = false }
         do {
             try await operation()
         } catch {
-            if table?.id == sessionID {
+            if table?.id == sessionID, sessionGeneration == generation {
                 showError(error.localizedDescription)
             }
         }
@@ -328,14 +467,14 @@ final class GameModel {
 
     private func notifyRoundResult() {
         guard let table, table.currentRound == nil, let result = table.lastResult,
-              let currentPlayerID
+              let currentPlayerID, let roundResultHandler
         else {
             return
         }
         let resultID = "\(table.id):\(result.roundNumber)"
         guard resultID != lastNotifiedResultID else { return }
         lastNotifiedResultID = resultID
-        roundResultHandler?(table, currentPlayerID)
+        roundResultHandler(table, currentPlayerID)
     }
 }
 
@@ -345,7 +484,8 @@ extension GameModel {
             client: PreviewGameClient(
                 table: table,
                 localPick: table?.allPlayersLocked == true ? 2 : nil
-            )
+            ),
+            sessionStore: VolatileGameSessionStore()
         )
         guard let table else { return model }
 

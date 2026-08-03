@@ -6,6 +6,7 @@ import (
 	"math"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestTableRules(t *testing.T) {
@@ -210,6 +211,91 @@ func TestLeaveRemovesPlayerAndPromotesHost(t *testing.T) {
 	}
 	if empty.HostID != "noah" || empty.CurrentRound != nil {
 		t.Fatal("first player to rejoin an empty table did not become host")
+	}
+}
+
+func TestSamePlayerRejoinResumesWithoutResettingTheRound(t *testing.T) {
+	table, _ := NewTable("table", "Friday", "ABC123", "maya", "Maya", "fox")
+	_ = table.Join("zoe", "Zoe", "owl")
+	_ = table.BeginRound("maya")
+	_ = table.LockPick("zoe", 5, 1)
+
+	if err := table.Join("zoe", "Zoë", "frog"); err != nil {
+		t.Fatal(err)
+	}
+	if len(table.Players) != 2 {
+		t.Fatalf("players = %d, want 2", len(table.Players))
+	}
+	player := table.player("zoe")
+	if player.Name != "Zoë" || player.Avatar != "frog" || !player.Locked || player.Pick != 5 {
+		t.Fatalf("resumed player = %#v", player)
+	}
+}
+
+func TestPresenceExpiryUnblocksReveal(t *testing.T) {
+	now := time.Date(2026, time.August, 3, 12, 0, 0, 0, time.UTC)
+	duration := 2 * time.Minute
+	table, _ := NewTable("table", "Friday", "ABC123", "maya", "Maya", "fox")
+	_ = table.Join("zoe", "Zoe", "owl")
+	_ = table.Join("liam", "Liam", "frog")
+	_ = table.RefreshPresence("maya", now, duration)
+	_ = table.RefreshPresence("zoe", now, duration)
+	_ = table.RefreshPresence("liam", now, duration)
+	_ = table.BeginRound("maya")
+	_ = table.LockPick("maya", 2, 1)
+	_ = table.LockPick("zoe", 5, 1)
+
+	later := now.Add(duration + time.Second)
+	table.player("maya").PresenceExpiresAt = later.Add(duration)
+	table.player("zoe").PresenceExpiresAt = later.Add(duration)
+	if err := table.RefreshPresence("maya", later, duration); err != nil {
+		t.Fatal(err)
+	}
+	if table.HasPlayer("liam") || len(table.Players) != 2 || table.CurrentRound.Phase != RoundReady {
+		t.Fatalf("expiry result = players %#v, phase %v", table.Players, table.CurrentRound.Phase)
+	}
+	if err := table.RevealRound("maya", 1); err != nil {
+		t.Fatalf("remaining players could not reveal: %v", err)
+	}
+}
+
+func TestPresenceExpiryPromotesHostAndCancelsUndersizedRound(t *testing.T) {
+	now := time.Date(2026, time.August, 3, 12, 0, 0, 0, time.UTC)
+	duration := 2 * time.Minute
+	table, _ := NewTable("table", "Friday", "ABC123", "maya", "Maya", "fox")
+	_ = table.Join("zoe", "Zoe", "owl")
+	_ = table.RefreshPresence("maya", now, duration)
+	_ = table.RefreshPresence("zoe", now, duration)
+	_ = table.BeginRound("maya")
+	_ = table.LockPick("zoe", 5, 1)
+
+	later := now.Add(duration + time.Second)
+	table.player("zoe").PresenceExpiresAt = later.Add(duration)
+	if err := table.RefreshPresence("zoe", later, duration); err != nil {
+		t.Fatal(err)
+	}
+	if table.HostID != "zoe" || table.CurrentRound != nil || table.player("zoe").Locked ||
+		table.player("zoe").Pick != 0 {
+		t.Fatalf("undersized round was not reconciled: %#v", table)
+	}
+}
+
+func TestPresenceRefreshBackfillsLegacyPlayersForOneLease(t *testing.T) {
+	now := time.Date(2026, time.August, 3, 12, 0, 0, 0, time.UTC)
+	duration := 2 * time.Minute
+	table, _ := NewTable("table", "Friday", "ABC123", "maya", "Maya", "fox")
+	_ = table.Join("zoe", "Zoe", "owl")
+
+	if !table.PresenceUpdateNeeded("maya", now, duration) {
+		t.Fatal("legacy table did not request presence backfill")
+	}
+	if err := table.RefreshPresence("maya", now, duration); err != nil {
+		t.Fatal(err)
+	}
+	for _, player := range table.Players {
+		if got := player.PresenceExpiresAt; !got.Equal(now.Add(duration)) {
+			t.Fatalf("%s expiry = %v", player.ID, got)
+		}
 	}
 }
 
