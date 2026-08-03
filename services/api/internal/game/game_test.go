@@ -165,6 +165,39 @@ func TestProfileInputBounds(t *testing.T) {
 	}
 }
 
+func TestProfileInputBoundsCountUnicodeCharacters(t *testing.T) {
+	if _, err := NewTable(
+		"table",
+		strings.Repeat("桌", maxTableNameLength),
+		"ABC123",
+		"maya",
+		strings.Repeat("名", maxPlayerNameLength),
+		"",
+	); err != nil {
+		t.Fatalf("Unicode boundary profile rejected: %v", err)
+	}
+	if _, err := NewTable(
+		"table",
+		strings.Repeat("桌", maxTableNameLength+1),
+		"ABC123",
+		"maya",
+		"Maya",
+		"",
+	); !errors.Is(err, ErrInvalid) {
+		t.Fatalf("oversized Unicode table name error = %v, want ErrInvalid", err)
+	}
+	if _, err := NewTable(
+		"table",
+		"Friday",
+		"ABC123",
+		"maya",
+		strings.Repeat("名", maxPlayerNameLength+1),
+		"",
+	); !errors.Is(err, ErrInvalid) {
+		t.Fatalf("oversized Unicode display name error = %v, want ErrInvalid", err)
+	}
+}
+
 func TestNoUniquePickHasNoWinner(t *testing.T) {
 	table, _ := NewTable("table", "Friday", "ABC123", "maya", "Maya", "")
 	_ = table.Join("zoe", "Zoe", "")

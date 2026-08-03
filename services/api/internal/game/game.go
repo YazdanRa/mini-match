@@ -8,6 +8,7 @@ import (
 	"strings"
 	"sync"
 	"time"
+	"unicode/utf8"
 )
 
 const (
@@ -372,7 +373,7 @@ func blank(value string) bool {
 
 func normalizedText(value string, maxLength int) (string, error) {
 	value = strings.TrimSpace(value)
-	if value == "" || len(value) > maxLength {
+	if value == "" || utf8.RuneCountInString(value) > maxLength {
 		return "", ErrInvalid
 	}
 	return value, nil
