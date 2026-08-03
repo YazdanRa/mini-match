@@ -1,24 +1,14 @@
 import SwiftUI
-import UIKit
 
 struct ProfileMenu: View {
     let gameCenter: GameCenterModel
-    let appleSignIn: AppleSignInModel
-    let canManageAccount: Bool
+    let showSettings: () -> Void
 
     var body: some View {
         Menu {
             Text(gameCenter.displayName)
-            Button("Settings", systemImage: "gearshape") {
-                UIApplication.shared.open(URL(string: UIApplication.openSettingsURLString)!)
-            }
-            Button("Log out of Mini Match", systemImage: "rectangle.portrait.and.arrow.right") {
-                appleSignIn.signOut()
-            }
-            .disabled(!canManageAccount)
-            if !canManageAccount {
-                Text("Return home to manage this profile.")
-            }
+            Button("Settings", systemImage: "gearshape", action: showSettings)
+                .accessibilityIdentifier("profile-settings-button")
         } label: {
             ProfileAvatar(image: gameCenter.avatarImage, size: 36)
         }
@@ -32,7 +22,6 @@ struct ProfileMenu: View {
 #Preview {
     ProfileMenu(
         gameCenter: GameCenterModel.preview(),
-        appleSignIn: AppleSignInModel(),
-        canManageAccount: true
+        showSettings: {}
     )
 }

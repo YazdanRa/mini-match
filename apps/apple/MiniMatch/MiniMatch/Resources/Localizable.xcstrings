@@ -315,6 +315,22 @@
         }
       }
     },
+    "Change in iOS Settings" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cambiar en los ajustes de iOS"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Modifier dans les réglages iOS"
+          }
+        }
+      }
+    },
     "Check the table details and try again." : {
       "localizations" : {
         "es" : {
@@ -395,7 +411,24 @@
         }
       }
     },
+    "Danger zone" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zona de peligro"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zone de danger"
+          }
+        }
+      }
+    },
     "Delete" : {
+      "extractionState" : "stale",
       "localizations" : {
         "es" : {
           "stringUnit" : {
@@ -423,6 +456,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Supprimer le profil"
+          }
+        }
+      }
+    },
+    "Delete profile permanently" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eliminar perfil permanentemente"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Supprimer définitivement le profil"
           }
         }
       }
@@ -703,6 +752,22 @@
         }
       }
     },
+    "Game settings" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajustes del juego"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Réglages du jeu"
+          }
+        }
+      }
+    },
     "Host" : {
       "localizations" : {
         "es" : {
@@ -797,6 +862,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Présent"
+          }
+        }
+      }
+    },
+    "Language" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Idioma"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Langue"
           }
         }
       }
@@ -983,6 +1064,22 @@
         }
       }
     },
+    "Make Mini Match feel right for you." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Personaliza Mini Match a tu gusto."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Personnalisez Mini Match à votre goût."
+          }
+        }
+      }
+    },
     "Match" : {
       "localizations" : {
         "es" : {
@@ -1127,6 +1224,22 @@
         }
       }
     },
+    "Opens Mini Match Settings, where you can change the language" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abre los ajustes de Mini Match, donde puedes cambiar el idioma"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ouvre les réglages de Mini Match, où vous pouvez changer la langue"
+          }
+        }
+      }
+    },
     "Owl" : {
       "localizations" : {
         "es" : {
@@ -1155,6 +1268,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Code de groupe"
+          }
+        }
+      }
+    },
+    "Permanently deletes your Mini Match account. This cannot be undone." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elimina permanentemente tu cuenta de Mini Match. Esta acción no se puede deshacer."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Supprime définitivement votre compte Mini Match. Cette action est irréversible."
           }
         }
       }
@@ -1203,6 +1332,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Joueur"
+          }
+        }
+      }
+    },
+    "Player account" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cuenta del jugador"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Compte joueur"
           }
         }
       }
@@ -1268,6 +1413,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Reconnexion à la table…"
+          }
+        }
+      }
+    },
+    "Requires confirmation. This cannot be undone." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Requiere confirmación. Esta acción no se puede deshacer."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nécessite une confirmation. Cette action est irréversible."
           }
         }
       }

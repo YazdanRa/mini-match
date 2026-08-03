@@ -14,6 +14,13 @@ struct MiniMatchApp: App {
         let arguments = ProcessInfo.processInfo.arguments
         let isTesting = ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil
         _model = State(initialValue: GameModel(client: client))
+        #if DEBUG
+        if arguments.contains("--preview-settings") {
+            _appleSignIn = State(initialValue: AppleSignInModel())
+            _gameCenter = State(initialValue: GameCenterModel.preview())
+            return
+        }
+        #endif
         _appleSignIn = State(initialValue: AppleSignInModel(client: client))
         _gameCenter = State(initialValue: GameCenterModel(
             isEnabled: !isTesting
