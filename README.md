@@ -19,6 +19,8 @@ Go keeps the server small and fast to start on Cloud Run. One generated Connect 
 4. `RevealRound` is host-only and succeeds only for the current round after every current player locks. It resolves the lowest unique pick, publishes `last_result`, clears private picks, and returns the table to the lobby.
 5. `BeginRound` is host-only and opens the next independent round for everyone in the lobby. The deprecated `StartRound` name remains as a wire-compatible reveal alias.
 
+Active authenticated table traffic renews a private two-minute membership lease. A returning member can resume the saved table while its row is retained; active peers evict expired rows during polling, promote the next host when necessary, and cancel an active round if fewer than two players remain. Lease deadlines stay in the private table document and never appear in the client-readable projection.
+
 Firestore uses separate server-only `tables` documents and client-readable `table_views` projections because security rules cannot hide selected fields within one readable document. Each table player stores the Game Center display name (editable before joining) and a random app-owned fallback avatar ID in both projections; Game Center photos remain on-device. Every RPC requires a Firebase ID token; the verified Firebase UID is the table player identity. Authenticated Game Center players also send Apple's signed identity payload so the backend can bind the table player to the current Game Center participant. Firestore transactions update both views atomically, while the in-memory repository keeps domain tests fast.
 
 ## Local validation

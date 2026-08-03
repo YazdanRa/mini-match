@@ -4,6 +4,7 @@ import (
 	"math"
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/YazdanRa/mini-match/services/api/internal/game"
 )
@@ -26,6 +27,7 @@ func TestFirestoreDocumentsKeepPicksPrivateAndPreserveUint64(t *testing.T) {
 	table.EventSequence = math.MaxUint64
 	table.WinnerLifetimeWins = math.MaxUint64
 	table.Players[0].GameCenterID = "game-center-maya"
+	table.Players[0].PresenceExpiresAt = time.Date(2026, time.August, 3, 12, 2, 0, 0, time.UTC)
 
 	private := privateDocument(table)
 	if got := private.Players[0].Pick; got != "18446744073709551615" {
@@ -46,6 +48,7 @@ func TestFirestoreDocumentsKeepPicksPrivateAndPreserveUint64(t *testing.T) {
 	}
 	if decoded.Players[0].Name != "Maya" || decoded.Players[0].Avatar != "fox" ||
 		decoded.Players[0].GameCenterID != "game-center-maya" ||
+		!decoded.Players[0].PresenceExpiresAt.Equal(table.Players[0].PresenceExpiresAt) ||
 		decoded.Players[1].Name != "Liam" || decoded.Players[1].Avatar != "owl" {
 		t.Fatal("player profiles did not round-trip through the private Firestore document")
 	}
@@ -61,6 +64,9 @@ func TestFirestoreDocumentsKeepPicksPrivateAndPreserveUint64(t *testing.T) {
 	}
 	if _, exposed := reflect.TypeOf(public.Players[0]).FieldByName("Pick"); exposed {
 		t.Fatal("safe player document exposes a private pick")
+	}
+	if _, exposed := reflect.TypeOf(public.Players[0]).FieldByName("PresenceExpiresAt"); exposed {
+		t.Fatal("safe player document exposes a private presence lease")
 	}
 	if public.LastResult != nil {
 		t.Fatal("safe document published a result before reveal")

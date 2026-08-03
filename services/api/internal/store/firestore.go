@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"math"
 	"strconv"
+	"time"
 
 	"cloud.google.com/go/firestore"
 	"github.com/YazdanRa/mini-match/services/api/internal/game"
@@ -77,14 +78,17 @@ func (r *FirestoreRepository) Update(ctx context.Context, id string, update func
 		if err != nil {
 			return err
 		}
+		version := table.Version
 		if err := update(table); err != nil {
 			return err
 		}
 		if err := tx.Set(private, privateDocument(table)); err != nil {
 			return err
 		}
-		if err := tx.Set(public, publicDocument(table)); err != nil {
-			return err
+		if table.Version != version {
+			if err := tx.Set(public, publicDocument(table)); err != nil {
+				return err
+			}
 		}
 		updated = table
 		return nil
@@ -192,13 +196,14 @@ type tableDocument struct {
 }
 
 type playerDocument struct {
-	ID           string `firestore:"id"`
-	GameCenterID string `firestore:"game_center_id,omitempty"`
-	Name         string `firestore:"display_name"`
-	Avatar       string `firestore:"avatar,omitempty"`
-	Score        int64  `firestore:"wins,omitempty"`
-	Locked       bool   `firestore:"locked"`
-	Pick         string `firestore:"pick"`
+	ID                string    `firestore:"id"`
+	GameCenterID      string    `firestore:"game_center_id,omitempty"`
+	Name              string    `firestore:"display_name"`
+	Avatar            string    `firestore:"avatar,omitempty"`
+	Score             int64     `firestore:"wins,omitempty"`
+	Locked            bool      `firestore:"locked"`
+	Pick              string    `firestore:"pick"`
+	PresenceExpiresAt time.Time `firestore:"presence_expires_at,omitempty"`
 }
 
 type roundDocument struct {
@@ -258,12 +263,13 @@ func privateDocument(table *game.Table) tableDocument {
 	}
 	for _, player := range table.Players {
 		document.Players = append(document.Players, playerDocument{
-			ID:           player.ID,
-			GameCenterID: player.GameCenterID,
-			Name:         player.Name,
-			Avatar:       player.Avatar,
-			Locked:       player.Locked,
-			Pick:         strconv.FormatUint(player.Pick, 10),
+			ID:                player.ID,
+			GameCenterID:      player.GameCenterID,
+			Name:              player.Name,
+			Avatar:            player.Avatar,
+			Locked:            player.Locked,
+			Pick:              strconv.FormatUint(player.Pick, 10),
+			PresenceExpiresAt: player.PresenceExpiresAt,
 		})
 	}
 	return document
@@ -405,12 +411,13 @@ func decodeDocument(id string, document tableDocument) (*game.Table, error) {
 			pick = 0
 		}
 		table.Players = append(table.Players, &game.Player{
-			ID:           player.ID,
-			GameCenterID: player.GameCenterID,
-			Name:         player.Name,
-			Avatar:       player.Avatar,
-			Locked:       player.Locked && !legacyFinished,
-			Pick:         pick,
+			ID:                player.ID,
+			GameCenterID:      player.GameCenterID,
+			Name:              player.Name,
+			Avatar:            player.Avatar,
+			Locked:            player.Locked && !legacyFinished,
+			Pick:              pick,
+			PresenceExpiresAt: player.PresenceExpiresAt,
 		})
 	}
 	if document.LastResult != nil {

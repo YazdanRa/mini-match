@@ -5,7 +5,9 @@ import (
 	"errors"
 	"net"
 	"net/http"
+	"net/http/httptest"
 	"testing"
+	"time"
 
 	"connectrpc.com/connect"
 	minimatchv1 "github.com/YazdanRa/mini-match/services/api/gen/minimatch/v1"
@@ -113,6 +115,17 @@ func TestConnectAndGRPCKeepPicksPrivateUntilReveal(t *testing.T) {
 	}, "player-token"))
 	if err != nil {
 		t.Fatal(err)
+	}
+	resumed, err := grpcClient.JoinTable(ctx, authenticated(&minimatchv1.JoinTableRequest{
+		JoinCode:    created.Msg.Table.JoinCode,
+		DisplayName: "Liam",
+		Avatar:      "owl",
+	}, "player-token"))
+	if err != nil {
+		t.Fatalf("same-user rejoin: %v", err)
+	}
+	if len(resumed.Msg.Table.Players) != 2 || resumed.Msg.PlayerId != joined.Msg.PlayerId {
+		t.Fatalf("same-user rejoin duplicated membership: %#v", resumed.Msg)
 	}
 	tableID := created.Msg.Table.Id
 	if _, err := connectClient.LeaveTable(ctx, authenticated(&minimatchv1.LeaveTableRequest{
@@ -238,6 +251,102 @@ func TestConnectAndGRPCKeepPicksPrivateUntilReveal(t *testing.T) {
 	}
 	if legacy.Msg.Table.CurrentRound != nil || legacy.Msg.Table.LastResult.GetRoundNumber() != 2 {
 		t.Fatal("legacy StartRound did not reveal the active round")
+	}
+}
+
+func TestPollingExpiresStaleMemberAndAllowsRejoin(t *testing.T) {
+	now := time.Date(2026, time.August, 3, 12, 0, 0, 0, time.UTC)
+	service := New(game.NewMemoryRepository())
+	service.now = func() time.Time { return now }
+	path, handler := minimatchv1connect.NewMiniMatchServiceHandler(
+		service,
+		connect.WithInterceptors(authn.NewInterceptor(testVerifier{
+			"host-token":   "maya",
+			"active-token": "zoe",
+			"stale-token":  "liam",
+		})),
+	)
+	mux := http.NewServeMux()
+	mux.Handle(path, handler)
+	server := httptest.NewServer(mux)
+	t.Cleanup(server.Close)
+	client := minimatchv1connect.NewMiniMatchServiceClient(server.Client(), server.URL)
+	ctx := context.Background()
+
+	created, err := client.CreateTable(ctx, authenticated(&minimatchv1.CreateTableRequest{
+		Name:            "Friday",
+		HostDisplayName: "Maya",
+	}, "host-token"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	joinCode := created.Msg.Table.JoinCode
+	for _, player := range []struct {
+		token string
+		name  string
+	}{{"active-token", "Zoe"}, {"stale-token", "Liam"}} {
+		if _, err := client.JoinTable(ctx, authenticated(&minimatchv1.JoinTableRequest{
+			JoinCode: joinCode, DisplayName: player.name,
+		}, player.token)); err != nil {
+			t.Fatal(err)
+		}
+	}
+	tableID := created.Msg.Table.Id
+	if _, err := client.BeginRound(ctx, authenticated(&minimatchv1.BeginRoundRequest{
+		TableId: tableID, HostPlayerId: "maya",
+	}, "host-token")); err != nil {
+		t.Fatal(err)
+	}
+	for _, pick := range []struct {
+		token string
+		id    string
+		value uint64
+	}{{"host-token", "maya", 2}, {"active-token", "zoe", 5}} {
+		if _, err := client.LockPick(ctx, authenticated(&minimatchv1.LockPickRequest{
+			TableId: tableID, PlayerId: pick.id,
+			Pick: &minimatchv1.Pick{Value: pick.value}, RoundNumber: 1,
+		}, pick.token)); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	now = now.Add(playerPresenceDuration/2 + time.Second)
+	for _, token := range []string{"host-token", "active-token"} {
+		if _, err := client.GetTable(ctx, authenticated(
+			&minimatchv1.GetTableRequest{TableId: tableID}, token,
+		)); err != nil {
+			t.Fatal(err)
+		}
+	}
+	now = now.Add(playerPresenceDuration / 2)
+	ready, err := client.GetTable(ctx, authenticated(
+		&minimatchv1.GetTableRequest{TableId: tableID}, "host-token",
+	))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(ready.Msg.Table.Players) != 2 ||
+		ready.Msg.Table.CurrentRound.GetPhase() != minimatchv1.RoundPhase_ROUND_PHASE_READY_TO_REVEAL {
+		t.Fatalf("stale member did not unblock reveal: %#v", ready.Msg.Table)
+	}
+	if _, err := client.RevealRound(ctx, authenticated(&minimatchv1.RevealRoundRequest{
+		TableId: tableID, HostPlayerId: "maya", RoundNumber: 1,
+	}, "host-token")); err != nil {
+		t.Fatalf("reveal after eviction: %v", err)
+	}
+	if _, err := client.GetTable(ctx, authenticated(
+		&minimatchv1.GetTableRequest{TableId: tableID}, "stale-token",
+	)); connect.CodeOf(err) != connect.CodePermissionDenied {
+		t.Fatalf("evicted member poll code = %v, want permission denied", connect.CodeOf(err))
+	}
+	rejoined, err := client.JoinTable(ctx, authenticated(&minimatchv1.JoinTableRequest{
+		JoinCode: joinCode, DisplayName: "Liam",
+	}, "stale-token"))
+	if err != nil {
+		t.Fatalf("evicted member rejoin: %v", err)
+	}
+	if len(rejoined.Msg.Table.Players) != 3 {
+		t.Fatalf("rejoined players = %d, want 3", len(rejoined.Msg.Table.Players))
 	}
 }
 

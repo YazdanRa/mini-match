@@ -38,6 +38,9 @@ final class GameCenterModel: NSObject {
     var authentication: GameCenterAuthentication?
     var matchmaking: GameCenterMatchmaking?
     private(set) var isAuthenticated = false
+    var authenticatedTeamPlayerID: String? {
+        isAuthenticated ? GKLocalPlayer.local.teamPlayerID : nil
+    }
     private(set) var displayName = ""
     private(set) var avatarImage: UIImage?
     private(set) var playerImages = [String: UIImage]()

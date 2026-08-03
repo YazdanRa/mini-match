@@ -7,6 +7,7 @@ import (
 	"errors"
 	"math/big"
 	"strings"
+	"time"
 
 	"connectrpc.com/connect"
 	minimatchv1 "github.com/YazdanRa/mini-match/services/api/gen/minimatch/v1"
@@ -16,11 +17,14 @@ import (
 
 type Service struct {
 	tables game.Repository
+	now    func() time.Time
 }
 
 func New(tables game.Repository) *Service {
-	return &Service{tables: tables}
+	return &Service{tables: tables, now: time.Now}
 }
+
+const playerPresenceDuration = 2 * time.Minute
 
 func (s *Service) CreateTable(ctx context.Context, request *connect.Request[minimatchv1.CreateTableRequest]) (*connect.Response[minimatchv1.CreateTableResponse], error) {
 	actor, err := actorID(ctx)
@@ -61,6 +65,9 @@ func (s *Service) CreateTable(ctx context.Context, request *connect.Request[mini
 		if err := table.SetGameCenterID(actor, gameCenterID); err != nil {
 			return nil, rpcError(err)
 		}
+		if err := table.RefreshPresence(actor, s.now(), playerPresenceDuration); err != nil {
+			return nil, rpcError(err)
+		}
 		if err := s.tables.Create(ctx, table); err != nil {
 			if errors.Is(err, game.ErrAlreadyExists) {
 				if requestedJoinCode != "" {
@@ -95,7 +102,10 @@ func (s *Service) JoinTable(ctx context.Context, request *connect.Request[minima
 		if err := table.Join(actor, request.Msg.GetDisplayName(), request.Msg.GetAvatar()); err != nil {
 			return err
 		}
-		return table.SetGameCenterID(actor, gameCenterID)
+		if err := table.SetGameCenterID(actor, gameCenterID); err != nil {
+			return err
+		}
+		return table.RefreshPresence(actor, s.now(), playerPresenceDuration)
 	})
 	if err != nil {
 		return nil, rpcError(err)
@@ -134,7 +144,7 @@ func (s *Service) LockPick(ctx context.Context, request *connect.Request[minimat
 	if request.Msg.GetPlayerId() != "" && request.Msg.GetPlayerId() != actor {
 		return nil, connect.NewError(connect.CodePermissionDenied, errors.New("player ID does not match authenticated user"))
 	}
-	table, err := s.tables.Update(ctx, request.Msg.GetTableId(), func(table *game.Table) error {
+	table, err := s.updateActiveTable(ctx, request.Msg.GetTableId(), actor, func(table *game.Table) error {
 		return table.LockPick(actor, request.Msg.GetPick().GetValue(), request.Msg.GetRoundNumber())
 	})
 	if err != nil {
@@ -151,7 +161,7 @@ func (s *Service) StartRound(ctx context.Context, request *connect.Request[minim
 	if request.Msg.GetHostPlayerId() != "" && request.Msg.GetHostPlayerId() != actor {
 		return nil, connect.NewError(connect.CodePermissionDenied, errors.New("host player ID does not match authenticated user"))
 	}
-	table, err := s.tables.Update(ctx, request.Msg.GetTableId(), func(table *game.Table) error {
+	table, err := s.updateActiveTable(ctx, request.Msg.GetTableId(), actor, func(table *game.Table) error {
 		return table.RevealRound(actor, request.Msg.GetRoundNumber())
 	})
 	if err != nil {
@@ -168,7 +178,7 @@ func (s *Service) BeginRound(ctx context.Context, request *connect.Request[minim
 	if request.Msg.GetHostPlayerId() != "" && request.Msg.GetHostPlayerId() != actor {
 		return nil, connect.NewError(connect.CodePermissionDenied, errors.New("host player ID does not match authenticated user"))
 	}
-	table, err := s.tables.Update(ctx, request.Msg.GetTableId(), func(table *game.Table) error {
+	table, err := s.updateActiveTable(ctx, request.Msg.GetTableId(), actor, func(table *game.Table) error {
 		return table.BeginRound(actor)
 	})
 	if err != nil {
@@ -185,7 +195,7 @@ func (s *Service) RevealRound(ctx context.Context, request *connect.Request[mini
 	if request.Msg.GetHostPlayerId() != "" && request.Msg.GetHostPlayerId() != actor {
 		return nil, connect.NewError(connect.CodePermissionDenied, errors.New("host player ID does not match authenticated user"))
 	}
-	table, err := s.tables.Update(ctx, request.Msg.GetTableId(), func(table *game.Table) error {
+	table, err := s.updateActiveTable(ctx, request.Msg.GetTableId(), actor, func(table *game.Table) error {
 		return table.RevealRound(actor, request.Msg.GetRoundNumber())
 	})
 	if err != nil {
@@ -206,7 +216,29 @@ func (s *Service) GetTable(ctx context.Context, request *connect.Request[minimat
 	if !table.HasPlayer(actor) {
 		return nil, connect.NewError(connect.CodePermissionDenied, game.ErrForbidden)
 	}
+	if table.PresenceUpdateNeeded(actor, s.now(), playerPresenceDuration) {
+		table, err = s.tables.Update(ctx, table.ID, func(table *game.Table) error {
+			return table.RefreshPresence(actor, s.now(), playerPresenceDuration)
+		})
+		if err != nil {
+			return nil, rpcError(err)
+		}
+	}
 	return connect.NewResponse(&minimatchv1.GetTableResponse{Table: toProto(table)}), nil
+}
+
+func (s *Service) updateActiveTable(
+	ctx context.Context,
+	tableID string,
+	actor string,
+	update func(*game.Table) error,
+) (*game.Table, error) {
+	return s.tables.Update(ctx, tableID, func(table *game.Table) error {
+		if err := table.RefreshPresence(actor, s.now(), playerPresenceDuration); err != nil {
+			return err
+		}
+		return update(table)
+	})
 }
 
 func (s *Service) DeleteProfile(

@@ -100,12 +100,23 @@ struct ContentView: View {
             gameCenter.setAccessPointActive(shouldActivateAccessPoint)
         }
         .onChange(
-            of: gameCenter.restrictionIsResolved && !gameCenter.isMultiplayerRestricted,
+            of: gameCenter.restrictionIsResolved
+                && !gameCenter.isMultiplayerRestricted
+                && gameCenter.isAuthenticated,
             initial: true
-        ) { _, multiplayerIsAvailable in
+        ) { _, canRestoreSession in
             Task {
-                await model.setMultiplayerRestricted(!multiplayerIsAvailable)
-                if !multiplayerIsAvailable {
+                await model.setMultiplayerRestricted(!canRestoreSession)
+                if canRestoreSession {
+                    let teamPlayerID = gameCenter.authenticatedTeamPlayerID
+                    await model.restoreSession(
+                        gameCenterPlayerID: teamPlayerID,
+                        identityIsCurrent: {
+                            gameCenter.isAuthenticated
+                                && gameCenter.authenticatedTeamPlayerID == teamPlayerID
+                        }
+                    )
+                } else {
                     gameCenter.endMatch()
                 }
             }
@@ -113,6 +124,20 @@ struct ContentView: View {
         .onChange(of: scenePhase) { _, phase in
             if phase == .active {
                 gameCenter.refreshRestrictions()
+                Task {
+                    guard gameCenter.restrictionIsResolved,
+                          !gameCenter.isMultiplayerRestricted,
+                          gameCenter.isAuthenticated
+                    else { return }
+                    let teamPlayerID = gameCenter.authenticatedTeamPlayerID
+                    await model.restoreSession(
+                        gameCenterPlayerID: teamPlayerID,
+                        identityIsCurrent: {
+                            gameCenter.isAuthenticated
+                                && gameCenter.authenticatedTeamPlayerID == teamPlayerID
+                        }
+                    )
+                }
             }
         }
         .onChange(of: model.screen) { _, screen in

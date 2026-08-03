@@ -194,6 +194,152 @@ struct GameModelTests {
 
     @Test
     @MainActor
+    func savedMembershipRestoresAfterRelaunch() async {
+        let client = PreviewGameClient()
+        let store = VolatileGameSessionStore()
+        let original = GameModel(client: client, sessionStore: store)
+
+        #expect(await original.createTable(name: "Friday Mini Match", displayName: "Maya"))
+        let restored = GameModel(client: client, sessionStore: store)
+
+        #expect(await restored.restoreSession())
+        #expect(restored.screen == .lobby)
+        #expect(restored.table?.id == original.table?.id)
+        #expect(restored.currentPlayerID == original.currentPlayerID)
+    }
+
+    @Test
+    @MainActor
+    func savedMembershipDoesNotCrossGameCenterAccounts() async {
+        let client = PreviewGameClient()
+        let store = VolatileGameSessionStore()
+        let original = GameModel(client: client, sessionStore: store)
+        let identity = GameCenterIdentityDTO(
+            teamPlayerId: "first-account",
+            publicKeyUrl: "https://example.com/key",
+            signature: Data(),
+            salt: Data(),
+            timestamp: "0"
+        )
+
+        #expect(await original.createTable(
+            name: "Friday Mini Match",
+            displayName: "Maya",
+            gameCenterIdentity: identity
+        ))
+
+        let restored = GameModel(client: client, sessionStore: store)
+        #expect(await restored.restoreSession(gameCenterPlayerID: "second-account") == false)
+        #expect(restored.screen == .home)
+        #expect(store.load() == nil)
+    }
+
+    @Test
+    @MainActor
+    func restorationStopsWhenGameCenterIdentityChangesDuringTheRequest() async {
+        let client = PreviewGameClient()
+        let store = VolatileGameSessionStore()
+        let original = GameModel(client: client, sessionStore: store)
+        let identity = GameCenterIdentityDTO(
+            teamPlayerId: "first-account",
+            publicKeyUrl: "https://example.com/key",
+            signature: Data(),
+            salt: Data(),
+            timestamp: "0"
+        )
+
+        #expect(await original.createTable(
+            name: "Friday Mini Match",
+            displayName: "Maya",
+            gameCenterIdentity: identity
+        ))
+
+        let restored = GameModel(client: client, sessionStore: store)
+        #expect(await restored.restoreSession(
+            gameCenterPlayerID: "first-account",
+            identityIsCurrent: { false }
+        ) == false)
+        #expect(restored.screen == .home)
+        #expect(store.load() == nil)
+    }
+
+    @Test
+    @MainActor
+    func delayedMutationResponseCannotOverwriteAReplacementSession() async {
+        let client = LifecycleTestGameClient()
+        let model = GameModel(client: client, sessionStore: VolatileGameSessionStore())
+
+        #expect(await model.createTable(name: "First", displayName: "Maya"))
+        let delayedStart = Task { await model.startRound() }
+        await client.waitUntilStartRoundIsPending()
+
+        model.discardSession()
+        #expect(await model.createTable(name: "Replacement", displayName: "Maya"))
+        await client.resumeStartRound()
+        await delayedStart.value
+
+        #expect(model.table?.name == "Replacement")
+        #expect(model.table?.currentRound == nil)
+        #expect(!model.isShowingError)
+    }
+
+    @Test
+    @MainActor
+    func restrictionDiscardsTheLocalSessionWhenLeaveCannotReachTheServer() async {
+        let store = VolatileGameSessionStore()
+        let client = LifecycleTestGameClient(leaveError: .server("offline"))
+        let model = GameModel(client: client, sessionStore: store)
+
+        #expect(await model.createTable(name: "Friday", displayName: "Maya"))
+        await model.setMultiplayerRestricted(true)
+
+        #expect(model.screen == .home)
+        #expect(model.table == nil)
+        #expect(store.load() == nil)
+    }
+
+    @Test
+    @MainActor
+    func terminalPollClearsTheSavedSession() async throws {
+        let client = PreviewGameClient()
+        let store = VolatileGameSessionStore()
+        let model = GameModel(client: client, sessionStore: store)
+
+        #expect(await model.createTable(name: "Friday Mini Match", displayName: "Maya"))
+        let tableID = try #require(model.table?.id)
+        let playerID = try #require(model.currentPlayerID)
+        try await client.leaveTable(tableID: tableID, playerID: playerID)
+
+        await model.refreshTable()
+
+        #expect(model.screen == .home)
+        #expect(model.table == nil)
+        #expect(model.isShowingError)
+        #expect(store.load() == nil)
+        #expect(await GameModel(client: client, sessionStore: store).restoreSession() == false)
+    }
+
+    @Test
+    @MainActor
+    func repeatedLeaveAfterCommittedMutationReturnsHome() async throws {
+        let client = PreviewGameClient()
+        let model = GameModel(client: client, sessionStore: VolatileGameSessionStore())
+
+        #expect(await model.createTable(name: "Friday Mini Match", displayName: "Maya"))
+        try await client.leaveTable(
+            tableID: try #require(model.table?.id),
+            playerID: try #require(model.currentPlayerID)
+        )
+
+        await model.leaveTable()
+
+        #expect(model.screen == .home)
+        #expect(model.table == nil)
+        #expect(!model.isShowingError)
+    }
+
+    @Test
+    @MainActor
     func leavingRemovesThePlayerBeforeReturningHome() async {
         let client = PreviewGameClient()
         let model = GameModel(client: client)
@@ -204,8 +350,105 @@ struct GameModelTests {
 
         #expect(model.screen == .home)
         #expect(model.table == nil)
-        let table = try? await client.getTable(id: tableID)
-        #expect(table?.players.contains { $0.id == "local-player" } == false)
-        #expect(table?.hostPlayerID == "zoe")
+        await #expect(throws: GameClientError.self) {
+            _ = try await client.getTable(id: tableID)
+        }
+    }
+}
+
+private actor LifecycleTestGameClient: GameClient {
+    private let base = PreviewGameClient()
+    private let leaveError: GameClientError?
+    private var startRoundContinuation: CheckedContinuation<Void, Never>?
+
+    init(leaveError: GameClientError? = nil) {
+        self.leaveError = leaveError
+    }
+
+    func waitUntilStartRoundIsPending() async {
+        while startRoundContinuation == nil {
+            await Task.yield()
+        }
+    }
+
+    func resumeStartRound() {
+        startRoundContinuation?.resume()
+        startRoundContinuation = nil
+    }
+
+    func createTable(
+        name: String,
+        displayName: String,
+        avatarID: String,
+        gameCenterIdentity: GameCenterIdentityDTO?,
+        joinCode: String?
+    ) async throws -> GameSession {
+        try await base.createTable(
+            name: name,
+            displayName: displayName,
+            avatarID: avatarID,
+            gameCenterIdentity: gameCenterIdentity,
+            joinCode: joinCode
+        )
+    }
+
+    func joinTable(
+        code: String,
+        displayName: String,
+        avatarID: String,
+        gameCenterIdentity: GameCenterIdentityDTO?
+    ) async throws -> GameSession {
+        try await base.joinTable(
+            code: code,
+            displayName: displayName,
+            avatarID: avatarID,
+            gameCenterIdentity: gameCenterIdentity
+        )
+    }
+
+    func leaveTable(tableID: String, playerID: String) async throws {
+        if let leaveError {
+            throw leaveError
+        }
+        try await base.leaveTable(tableID: tableID, playerID: playerID)
+    }
+
+    func lockPick(
+        tableID: String,
+        playerID: String,
+        roundNumber: UInt32,
+        pick: UInt64
+    ) async throws -> GameTable {
+        try await base.lockPick(
+            tableID: tableID,
+            playerID: playerID,
+            roundNumber: roundNumber,
+            pick: pick
+        )
+    }
+
+    func startRound(tableID: String, hostPlayerID: String) async throws -> GameTable {
+        await withCheckedContinuation { startRoundContinuation = $0 }
+        return try await base.startRound(tableID: tableID, hostPlayerID: hostPlayerID)
+    }
+
+    func revealRound(
+        tableID: String,
+        hostPlayerID: String,
+        roundNumber: UInt32
+    ) async throws -> GameTable {
+        try await base.revealRound(
+            tableID: tableID,
+            hostPlayerID: hostPlayerID,
+            roundNumber: roundNumber
+        )
+    }
+
+    func getTable(id: String) async throws -> GameTable {
+        try await base.getTable(id: id)
+    }
+
+    func deleteProfile() async throws {
+        try await base.deleteProfile()
     }
 }

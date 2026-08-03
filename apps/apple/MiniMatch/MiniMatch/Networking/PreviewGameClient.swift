@@ -62,7 +62,10 @@ actor PreviewGameClient: GameClient {
 
     func leaveTable(tableID: String, playerID: String) async throws {
         guard var table, table.id == tableID else {
-            throw GameClientError.server(String(localized: "Table not found."))
+            throw GameClientError.notFound
+        }
+        guard table.players.contains(where: { $0.id == playerID }) else {
+            throw GameClientError.permissionDenied
         }
         table.players.removeAll { $0.id == playerID }
         if table.hostPlayerID == playerID, let nextHost = table.players.first {
@@ -164,7 +167,10 @@ actor PreviewGameClient: GameClient {
 
     func getTable(id: String) async throws -> GameTable {
         guard let table, table.id == id else {
-            throw GameClientError.server(String(localized: "Table not found."))
+            throw GameClientError.notFound
+        }
+        guard table.players.contains(where: { $0.id == currentPlayerID }) else {
+            throw GameClientError.permissionDenied
         }
         return table
     }

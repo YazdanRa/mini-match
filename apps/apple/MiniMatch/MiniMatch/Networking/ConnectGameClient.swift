@@ -3,11 +3,23 @@ import FirebaseAuth
 
 struct ConnectGameClient: GameClient {
     private let baseURL: URL
-    private let session: URLSession
+    private let authorizationToken: @Sendable () async throws -> String
+    private let send: @Sendable (URLRequest) async throws -> (Data, URLResponse)
 
     init(baseURL: URL, session: URLSession = .shared) {
         self.baseURL = baseURL
-        self.session = session
+        authorizationToken = Self.firebaseAuthorizationToken
+        send = { try await session.data(for: $0) }
+    }
+
+    init(
+        baseURL: URL,
+        authorizationToken: @escaping @Sendable () async throws -> String,
+        send: @escaping @Sendable (URLRequest) async throws -> (Data, URLResponse)
+    ) {
+        self.baseURL = baseURL
+        self.authorizationToken = authorizationToken
+        self.send = send
     }
 
     func createTable(
@@ -49,7 +61,7 @@ struct ConnectGameClient: GameClient {
     }
 
     func leaveTable(tableID: String, playerID: String) async throws {
-        let _: TableResponse = try await call(
+        let _: EmptyResponse = try await call(
             "LeaveTable",
             body: LeaveTableRequest(tableId: tableID, playerId: playerID)
         )
@@ -110,12 +122,7 @@ struct ConnectGameClient: GameClient {
         _ method: String,
         body: Request
     ) async throws -> Response {
-        let user = if let currentUser = Auth.auth().currentUser {
-            currentUser
-        } else {
-            try await Auth.auth().signInAnonymously().user
-        }
-        let idToken = try await user.getIDToken()
+        let idToken = try await authorizationToken()
         let servicePath = "minimatch.v1.MiniMatchService/\(method)"
         var request = URLRequest(url: baseURL.appending(path: servicePath))
         request.httpMethod = "POST"
@@ -125,7 +132,7 @@ struct ConnectGameClient: GameClient {
         request.setValue("1", forHTTPHeaderField: "Connect-Protocol-Version")
         request.setValue("Bearer \(idToken)", forHTTPHeaderField: "Authorization")
 
-        let (data, response) = try await session.data(for: request)
+        let (data, response) = try await send(request)
         guard let httpResponse = response as? HTTPURLResponse else {
             throw GameClientError.invalidResponse
         }
@@ -136,6 +143,10 @@ struct ConnectGameClient: GameClient {
                     throw GameClientError.notFound
                 case "already_exists":
                     throw GameClientError.alreadyExists
+                case "permission_denied":
+                    throw GameClientError.permissionDenied
+                case "unauthenticated":
+                    throw GameClientError.unauthenticated
                 default:
                     throw GameClientError.server(error.localizedMessage)
                 }
@@ -144,5 +155,14 @@ struct ConnectGameClient: GameClient {
             throw GameClientError.server(message)
         }
         return try JSONDecoder().decode(Response.self, from: data)
+    }
+
+    private static func firebaseAuthorizationToken() async throws -> String {
+        let user = if let currentUser = Auth.auth().currentUser {
+            currentUser
+        } else {
+            try await Auth.auth().signInAnonymously().user
+        }
+        return try await user.getIDToken()
     }
 }
