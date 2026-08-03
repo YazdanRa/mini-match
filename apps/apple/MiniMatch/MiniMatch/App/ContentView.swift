@@ -7,6 +7,7 @@ struct ContentView: View {
     let appleSignIn: AppleSignInModel
     @Environment(\.scenePhase) private var scenePhase
     @State private var isConfirmingLeave = false
+    @State private var isShowingSettings = false
 
     var body: some View {
         @Bindable var model = model
@@ -65,11 +66,19 @@ struct ContentView: View {
                     ToolbarItem(placement: .topBarTrailing) {
                         ProfileMenu(
                             gameCenter: gameCenter,
-                            appleSignIn: appleSignIn,
-                            canManageAccount: model.screen == .home
+                            showSettings: {
+                                appleSignIn.refreshProfileAvailability()
+                                isShowingSettings = true
+                            }
                         )
                     }
                 }
+            }
+            .navigationDestination(isPresented: $isShowingSettings) {
+                SettingsView(
+                    appleSignIn: appleSignIn,
+                    canManageAccount: model.screen == .home
+                )
             }
         }
         .tint(MiniMatchColors.blueText)
@@ -188,7 +197,7 @@ struct ContentView: View {
             Text(appleSignIn.errorMessage)
         }
         .alert("Delete your profile?", isPresented: $appleSignIn.isConfirmingDeletion) {
-            Button("Delete", role: .destructive) {
+            Button("Delete profile permanently", role: .destructive) {
                 Task {
                     await appleSignIn.deleteProfile()
                 }

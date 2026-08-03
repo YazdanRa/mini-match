@@ -3,6 +3,16 @@ import Testing
 @testable import MiniMatch
 
 struct AppleSignInModelTests {
+    @Test @MainActor
+    func profileDeletionConfirmationCanBeRequestedFromSettings() {
+        let model = AppleSignInModel()
+
+        model.requestProfileDeletionConfirmation()
+
+        #expect(model.canDeleteProfile)
+        #expect(model.isConfirmingDeletion)
+    }
+
     @Test
     func appleSignInNonceIsSecurelyShaped() throws {
         let nonce = try AppleSignInModel.randomNonce()

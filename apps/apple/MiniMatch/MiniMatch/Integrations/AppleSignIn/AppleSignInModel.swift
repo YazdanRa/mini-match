@@ -13,6 +13,7 @@ final class AppleSignInModel {
 
     private(set) var isWorking = false
     private(set) var isSignedIn: Bool
+    private(set) var canDeleteProfile: Bool
     private(set) var errorMessage = ""
     var isShowingError = false
     var isConfirmingDeletion = false
@@ -21,11 +22,13 @@ final class AppleSignInModel {
     init(client: any GameClient) {
         self.client = client
         isSignedIn = Self.currentUserUsesApple
+        canDeleteProfile = Auth.auth().currentUser != nil
     }
 
     init(previewIsSignedIn: Bool = true) {
         client = PreviewGameClient()
         isSignedIn = previewIsSignedIn
+        canDeleteProfile = previewIsSignedIn
     }
 
     func prepare(_ request: ASAuthorizationAppleIDRequest) {
@@ -80,6 +83,10 @@ final class AppleSignInModel {
         isAwaitingDeletionAuthorization = true
     }
 
+    func requestProfileDeletionConfirmation() {
+        isConfirmingDeletion = true
+    }
+
     func cancelDeletionAuthorization() {
         isAwaitingDeletionAuthorization = false
     }
@@ -88,6 +95,7 @@ final class AppleSignInModel {
         do {
             try Auth.auth().signOut()
             isSignedIn = false
+            canDeleteProfile = false
         } catch {
             showError(error)
         }
@@ -98,7 +106,10 @@ final class AppleSignInModel {
             requestDeletionAuthorization()
             return
         }
-        guard let user = Auth.auth().currentUser else { return }
+        guard let user = Auth.auth().currentUser else {
+            canDeleteProfile = false
+            return
+        }
 
         isWorking = true
         defer { isWorking = false }
@@ -106,15 +117,25 @@ final class AppleSignInModel {
             try await client.deleteProfile()
             try await user.delete()
             isSignedIn = false
+            canDeleteProfile = false
         } catch {
             showError(error)
         }
     }
 
+    func refreshProfileAvailability() {
+        canDeleteProfile = isSignedIn || Auth.auth().currentUser != nil
+    }
+
     func refreshCredentialState() async {
         guard !(client is PreviewGameClient) else { return }
-        guard let user = Auth.auth().currentUser,
-              let appleUserID = user.providerData
+        guard let user = Auth.auth().currentUser else {
+            isSignedIn = false
+            canDeleteProfile = false
+            return
+        }
+        canDeleteProfile = true
+        guard let appleUserID = user.providerData
                   .first(where: { $0.providerID == "apple.com" })?
                   .uid
         else {
@@ -129,6 +150,7 @@ final class AppleSignInModel {
             guard state == .authorized else {
                 try? Auth.auth().signOut()
                 isSignedIn = false
+                canDeleteProfile = false
                 return
             }
             isSignedIn = true
@@ -202,6 +224,7 @@ final class AppleSignInModel {
                 _ = try await Auth.auth().signIn(with: credential)
             }
             isSignedIn = true
+            canDeleteProfile = true
         } catch {
             let authError = error as NSError
             if authError.code == AuthErrorCode.credentialAlreadyInUse.rawValue,
@@ -211,6 +234,7 @@ final class AppleSignInModel {
                 do {
                     _ = try await Auth.auth().signIn(with: updatedCredential)
                     isSignedIn = true
+                    canDeleteProfile = true
                     return
                 } catch {
                     showError(error)
@@ -228,6 +252,7 @@ final class AppleSignInModel {
         guard let user = Auth.auth().currentUser else {
             isAwaitingDeletionAuthorization = false
             isSignedIn = false
+            canDeleteProfile = false
             return
         }
 
@@ -240,6 +265,7 @@ final class AppleSignInModel {
             try await user.delete()
             isAwaitingDeletionAuthorization = false
             isSignedIn = false
+            canDeleteProfile = false
         } catch {
             showError(error)
         }
