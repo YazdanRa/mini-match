@@ -69,3 +69,6 @@ fastlane/test_output
 .firebase/
 GoogleService-Info.plist
 *service-account*.json
+
+# GitHub Actions Google Cloud authentication
+gha-creds-*.json
