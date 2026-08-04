@@ -98,9 +98,8 @@ The workflow must exist on the default branch before GitHub exposes its manual d
 Grant only the permissions needed by the workflow:
 
 - The GitHub Workload Identity principal needs `roles/iam.workloadIdentityUser` on the deployment service account.
-- The deployment service account needs `roles/run.sourceDeveloper` and `roles/serviceusage.serviceUsageConsumer` on the project.
+- The deployment service account needs `roles/run.sourceDeveloper` on the project.
 - The deployment service account needs `roles/iam.serviceAccountUser` on the build and runtime service accounts.
-- Because the workflow maintains public invocation with `--allow-unauthenticated`, the deployment service account also needs `run.services.setIamPolicy` on the Cloud Run service. Prefer a custom role scoped to that service over a project-wide administrative role.
 - The build service account needs `roles/run.builder` on the project.
 
 ### Firestore rules
