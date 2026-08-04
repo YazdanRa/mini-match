@@ -56,6 +56,17 @@ struct GameModelTests {
     }
 
     @Test
+    func retainedResultStillEarnsAfterTheNextRoundStarts() {
+        var table = achievementTable(playerCount: 4, winnerPick: 4)
+        table.currentRound = GameRound(number: 2, phase: .acceptingPicks)
+
+        #expect(GameCenterAchievement.earned(
+            in: table,
+            currentPlayerID: PreviewFixtures.currentPlayerID
+        ) == [.firstWin, .pickFourWin, .fourPlayerWin])
+    }
+
+    @Test
     func exactWinningPicksEarnTheirAchievements() {
         for (pick, achievement) in [
             (UInt64(4), GameCenterAchievement.pickFourWin),
@@ -316,6 +327,42 @@ struct GameModelTests {
         await model.refreshTable()
         #expect(model.table?.currentRound?.number == 2)
         #expect(model.result == nil)
+    }
+
+    @Test
+    @MainActor
+    func retainedResultNotifiesAfterTheNextRoundStarts() async throws {
+        let client = PreviewGameClient()
+        let model = GameModel(client: client)
+        var reportedRoundNumbers = [UInt32]()
+        model.roundResultHandler = { table, _ in
+            if let roundNumber = table.lastResult?.roundNumber {
+                reportedRoundNumbers.append(roundNumber)
+            }
+        }
+
+        #expect(await model.createTable(name: "Friday Mini Match", displayName: "Maya"))
+        let table = try #require(model.table)
+        let playerID = try #require(model.currentPlayerID)
+        _ = try await client.startRound(tableID: table.id, hostPlayerID: playerID)
+        _ = try await client.lockPick(
+            tableID: table.id,
+            playerID: playerID,
+            roundNumber: 1,
+            pick: 2
+        )
+        _ = try await client.revealRound(
+            tableID: table.id,
+            hostPlayerID: playerID,
+            roundNumber: 1
+        )
+        _ = try await client.startRound(tableID: table.id, hostPlayerID: playerID)
+
+        await model.refreshTable()
+        await model.refreshTable()
+
+        #expect(model.table?.currentRound?.number == 2)
+        #expect(reportedRoundNumbers == [1])
     }
 
     @Test

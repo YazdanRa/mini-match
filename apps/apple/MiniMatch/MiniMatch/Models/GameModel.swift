@@ -525,8 +525,7 @@ final class GameModel {
     }
 
     private func notifyRoundResult() {
-        guard let table, table.currentRound == nil, let result = table.lastResult,
-              let currentPlayerID, let roundResultHandler
+        guard let table, let result = table.lastResult, let currentPlayerID, let roundResultHandler
         else {
             return
         }

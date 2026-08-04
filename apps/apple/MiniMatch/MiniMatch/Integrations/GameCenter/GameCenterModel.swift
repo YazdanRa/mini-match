@@ -906,8 +906,7 @@ enum GameCenterAchievement: String, CaseIterable {
     case sixteenPlayerRound = "com.yazdanra.minimatch.achievement.sixteenPlayerRound"
 
     static func earned(in table: GameTable, currentPlayerID: String) -> Set<Self> {
-        guard table.currentRound == nil,
-              let result = table.lastResult,
+        guard let result = table.lastResult,
               let selection = result.selections.first(where: { $0.playerID == currentPlayerID })
         else {
             return []
