@@ -178,6 +178,8 @@ private struct HomeActionSection: View {
         !gameCenter.restrictionIsResolved
             || gameCenter.isMultiplayerRestricted
             || !gameCenter.isAuthenticated
+            || gameCenter.isStartingActivity
+            || gameCenter.isTransitioningPlayerSession
             || gameCenter.displayName.isEmpty
     }
 }

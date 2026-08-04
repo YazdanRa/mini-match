@@ -130,6 +130,11 @@ struct ContentView: View {
                 }
             }
         }
+        .onChange(of: gameCenter.authenticatedTeamPlayerID) { _, playerID in
+            if model.handleGameCenterPlayerChange(to: playerID) {
+                gameCenter.endMatch()
+            }
+        }
         .onChange(of: scenePhase) { _, phase in
             if phase == .active {
                 gameCenter.refreshRestrictions()

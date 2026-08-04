@@ -14,6 +14,20 @@ struct GameCenterMatchmaking: Identifiable {
     let hostPlayerID: String
 }
 
+struct ActivityStartGate {
+    private(set) var isActive = false
+
+    mutating func begin() -> Bool {
+        guard !isActive else { return false }
+        isActive = true
+        return true
+    }
+
+    mutating func end() {
+        isActive = false
+    }
+}
+
 @MainActor
 @Observable
 final class GameCenterModel: NSObject {
@@ -34,13 +48,12 @@ final class GameCenterModel: NSObject {
     private var pendingAchievementIDs = Set<String>()
     private var completedAchievementIDs = Set<String>()
     private var reportingAchievementIDs = Set<String>()
+    private var activityStartGate = ActivityStartGate()
 
     var authentication: GameCenterAuthentication?
     var matchmaking: GameCenterMatchmaking?
     private(set) var isAuthenticated = false
-    var authenticatedTeamPlayerID: String? {
-        isAuthenticated ? GKLocalPlayer.local.teamPlayerID : nil
-    }
+    private(set) var authenticatedTeamPlayerID: String?
     private(set) var displayName = ""
     private(set) var avatarImage: UIImage?
     private(set) var playerImages = [String: UIImage]()
@@ -49,6 +62,10 @@ final class GameCenterModel: NSObject {
     private(set) var restrictionIsResolved: Bool
     private(set) var errorMessage = ""
     var isShowingError = false
+    var isStartingActivity: Bool { activityStartGate.isActive }
+    var isTransitioningPlayerSession: Bool {
+        gameModel?.isEndingGameCenterSession == true
+    }
 
     init(isEnabled: Bool = true) {
         self.isEnabled = isEnabled
@@ -64,7 +81,7 @@ final class GameCenterModel: NSObject {
             Task { @MainActor in
                 guard let self else { return }
                 self.authentication = viewController.map(GameCenterAuthentication.init)
-                self.isAuthenticated = GKLocalPlayer.local.isAuthenticated
+                self.refreshLocalPlayerIdentity()
                 self.isMultiplayerRestricted = GKLocalPlayer.local.isMultiplayerGamingRestricted
                 self.restrictionIsResolved = viewController == nil
                 if self.isAuthenticated {
@@ -87,8 +104,9 @@ final class GameCenterModel: NSObject {
     }
 
     func startActivity() {
-        guard authorizeMatchmaking() else { return }
+        guard authorizeMatchmaking(), activityStartGate.begin() else { return }
         Task {
+            defer { activityStartGate.end() }
             do {
                 let definitions = try await GKGameActivityDefinition.loadGameActivityDefinitions(
                     IDs: [Self.activityID]
@@ -120,13 +138,15 @@ final class GameCenterModel: NSObject {
     }
 
     func joinActivity(code: String) {
-        guard authorizeMatchmaking() else { return }
+        guard authorizeMatchmaking(), activityStartGate.begin() else { return }
         let code = code.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
         guard GKGameActivity.isValidPartyCode(code) else {
+            activityStartGate.end()
             showError(String(localized: "Enter a valid Game Center party code."))
             return
         }
         Task {
+            defer { activityStartGate.end() }
             do {
                 let definitions = try await GKGameActivityDefinition.loadGameActivityDefinitions(
                     IDs: [Self.activityID]
@@ -246,7 +266,11 @@ final class GameCenterModel: NSObject {
     }
 
     private func authorizeMatchmaking() -> Bool {
-        guard gameModel?.screen == .home else { return false }
+        guard gameModel?.screen == .home,
+              gameModel?.isEndingGameCenterSession != true
+        else {
+            return false
+        }
         guard restrictionIsResolved, !isMultiplayerRestricted else {
             showError(String(localized: "Multiplayer is unavailable because of Screen Time settings."))
             return false
@@ -345,7 +369,7 @@ final class GameCenterModel: NSObject {
 
     func refreshRestrictions() {
         guard isEnabled, started, authentication == nil else { return }
-        isAuthenticated = GKLocalPlayer.local.isAuthenticated
+        refreshLocalPlayerIdentity()
         isMultiplayerRestricted = GKLocalPlayer.local.isMultiplayerGamingRestricted
         restrictionIsResolved = true
         guard isAuthenticated else {
@@ -357,6 +381,12 @@ final class GameCenterModel: NSObject {
         Task {
             await refreshProfile()
         }
+    }
+
+    private func refreshLocalPlayerIdentity() {
+        let player = GKLocalPlayer.local
+        isAuthenticated = player.isAuthenticated
+        authenticatedTeamPlayerID = isAuthenticated ? player.teamPlayerID : nil
     }
 
     private func registerListener() {

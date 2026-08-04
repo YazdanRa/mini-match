@@ -250,6 +250,102 @@ struct GameModelTests {
 
     @Test
     @MainActor
+    func activeSessionStaysBoundToTheSameGameCenterAccount() async {
+        let model = restorableWinningModel()
+        #expect(await model.restoreSession(gameCenterPlayerID: "team-player"))
+
+        #expect(!model.handleGameCenterPlayerChange(to: "team-player"))
+
+        #expect(model.screen == .lobby)
+        #expect(model.table != nil)
+    }
+
+    @Test
+    @MainActor
+    func playerChangeInvalidatesTheSessionBeforeLeavingTheBackend() async {
+        let store = VolatileGameSessionStore()
+        let client = LifecycleTestGameClient(delaysLeave: true)
+        let model = GameModel(client: client, sessionStore: store)
+        #expect(await model.createTable(
+            name: "Friday Mini Match",
+            displayName: "Maya",
+            gameCenterIdentity: gameCenterIdentity(teamPlayerID: "first-account")
+        ))
+
+        model.handleGameCenterPlayerChange(to: "second-account")
+        await client.waitUntilLeaveTableIsPending()
+
+        #expect(model.screen == .home)
+        #expect(model.table == nil)
+        #expect(store.load() == nil)
+
+        #expect(await model.createTable(
+            name: "Replacement",
+            displayName: "Maya",
+            gameCenterIdentity: gameCenterIdentity(teamPlayerID: "second-account")
+        ) == false)
+
+        await client.resumeLeaveTable()
+    }
+
+    @Test
+    @MainActor
+    func playerChangeDiscardsTheSessionWhenLeaveFails() async {
+        let store = VolatileGameSessionStore()
+        let client = LifecycleTestGameClient(leaveError: .server("offline"))
+        let model = GameModel(client: client, sessionStore: store)
+
+        #expect(await model.createTable(
+            name: "Friday Mini Match",
+            displayName: "Maya",
+            gameCenterIdentity: gameCenterIdentity(teamPlayerID: "first-account")
+        ))
+
+        model.handleGameCenterPlayerChange(to: "second-account")
+
+        #expect(model.screen == .home)
+        #expect(model.table == nil)
+        #expect(store.load() == nil)
+    }
+
+    @Test
+    @MainActor
+    func playerChangeInvalidatesAnInFlightGameCenterSession() async {
+        let client = LifecycleTestGameClient(delaysCreate: true)
+        let model = GameModel(client: client, sessionStore: VolatileGameSessionStore())
+        let creation = Task {
+            await model.createTable(
+                name: "Friday Mini Match",
+                displayName: "Maya",
+                gameCenterIdentity: gameCenterIdentity(teamPlayerID: "first-account")
+            )
+        }
+        await client.waitUntilCreateTableIsPending()
+
+        #expect(model.handleGameCenterPlayerChange(to: "second-account"))
+        await client.resumeCreateTable()
+        let created = await creation.value
+
+        #expect(!created)
+        #expect(model.screen == .home)
+        #expect(model.table == nil)
+    }
+
+    @Test
+    func activityStartGateAllowsOnlyOneStartUntilCompletion() {
+        var gate = ActivityStartGate()
+
+        let firstStart = gate.begin()
+        let overlappingStart = gate.begin()
+        #expect(firstStart)
+        #expect(!overlappingStart)
+        gate.end()
+        let nextStart = gate.begin()
+        #expect(nextStart)
+    }
+
+    @Test
+    @MainActor
     func restorationStopsWhenGameCenterIdentityChangesDuringTheRequest() async {
         let client = PreviewGameClient()
         let store = VolatileGameSessionStore()
@@ -469,22 +565,40 @@ private func restorableWinningModel() -> GameModel {
     )
 }
 
+private func gameCenterIdentity(teamPlayerID: String) -> GameCenterIdentityDTO {
+    GameCenterIdentityDTO(
+        teamPlayerId: teamPlayerID,
+        publicKeyUrl: "https://example.com/key",
+        signature: Data(),
+        salt: Data(),
+        timestamp: "0"
+    )
+}
+
 private actor LifecycleTestGameClient: GameClient {
     private let base = PreviewGameClient()
     private let leaveError: GameClientError?
     private let getTableError: GameClientError?
     private let delaysGetTable: Bool
+    private let delaysLeave: Bool
+    private let delaysCreate: Bool
     private var startRoundContinuation: CheckedContinuation<Void, Never>?
     private var getTableContinuation: CheckedContinuation<Void, Never>?
+    private var leaveTableContinuation: CheckedContinuation<Void, Never>?
+    private var createTableContinuation: CheckedContinuation<Void, Never>?
 
     init(
         leaveError: GameClientError? = nil,
         getTableError: GameClientError? = nil,
-        delaysGetTable: Bool = false
+        delaysGetTable: Bool = false,
+        delaysLeave: Bool = false,
+        delaysCreate: Bool = false
     ) {
         self.leaveError = leaveError
         self.getTableError = getTableError
         self.delaysGetTable = delaysGetTable
+        self.delaysLeave = delaysLeave
+        self.delaysCreate = delaysCreate
     }
 
     func waitUntilStartRoundIsPending() async {
@@ -509,6 +623,28 @@ private actor LifecycleTestGameClient: GameClient {
         getTableContinuation = nil
     }
 
+    func waitUntilLeaveTableIsPending() async {
+        while leaveTableContinuation == nil {
+            await Task.yield()
+        }
+    }
+
+    func resumeLeaveTable() {
+        leaveTableContinuation?.resume()
+        leaveTableContinuation = nil
+    }
+
+    func waitUntilCreateTableIsPending() async {
+        while createTableContinuation == nil {
+            await Task.yield()
+        }
+    }
+
+    func resumeCreateTable() {
+        createTableContinuation?.resume()
+        createTableContinuation = nil
+    }
+
     func createTable(
         name: String,
         displayName: String,
@@ -516,13 +652,17 @@ private actor LifecycleTestGameClient: GameClient {
         gameCenterIdentity: GameCenterIdentityDTO?,
         joinCode: String?
     ) async throws -> GameSession {
-        try await base.createTable(
+        let session = try await base.createTable(
             name: name,
             displayName: displayName,
             avatarID: avatarID,
             gameCenterIdentity: gameCenterIdentity,
             joinCode: joinCode
         )
+        if delaysCreate {
+            await withCheckedContinuation { createTableContinuation = $0 }
+        }
+        return session
     }
 
     func joinTable(
@@ -540,6 +680,9 @@ private actor LifecycleTestGameClient: GameClient {
     }
 
     func leaveTable(tableID: String, playerID: String) async throws {
+        if delaysLeave {
+            await withCheckedContinuation { leaveTableContinuation = $0 }
+        }
         if let leaveError {
             throw leaveError
         }

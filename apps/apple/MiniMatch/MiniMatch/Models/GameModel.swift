@@ -60,6 +60,7 @@ final class GameModel {
     @ObservationIgnored private var lastNotifiedResultID: String?
     @ObservationIgnored private var sessionGeneration = 0
     @ObservationIgnored private(set) var gameCenterTeamPlayerID: String?
+    @ObservationIgnored private var pendingGameCenterTeamPlayerID: String?
 
     private(set) var screen: Screen = .home
     private(set) var table: GameTable?
@@ -67,6 +68,7 @@ final class GameModel {
     private(set) var myLockedPick: UInt64?
     private(set) var isWorking = false
     private(set) var isReconnecting = false
+    private(set) var isEndingGameCenterSession = false
     private(set) var errorMessage = ""
     var isShowingError = false
     private(set) var multiplayerIsRestricted = false
@@ -361,6 +363,29 @@ final class GameModel {
         }
     }
 
+    @discardableResult
+    func handleGameCenterPlayerChange(to playerID: String?) -> Bool {
+        guard let playerID,
+              let boundPlayerID = gameCenterTeamPlayerID ?? pendingGameCenterTeamPlayerID,
+              playerID != boundPlayerID
+        else {
+            return false
+        }
+        let membership = table.flatMap { table in
+            currentPlayerID.map { (table.id, $0) }
+        }
+        isEndingGameCenterSession = membership != nil
+            || pendingGameCenterTeamPlayerID != nil
+        resetSession()
+        if let (tableID, currentPlayerID) = membership {
+            Task {
+                defer { isEndingGameCenterSession = false }
+                try? await client.leaveTable(tableID: tableID, playerID: currentPlayerID)
+            }
+        }
+        return true
+    }
+
     func setMultiplayerRestricted(_ restricted: Bool) async {
         multiplayerIsRestricted = restricted
         if restricted, screen != .home {
@@ -418,10 +443,26 @@ final class GameModel {
         gameCenterPlayerID: String?,
         _ operation: () async throws -> GameSession
     ) async -> Bool {
+        guard !isEndingGameCenterSession else { return false }
+        let generation = sessionGeneration
+        pendingGameCenterTeamPlayerID = gameCenterPlayerID
         isWorking = true
-        defer { isWorking = false }
+        defer {
+            if pendingGameCenterTeamPlayerID == gameCenterPlayerID {
+                pendingGameCenterTeamPlayerID = nil
+            }
+            isWorking = false
+        }
         do {
             let session = try await operation()
+            guard sessionGeneration == generation else {
+                try? await client.leaveTable(
+                    tableID: session.table.id,
+                    playerID: session.playerID
+                )
+                isEndingGameCenterSession = false
+                return false
+            }
             sessionGeneration += 1
             table = session.table
             currentPlayerID = session.playerID
@@ -437,6 +478,10 @@ final class GameModel {
             notifyRoundResult()
             return true
         } catch {
+            guard sessionGeneration == generation else {
+                isEndingGameCenterSession = false
+                return false
+            }
             showError(error.localizedDescription)
             return false
         }
