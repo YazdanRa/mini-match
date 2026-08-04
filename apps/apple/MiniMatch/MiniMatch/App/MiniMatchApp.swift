@@ -13,14 +13,21 @@ struct MiniMatchApp: App {
         let client = GameClientFactory.make()
         let arguments = ProcessInfo.processInfo.arguments
         let isTesting = ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil
-        _model = State(initialValue: GameModel(client: client))
         #if DEBUG
-        if arguments.contains("--preview-settings") {
-            _appleSignIn = State(initialValue: AppleSignInModel())
+        if arguments.contains("--preview-settings")
+            || arguments.contains("--preview-signed-out")
+            || arguments.contains("--preview-lobby")
+            || arguments.contains("--preview-result")
+        {
+            _model = State(initialValue: GameModel.preview())
+            _appleSignIn = State(initialValue: AppleSignInModel(
+                previewIsSignedIn: !arguments.contains("--preview-signed-out")
+            ))
             _gameCenter = State(initialValue: GameCenterModel.preview())
             return
         }
         #endif
+        _model = State(initialValue: GameModel(client: client))
         _appleSignIn = State(initialValue: AppleSignInModel(client: client))
         _gameCenter = State(initialValue: GameCenterModel(
             isEnabled: !isTesting

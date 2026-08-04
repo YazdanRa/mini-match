@@ -8,10 +8,21 @@ struct PrimaryButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.headline)
-            .foregroundStyle(.white)
+            .foregroundStyle(isEnabled ? Color.white : MiniMatchColors.ink)
+            .tint(isEnabled ? Color.white : MiniMatchColors.ink)
             .frame(maxWidth: .infinity, minHeight: 56)
-            .background(color.opacity(!isEnabled ? 0.45 : configuration.isPressed ? 0.78 : 1))
+            .background(
+                isEnabled
+                    ? color.opacity(configuration.isPressed ? 0.78 : 1)
+                    : MiniMatchColors.surface
+            )
             .clipShape(.rect(cornerRadius: 18))
+            .overlay {
+                if !isEnabled {
+                    RoundedRectangle(cornerRadius: 18)
+                        .stroke(MiniMatchColors.ink, lineWidth: 2)
+                }
+            }
             .scaleEffect(reduceMotion ? 1 : configuration.isPressed ? 0.98 : 1)
             .animation(
                 reduceMotion ? nil : .easeOut(duration: 0.12),

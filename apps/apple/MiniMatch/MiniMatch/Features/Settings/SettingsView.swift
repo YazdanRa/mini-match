@@ -31,18 +31,7 @@ struct SettingsView: View {
             .padding(.vertical, 24)
             .frame(maxWidth: .infinity)
         }
-        .background {
-            LinearGradient(
-                colors: [
-                    MiniMatchColors.coralBrand.opacity(0.08),
-                    MiniMatchColors.background,
-                    MiniMatchColors.blueText.opacity(0.08),
-                ],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-            .ignoresSafeArea()
-        }
+        .background(MiniMatchColors.background)
         .navigationTitle("Settings")
         .navigationBarTitleDisplayMode(.inline)
         .accessibilityIdentifier("settings-page")
@@ -60,7 +49,7 @@ private struct SettingsHeader: View {
                 .accessibilityAddTraits(.isHeader)
             Text("Make Mini Match feel right for you.")
                 .font(.subheadline)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(MiniMatchColors.ink)
                 .multilineTextAlignment(.center)
         }
         .padding(.bottom, 4)
@@ -125,11 +114,11 @@ private struct LanguageSettingsCopy: View {
                 .font(.headline)
                 .foregroundStyle(MiniMatchColors.ink)
             Text(languageName)
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
+                .font(.subheadline.weight(.medium))
+                .foregroundStyle(MiniMatchColors.ink)
             Text("Change in iOS Settings")
-                .font(.caption)
-                .foregroundStyle(.secondary)
+                .font(.subheadline.weight(.medium))
+                .foregroundStyle(MiniMatchColors.ink)
         }
     }
 }
@@ -151,14 +140,21 @@ private struct AccountSettingsCard: View {
             VStack(alignment: .leading, spacing: 16) {
                 Label("Player account", systemImage: "person.crop.circle.fill")
                     .font(.headline)
-                    .foregroundStyle(MiniMatchColors.blueText)
+                    .foregroundStyle(MiniMatchColors.ink)
                     .accessibilityAddTraits(.isHeader)
 
                 Button("Log out of Mini Match", systemImage: "rectangle.portrait.and.arrow.right") {
                     appleSignIn.signOut()
                 }
-                .buttonStyle(.bordered)
-                .controlSize(.large)
+                .buttonStyle(.plain)
+                .font(.body)
+                .foregroundStyle(MiniMatchColors.ink)
+                .padding(.horizontal, 14)
+                .frame(minHeight: 44)
+                .overlay {
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(MiniMatchColors.blueText, lineWidth: 2)
+                }
                 .disabled(!canManageAccount || appleSignIn.isWorking)
 
                 if !canManageAccount {
@@ -181,19 +177,19 @@ private struct DeleteProfileCard: View {
             VStack(alignment: .leading, spacing: 14) {
                 Label("Danger zone", systemImage: "exclamationmark.triangle.fill")
                     .font(.headline)
-                    .foregroundStyle(MiniMatchColors.coralText)
+                    .foregroundStyle(MiniMatchColors.ink)
                     .accessibilityAddTraits(.isHeader)
 
                 Text("Permanently deletes your Mini Match account. This cannot be undone.")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                    .font(.headline)
+                    .foregroundStyle(MiniMatchColors.ink)
 
                 Button(role: .destructive) {
                     appleSignIn.requestProfileDeletionConfirmation()
                 } label: {
                     Label("Delete profile", systemImage: "trash.fill")
                 }
-                .buttonStyle(PrimaryButtonStyle(color: MiniMatchColors.coralBrand))
+                .buttonStyle(PrimaryButtonStyle(color: MiniMatchColors.coral))
                 .disabled(!canManageAccount || appleSignIn.isWorking)
                 .accessibilityHint("Requires confirmation. This cannot be undone.")
                 .accessibilityIdentifier("delete-profile-button")

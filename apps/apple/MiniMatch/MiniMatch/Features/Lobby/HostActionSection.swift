@@ -22,10 +22,8 @@ struct HostActionSection: View {
             if model.isWorking {
                 if isWaiting {
                     ProgressView("Starting…")
-                        .tint(.white)
                 } else {
                     ProgressView("Revealing…")
-                        .tint(.white)
                 }
             } else if isWaiting {
                 if model.canStartRound {

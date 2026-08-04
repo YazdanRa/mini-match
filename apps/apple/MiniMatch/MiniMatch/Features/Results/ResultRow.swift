@@ -34,7 +34,7 @@ struct ResultRow: View {
                 .font(.headline)
             Text("selected")
                 .font(.subheadline)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(MiniMatchColors.ink)
         }
     }
 
@@ -52,7 +52,7 @@ struct ResultRow: View {
             systemImage: row.status == .duplicate ? "xmark.circle.fill" : "checkmark.circle.fill"
         )
         .font(.subheadline)
-        .foregroundStyle(row.status == .duplicate ? MiniMatchColors.coralText : MiniMatchColors.blueText)
+        .foregroundStyle(MiniMatchColors.ink)
     }
 
     private var statusText: LocalizedStringResource {
