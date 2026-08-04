@@ -99,13 +99,13 @@ func (s *Service) JoinTable(ctx context.Context, request *connect.Request[minima
 		return nil, rpcError(err)
 	}
 	table, err = s.tables.Update(ctx, table.ID, func(table *game.Table) error {
-		if err := table.Join(actor, request.Msg.GetDisplayName(), request.Msg.GetAvatar()); err != nil {
-			return err
-		}
-		if err := table.SetGameCenterID(actor, gameCenterID); err != nil {
-			return err
-		}
-		return table.RefreshPresence(actor, s.now(), playerPresenceDuration)
+		return s.joinTable(
+			table,
+			actor,
+			request.Msg.GetDisplayName(),
+			request.Msg.GetAvatar(),
+			gameCenterID,
+		)
 	})
 	if err != nil {
 		return nil, rpcError(err)
@@ -114,6 +114,19 @@ func (s *Service) JoinTable(ctx context.Context, request *connect.Request[minima
 		Table:    toProto(table),
 		PlayerId: actor,
 	}), nil
+}
+
+func (s *Service) joinTable(
+	table *game.Table,
+	actor, displayName, avatar, gameCenterID string,
+) error {
+	if err := table.Join(actor, displayName, avatar); err != nil {
+		return err
+	}
+	if err := table.RefreshPresence(actor, s.now(), playerPresenceDuration); err != nil {
+		return err
+	}
+	return table.SetGameCenterID(actor, gameCenterID)
 }
 
 func (s *Service) LeaveTable(ctx context.Context, request *connect.Request[minimatchv1.LeaveTableRequest]) (*connect.Response[minimatchv1.LeaveTableResponse], error) {

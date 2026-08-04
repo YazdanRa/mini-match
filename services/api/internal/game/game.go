@@ -332,6 +332,13 @@ func (t *Table) SetGameCenterID(playerID, gameCenterID string) error {
 	if player == nil {
 		return ErrNotFound
 	}
+	if gameCenterID != "" {
+		for _, existing := range t.Players {
+			if existing.ID != playerID && existing.GameCenterID == gameCenterID {
+				return fmt.Errorf("%w: Game Center identity", ErrAlreadyExists)
+			}
+		}
+	}
 	player.GameCenterID = gameCenterID
 	return nil
 }

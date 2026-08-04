@@ -48,6 +48,57 @@ func TestPartyCodeMatchesGameKitFormat(t *testing.T) {
 	}
 }
 
+func TestJoinTableEnforcesLiveGameCenterIdentityOwnership(t *testing.T) {
+	now := time.Date(2026, time.August, 3, 12, 0, 0, 0, time.UTC)
+	service := &Service{now: func() time.Time { return now }}
+
+	t.Run("live duplicate", func(t *testing.T) {
+		repository := game.NewMemoryRepository()
+		table, _ := game.NewTable("live", "Friday", "LIVE", "maya", "Maya", "fox")
+		_ = table.SetGameCenterID("maya", "game-center-player")
+		_ = table.RefreshPresence("maya", now, playerPresenceDuration)
+		if err := repository.Create(context.Background(), table); err != nil {
+			t.Fatal(err)
+		}
+
+		_, err := repository.Update(context.Background(), table.ID, func(next *game.Table) error {
+			return service.joinTable(next, "zoe", "Zoe", "owl", "game-center-player")
+		})
+		if !errors.Is(err, game.ErrAlreadyExists) {
+			t.Fatalf("duplicate identity error = %v, want ErrAlreadyExists", err)
+		}
+		stored, _ := repository.Get(context.Background(), table.ID)
+		if len(stored.Players) != 1 || stored.Players[0].ID != "maya" {
+			t.Fatalf("rejected join changed table players: %#v", stored.Players)
+		}
+	})
+
+	t.Run("expired membership", func(t *testing.T) {
+		repository := game.NewMemoryRepository()
+		table, _ := game.NewTable("expired", "Friday", "EXPIRED", "maya", "Maya", "fox")
+		_ = table.SetGameCenterID("maya", "game-center-player")
+		_ = table.RefreshPresence(
+			"maya",
+			now.Add(-playerPresenceDuration-time.Second),
+			playerPresenceDuration,
+		)
+		if err := repository.Create(context.Background(), table); err != nil {
+			t.Fatal(err)
+		}
+
+		updated, err := repository.Update(context.Background(), table.ID, func(next *game.Table) error {
+			return service.joinTable(next, "zoe", "Zoe", "owl", "game-center-player")
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if len(updated.Players) != 1 || updated.Players[0].ID != "zoe" ||
+			updated.Players[0].GameCenterID != "game-center-player" {
+			t.Fatalf("reclaimed table players: %#v", updated.Players)
+		}
+	})
+}
+
 func TestConnectAndGRPCKeepPicksPrivateUntilReveal(t *testing.T) {
 	mux := http.NewServeMux()
 	path, handler := minimatchv1connect.NewMiniMatchServiceHandler(

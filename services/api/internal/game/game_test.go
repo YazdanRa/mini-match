@@ -265,6 +265,27 @@ func TestSamePlayerRejoinResumesWithoutResettingTheRound(t *testing.T) {
 	}
 }
 
+func TestGameCenterIdentityCannotBindMultiplePlayers(t *testing.T) {
+	table, _ := NewTable("table", "Friday", "ABC123", "maya", "Maya", "fox")
+	_ = table.Join("zoe", "Zoe", "owl")
+
+	if err := table.SetGameCenterID("maya", "game-center-player"); err != nil {
+		t.Fatal(err)
+	}
+	if err := table.SetGameCenterID("maya", "game-center-player"); err != nil {
+		t.Fatalf("same-player reconnect error = %v, want nil", err)
+	}
+	if err := table.SetGameCenterID("zoe", "game-center-player"); !errors.Is(err, ErrAlreadyExists) {
+		t.Fatalf("duplicate identity error = %v, want ErrAlreadyExists", err)
+	}
+	if err := table.SetGameCenterID("zoe", ""); err != nil {
+		t.Fatalf("anonymous player identity error = %v, want nil", err)
+	}
+	if table.player("zoe").GameCenterID != "" {
+		t.Fatalf("rejected player identity = %q, want empty", table.player("zoe").GameCenterID)
+	}
+}
+
 func TestPresenceExpiryUnblocksReveal(t *testing.T) {
 	now := time.Date(2026, time.August, 3, 12, 0, 0, 0, time.UTC)
 	duration := 2 * time.Minute
