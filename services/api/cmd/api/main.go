@@ -39,12 +39,10 @@ func main() {
 	}
 	defer firestoreClient.Close()
 
-	mux := http.NewServeMux()
 	path, handler := minimatchv1connect.NewMiniMatchServiceHandler(
 		server.New(store.NewFirestoreRepository(firestoreClient)),
 		connect.WithInterceptors(authn.NewInterceptor(authn.NewFirebaseVerifier(authClient))),
 	)
-	mux.Handle(path, handler)
 
 	protocols := new(http.Protocols)
 	protocols.SetHTTP1(true)
@@ -52,7 +50,16 @@ func main() {
 	log.Printf("listening on :%s", port)
 	log.Fatal((&http.Server{
 		Addr:      ":" + port,
-		Handler:   mux,
+		Handler:   newHandler(path, handler),
 		Protocols: protocols,
 	}).ListenAndServe())
+}
+
+func newHandler(apiPath string, apiHandler http.Handler) http.Handler {
+	mux := http.NewServeMux()
+	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	})
+	mux.Handle(apiPath, apiHandler)
+	return mux
 }

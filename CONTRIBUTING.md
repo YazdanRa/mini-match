@@ -73,7 +73,7 @@ The App ID and provisioning profile require Game Center, Group Activities, and S
 
 ## Production server deployment
 
-The backend targets GCP project `mini-match-20260729`, region `northamerica-northeast2`, and Cloud Run service `mini-match-api`. [The deployment workflow](.github/workflows/deploy-server.yml) is manually dispatched, runs the race-enabled Go test suite, deploys `services/api` to Cloud Run, and verifies that the unauthenticated RPC boundary returns the expected `401` response.
+The backend targets GCP project `mini-match-20260729`, region `northamerica-northeast2`, and Cloud Run service `mini-match-api`. [The deployment workflow](.github/workflows/deploy-server.yml) is manually dispatched, runs the race-enabled Go test suite, deploys `services/api` to Cloud Run, and verifies the server's unauthenticated health endpoint.
 
 The workflow uses GitHub Actions OIDC with Google Cloud Workload Identity Federation, so it does not require a long-lived service account key or GitHub secret. It deploys with separate deployment, build, and runtime service accounts and enables end-to-end HTTP/2 for native gRPC. Cloud Run permits public invocation for mobile clients, while the application rejects requests without a valid Firebase bearer token.
 
