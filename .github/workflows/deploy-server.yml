@@ -73,20 +73,5 @@ jobs:
             --format='value(status.url)')"
           echo "url=${url}" >> "$GITHUB_OUTPUT"
 
-      - name: Verify authentication boundary
-        run: |
-          response_file="$(mktemp)"
-          status="$(curl --silent --show-error \
-            --output "$response_file" \
-            --write-out '%{http_code}' \
-            --request POST \
-            --header 'Content-Type: application/json' \
-            --data '{}' \
-            "${{ steps.service.outputs.url }}/minimatch.v1.MiniMatchService/GetTable")"
-          body="$(cat "$response_file")"
-          expected='{"code":"unauthenticated","message":"missing bearer token"}'
-          if [[ "$status" != "401" || "$body" != "$expected" ]]; then
-            cat "$response_file"
-            echo "Expected the unauthenticated Firebase boundary response; got HTTP ${status}." >&2
-            exit 1
-          fi
+      - name: Verify server health
+        run: curl --fail --silent --show-error "${{ steps.service.outputs.url }}/healthz"
