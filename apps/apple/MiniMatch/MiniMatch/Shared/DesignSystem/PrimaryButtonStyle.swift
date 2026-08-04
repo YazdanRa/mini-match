@@ -9,6 +9,7 @@ struct PrimaryButtonStyle: ButtonStyle {
         configuration.label
             .font(.headline)
             .foregroundStyle(isEnabled ? Color.white : MiniMatchColors.ink)
+            .tint(isEnabled ? Color.white : MiniMatchColors.ink)
             .frame(maxWidth: .infinity, minHeight: 56)
             .background(
                 isEnabled
