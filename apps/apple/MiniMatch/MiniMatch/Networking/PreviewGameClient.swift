@@ -243,6 +243,10 @@ enum PreviewFixtures {
         ResultPresentation(table: resultTable, result: roundResult)
     }
 
+    static var noWinnerResult: ResultPresentation {
+        ResultPresentation(table: lobbyTable, result: noWinnerRoundResult)
+    }
+
     static let winnerRow = ResultPresentation.Row(
         playerID: "liam",
         displayName: "Liam",
@@ -258,6 +262,16 @@ enum PreviewFixtures {
             GameSelection(playerID: "liam", displayName: "Liam", pick: 5),
         ],
         winnerPlayerID: "liam"
+    )
+
+    private static let noWinnerRoundResult = GameRoundResult(
+        roundNumber: 1,
+        selections: [
+            GameSelection(playerID: currentPlayerID, displayName: "Maya", pick: 2),
+            GameSelection(playerID: "zoe", displayName: "Zoe", pick: 2),
+            GameSelection(playerID: "liam", displayName: "Liam", pick: 2),
+        ],
+        winnerPlayerID: nil
     )
 
     static func table(
