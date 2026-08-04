@@ -44,6 +44,9 @@
 		D0E416549451497B8A9A1272 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = F380CD1A9FEF4AA9A86B8B45 /* FirebaseAuth */; };
 		4C4F5454494553504D000003 /* Lottie in Frameworks */ = {isa = PBXBuildFile; productRef = 4C4F5454494553504D000002 /* Lottie */; };
 		00000000000000000000201D /* trophy.lottie in Resources */ = {isa = PBXBuildFile; fileRef = 00000000000000000000101D /* trophy.lottie */; };
+		A10000000000000000000001 /* RoundResultSoundPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000002 /* RoundResultSoundPlayer.swift */; };
+		A10000000000000000000003 /* winner.wav in Resources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000004 /* winner.wav */; };
+		A10000000000000000000005 /* no_winner.wav in Resources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000006 /* no_winner.wav */; };
 		E75225F9301C7DE5006B1B4C /* MiniMatch.gamekit in Resources */ = {isa = PBXBuildFile; fileRef = E75225F8301C7DE5006B1B4C /* MiniMatch.gamekit */; };
 		EE5CC43F3F21467F9D07A4E8 /* GameModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8A4EB400AA14E00A31C19EC /* GameModel.swift */; };
 /* End PBXBuildFile section */
@@ -93,6 +96,9 @@
 		83296CFF50320284730F0D51 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		95B8263978044D02A158AE30 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		00000000000000000000101D /* trophy.lottie */ = {isa = PBXFileReference; lastKnownFileType = file; path = trophy.lottie; sourceTree = "<group>"; };
+		A10000000000000000000002 /* RoundResultSoundPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoundResultSoundPlayer.swift; sourceTree = "<group>"; };
+		A10000000000000000000004 /* winner.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = winner.wav; sourceTree = "<group>"; };
+		A10000000000000000000006 /* no_winner.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = no_winner.wav; sourceTree = "<group>"; };
 		C395C0D8211F4A7BBA1F0065 /* GameModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameModels.swift; sourceTree = "<group>"; };
 		C8A4EB400AA14E00A31C19EC /* GameModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameModel.swift; sourceTree = "<group>"; };
 		E5988938016346E98E3996BC /* AppleSignInModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleSignInModel.swift; sourceTree = "<group>"; };
@@ -169,6 +175,7 @@
 			children = (
 				00000000000000000000100B /* ResultRow.swift */,
 				00000000000000000000100C /* RoundResultSection.swift */,
+				A10000000000000000000002 /* RoundResultSoundPlayer.swift */,
 				00000000000000000000100E /* WinnerCard.swift */,
 			);
 			path = Results;
@@ -290,6 +297,7 @@
 				F292770B1D1C4E6EB44A5F6C /* MiniMatch.entitlements */,
 				E75225F8301C7DE5006B1B4C /* MiniMatch.gamekit */,
 				1C9872C6908E4474AB19E42F /* PrivacyInfo.xcprivacy */,
+				A10000000000000000000007 /* Sounds */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -300,6 +308,15 @@
 				00000000000000000000101D /* trophy.lottie */,
 			);
 			path = Animations;
+			sourceTree = "<group>";
+		};
+		A10000000000000000000007 /* Sounds */ = {
+			isa = PBXGroup;
+			children = (
+				A10000000000000000000006 /* no_winner.wav */,
+				A10000000000000000000004 /* winner.wav */,
+			);
+			path = Sounds;
 			sourceTree = "<group>";
 		};
 		02CD513A8AA6696657A2D72F /* MiniMatch */ = {
@@ -445,6 +462,8 @@
 				E75225F9301C7DE5006B1B4C /* MiniMatch.gamekit in Resources */,
 				7B4940F317DC4A22A42C3D3D /* PrivacyInfo.xcprivacy in Resources */,
 				00000000000000000000201D /* trophy.lottie in Resources */,
+				A10000000000000000000005 /* no_winner.wav in Resources */,
+				A10000000000000000000003 /* winner.wav in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -468,6 +487,7 @@
 				00000000000000000000200A /* PlayersSection.swift in Sources */,
 				00000000000000000000200B /* ResultRow.swift in Sources */,
 				00000000000000000000200C /* RoundResultSection.swift in Sources */,
+				A10000000000000000000001 /* RoundResultSoundPlayer.swift in Sources */,
 				00000000000000000000200E /* WinnerCard.swift in Sources */,
 				1E0DF12FEFC34F8790E06E50 /* AppleSignInModel.swift in Sources */,
 				00000000000000000000201A /* GameCenterAuthenticationView.swift in Sources */,
