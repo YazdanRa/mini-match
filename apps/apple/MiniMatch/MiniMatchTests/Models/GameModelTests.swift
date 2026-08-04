@@ -35,6 +35,20 @@ struct GameModelTests {
 
     @Test
     @MainActor
+    func restoredSessionBindsGameCenterIdentityBeforeReportingResults() async {
+        let model = restorableWinningModel()
+        var reportedTeamPlayerID: String?
+        model.roundResultHandler = { _, _ in
+            reportedTeamPlayerID = model.gameCenterTeamPlayerID
+        }
+
+        #expect(await model.restoreSession(gameCenterPlayerID: "team-player"))
+
+        #expect(reportedTeamPlayerID == "team-player")
+    }
+
+    @Test
+    @MainActor
     func pickStartsEmptyAndOnlyAcceptsUInt64Values() async {
         let model = GameModel(client: PreviewGameClient())
 
@@ -425,6 +439,34 @@ struct GameModelTests {
             _ = try await client.getTable(id: tableID)
         }
     }
+}
+
+@MainActor
+private func restorableWinningModel() -> GameModel {
+    var table = PreviewFixtures.lobbyTable
+    table.lastResult = GameRoundResult(
+        roundNumber: 1,
+        selections: [
+            GameSelection(
+                playerID: PreviewFixtures.currentPlayerID,
+                displayName: "Maya",
+                pick: 0
+            ),
+            GameSelection(playerID: "zoe", displayName: "Zoe", pick: 1),
+            GameSelection(playerID: "liam", displayName: "Liam", pick: 2),
+        ],
+        winnerPlayerID: PreviewFixtures.currentPlayerID
+    )
+    let store = VolatileGameSessionStore()
+    store.save(SavedGameSession(
+        tableID: table.id,
+        playerID: PreviewFixtures.currentPlayerID,
+        gameCenterPlayerID: "team-player"
+    ))
+    return GameModel(
+        client: PreviewGameClient(table: table),
+        sessionStore: store
+    )
 }
 
 private actor LifecycleTestGameClient: GameClient {

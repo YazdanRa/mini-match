@@ -59,6 +59,7 @@ final class GameModel {
     @ObservationIgnored var roundResultHandler: ((GameTable, String) -> Void)?
     @ObservationIgnored private var lastNotifiedResultID: String?
     @ObservationIgnored private var sessionGeneration = 0
+    @ObservationIgnored private(set) var gameCenterTeamPlayerID: String?
 
     private(set) var screen: Screen = .home
     private(set) var table: GameTable?
@@ -340,6 +341,7 @@ final class GameModel {
             sessionGeneration += 1
             table = restored
             currentPlayerID = saved.playerID
+            gameCenterTeamPlayerID = saved.gameCenterPlayerID
             myLockedPick = nil
             pickText = ""
             isReconnecting = false
@@ -399,6 +401,7 @@ final class GameModel {
         sessionGeneration += 1
         table = nil
         currentPlayerID = nil
+        gameCenterTeamPlayerID = nil
         myLockedPick = nil
         isReconnecting = false
         pickText = ""
@@ -422,6 +425,7 @@ final class GameModel {
             sessionGeneration += 1
             table = session.table
             currentPlayerID = session.playerID
+            gameCenterTeamPlayerID = gameCenterPlayerID
             sessionStore.save(SavedGameSession(
                 tableID: session.table.id,
                 playerID: session.playerID,

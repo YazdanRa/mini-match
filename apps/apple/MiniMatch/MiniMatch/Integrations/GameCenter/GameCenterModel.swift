@@ -22,7 +22,7 @@ final class GameCenterModel: NSObject {
     private let isEnabled: Bool
     private var started = false
     private var listenerIsRegistered = false
-    private var matchPlayerID: String?
+    private var achievementPlayerID: String?
     private weak var gameModel: GameModel?
     private var match: GKMatch?
     private var createsTable = false
@@ -279,7 +279,7 @@ final class GameCenterModel: NSObject {
         activity?.end()
         activity = nil
         canShareActivity = false
-        matchPlayerID = nil
+        bindAchievementPlayer(nil)
     }
 
     private func endControlMatch() {
@@ -297,15 +297,11 @@ final class GameCenterModel: NSObject {
     func identityVerification() async throws -> GameCenterIdentityDTO? {
         let player = GKLocalPlayer.local
         guard player.isAuthenticated else {
-            matchPlayerID = nil
+            bindAchievementPlayer(nil)
             return nil
         }
         let playerID = player.gamePlayerID
-        if matchPlayerID != playerID {
-            pendingAchievementIDs.removeAll()
-            completedAchievementIDs.removeAll()
-            reportingAchievementIDs.removeAll()
-        }
+        bindAchievementPlayer(playerID)
         let items: GameCenterVerificationItems = try await withCheckedThrowingContinuation {
             continuation in
             player.fetchItems(forIdentityVerificationSignature: {
@@ -333,7 +329,6 @@ final class GameCenterModel: NSObject {
         else {
             throw GameCenterError.accountChanged
         }
-        matchPlayerID = playerID
         return GameCenterIdentityDTO(
             teamPlayerId: player.teamPlayerID,
             publicKeyUrl: items.publicKeyURL.absoluteString,
@@ -590,7 +585,12 @@ final class GameCenterModel: NSObject {
 
     private func reportAchievements(for table: GameTable, currentPlayerID: String) {
         let player = GKLocalPlayer.local
-        guard player.isAuthenticated, matchPlayerID == player.gamePlayerID else { return }
+        guard player.isAuthenticated,
+              gameModel?.gameCenterTeamPlayerID == player.teamPlayerID
+        else {
+            return
+        }
+        bindAchievementPlayer(player.gamePlayerID)
         pendingAchievementIDs.formUnion(GameCenterAchievement.earned(
             in: table,
             currentPlayerID: currentPlayerID
@@ -620,6 +620,14 @@ final class GameCenterModel: NSObject {
                 reportingAchievementIDs.subtract(pending)
             }
         }
+    }
+
+    private func bindAchievementPlayer(_ playerID: String?) {
+        guard achievementPlayerID != playerID else { return }
+        achievementPlayerID = playerID
+        pendingAchievementIDs.removeAll()
+        completedAchievementIDs.removeAll()
+        reportingAchievementIDs.removeAll()
     }
 
 }
