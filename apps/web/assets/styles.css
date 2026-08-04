@@ -76,10 +76,27 @@ a:focus-visible {
   line-height: 1;
 }
 
-.home p {
-  margin: 0.8rem 0 0;
-  color: var(--muted);
-  font-size: clamp(1.15rem, 3vw, 1.4rem);
+.testflight-link {
+  display: block;
+  width: min(100%, 27.5rem);
+  margin-top: 1.25rem;
+  border-radius: 1.1rem;
+  box-shadow: 0 0.75rem 2rem rgba(0, 38, 92, 0.14);
+}
+
+.testflight-link:hover {
+  opacity: 0.9;
+}
+
+.testflight-link:focus-visible {
+  border-radius: 1.1rem;
+}
+
+.testflight-badge {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 1.1rem;
 }
 
 .home-links {
