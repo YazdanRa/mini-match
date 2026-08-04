@@ -8,7 +8,7 @@ import (
 
 func TestHealthCheck(t *testing.T) {
 	handler := newHandler("/api/", http.NotFoundHandler())
-	request := httptest.NewRequest(http.MethodGet, "/healthz", nil)
+	request := httptest.NewRequest(http.MethodGet, "/health", nil)
 	response := httptest.NewRecorder()
 
 	handler.ServeHTTP(response, request)
