@@ -10,8 +10,7 @@ enum RoundResultSound: String, CaseIterable {
     }
 }
 
-@MainActor
-final class RoundResultSoundPlayer {
+actor RoundResultSoundPlayer {
     static let shared = RoundResultSoundPlayer()
 
     private let logger = Logger(
@@ -35,7 +34,6 @@ final class RoundResultSoundPlayer {
 
             do {
                 let player = try AVAudioPlayer(contentsOf: url)
-                player.prepareToPlay()
                 players[sound] = player
             } catch {
                 logger.error("Could not load \(sound.rawValue).wav: \(error.localizedDescription)")
@@ -43,10 +41,38 @@ final class RoundResultSoundPlayer {
         }
     }
 
-    func play(for result: GameRoundResult) {
+    func play(for result: GameRoundResult) async {
+        do {
+            guard try await Self.activateAudioSession() else {
+                logger.error("Could not activate round-result audio")
+                return
+            }
+        } catch {
+            logger.error("Could not activate round-result audio: \(error.localizedDescription)")
+            return
+        }
+
         let sound = RoundResultSound(result: result)
         guard let player = players[sound] else { return }
         player.currentTime = 0
         player.play()
+    }
+
+    nonisolated private static func activateAudioSession() async throws -> Bool {
+        let session = AVAudioSession.sharedInstance()
+        if #available(iOS 27.0, *) {
+            return try await session.activate(options: [])
+        }
+
+        return try await withCheckedThrowingContinuation { continuation in
+            DispatchQueue.global(qos: .userInitiated).async {
+                do {
+                    try session.setActive(true)
+                    continuation.resume(returning: true)
+                } catch {
+                    continuation.resume(throwing: error)
+                }
+            }
+        }
     }
 }
