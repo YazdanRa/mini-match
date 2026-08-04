@@ -12,6 +12,7 @@ WEB_ROOT = ROOT / "apps" / "web"
 SUPPORT_URL = "https://github.com/YazdanRa/mini-match/issues"
 REPOSITORY_URL = "https://github.com/YazdanRa/mini-match"
 EXPECTED_PAGES = {
+    Path("background/index.html"),
     Path("index.html"),
     Path("privacy/index.html"),
 }
@@ -79,16 +80,19 @@ def internal_target(source: Path, href: str) -> Path | None:
 
 
 class WebsiteTests(unittest.TestCase):
-    def test_exactly_two_html_pages_exist(self) -> None:
+    def test_expected_html_pages_exist(self) -> None:
         pages = {path.relative_to(WEB_ROOT) for path in WEB_ROOT.rglob("*.html")}
         self.assertEqual(pages, EXPECTED_PAGES)
 
     def test_home_contains_the_requested_content_and_links(self) -> None:
         page = parse(Path("index.html"))
 
-        self.assertEqual(page.text, ["Mini Match", "Coming soon…", "GitHub", "Privacy Policy"])
-        self.assertEqual(page.body_tags, ["main", "img", "h1", "p", "nav", "a", "a"])
-        self.assertEqual(page.links, [REPOSITORY_URL, "privacy/"])
+        self.assertEqual(
+            page.text,
+            ["Mini Match", "Coming soon…", "GitHub", "Background", "Privacy Policy"],
+        )
+        self.assertEqual(page.body_tags, ["main", "img", "h1", "p", "nav", "a", "a", "a"])
+        self.assertEqual(page.links, [REPOSITORY_URL, "background/", "privacy/"])
         self.assertEqual(
             page.images,
             [{"class": "logo", "src": "assets/mini-match-logo.png", "alt": "Mini Match logo"}],
@@ -112,6 +116,23 @@ class WebsiteTests(unittest.TestCase):
         self.assertIn("Effective August 4, 2026", page.text)
         self.assertIn(SUPPORT_URL, page.links)
         self.assertIn("../", page.links)
+
+    def test_background_page_explains_lupi_and_links_sources(self) -> None:
+        page = parse(Path("background/index.html"))
+
+        self.assertIn("Game Theory Background", page.text)
+        self.assertIn("The classic rules", page.text)
+        self.assertIn("Why the obvious answer is not obvious", page.text)
+        self.assertIn("Research papers", page.text)
+        self.assertIn("Community discussions", page.text)
+        self.assertIn("https://www.stat.berkeley.edu/~aldous/157/Papers/ostling.pdf", page.links)
+        self.assertIn("https://arxiv.org/pdf/1001.1065", page.links)
+        self.assertIn(
+            "https://math.stackexchange.com/questions/80714/game-theory-choosing-the-smallest-number-not-chosen-yet",
+            page.links,
+        )
+        self.assertIn("../", page.links)
+        self.assertIn("../privacy/", page.links)
 
     def test_all_internal_references_resolve(self) -> None:
         for page_path in EXPECTED_PAGES:
