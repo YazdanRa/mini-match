@@ -1,0 +1,92 @@
+name: Deploy server
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-server-production
+  cancel-in-progress: false
+
+jobs:
+  test:
+    name: Test server
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up Go
+        uses: actions/setup-go@v7
+        with:
+          go-version-file: services/api/go.mod
+          cache-dependency-path: services/api/go.sum
+
+      - name: Run tests
+        working-directory: services/api
+        run: go test -race ./...
+
+  deploy:
+    name: Deploy to production
+    needs: test
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: ${{ steps.service.outputs.url }}
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v3
+        with:
+          project_id: ${{ vars.GCP_PROJECT_ID }}
+          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.GCP_DEPLOY_SERVICE_ACCOUNT }}
+
+      - name: Set up Google Cloud CLI
+        uses: google-github-actions/setup-gcloud@v3
+
+      - name: Deploy Cloud Run service
+        run: |
+          gcloud run deploy "${{ vars.CLOUD_RUN_SERVICE }}" \
+            --source services/api \
+            --project "${{ vars.GCP_PROJECT_ID }}" \
+            --region "${{ vars.GCP_REGION }}" \
+            --service-account "${{ vars.CLOUD_RUN_RUNTIME_SERVICE_ACCOUNT }}" \
+            --build-service-account "${{ vars.CLOUD_RUN_BUILD_SERVICE_ACCOUNT }}" \
+            --update-env-vars "GOOGLE_CLOUD_PROJECT=${{ vars.GCP_PROJECT_ID }}" \
+            --allow-unauthenticated \
+            --use-http2 \
+            --quiet
+
+      - name: Read service URL
+        id: service
+        run: |
+          url="$(gcloud run services describe "${{ vars.CLOUD_RUN_SERVICE }}" \
+            --project "${{ vars.GCP_PROJECT_ID }}" \
+            --region "${{ vars.GCP_REGION }}" \
+            --format='value(status.url)')"
+          echo "url=${url}" >> "$GITHUB_OUTPUT"
+
+      - name: Verify authentication boundary
+        run: |
+          response_file="$(mktemp)"
+          status="$(curl --silent --show-error \
+            --output "$response_file" \
+            --write-out '%{http_code}' \
+            --request POST \
+            --header 'Content-Type: application/json' \
+            --data '{}' \
+            "${{ steps.service.outputs.url }}/minimatch.v1.MiniMatchService/GetTable")"
+          body="$(cat "$response_file")"
+          expected='{"code":"unauthenticated","message":"missing bearer token"}'
+          if [[ "$status" != "401" || "$body" != "$expected" ]]; then
+            cat "$response_file"
+            echo "Expected the unauthenticated Firebase boundary response; got HTTP ${status}." >&2
+            exit 1
+          fi

@@ -1,0 +1,5 @@
+{
+  "firestore": {
+    "rules": "services/api/firestore.rules"
+  }
+}

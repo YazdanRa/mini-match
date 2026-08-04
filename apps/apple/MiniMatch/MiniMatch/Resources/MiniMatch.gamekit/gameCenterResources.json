@@ -1,0 +1,209 @@
+{
+  "meta" : {
+    "version" : "2024-11-15"
+  },
+  "resources" : {
+    "achievementImages" : {
+      "com.yazdanra.minimatch.achievement.firstWin" : [
+        {
+          "localID" : "com.yazdanra.minimatch.achievement.firstWin:en-US",
+          "url" : "AchievementImage-com.yazdanra.minimatch.achievement.firstWin:en-US.jpeg"
+        },
+        {
+          "localID" : "com.yazdanra.minimatch.achievement.firstWin:fr-FR",
+          "url" : "AchievementImage-com.yazdanra.minimatch.achievement.firstWin:fr-FR.jpeg"
+        },
+        {
+          "localID" : "com.yazdanra.minimatch.achievement.firstWin:es-ES",
+          "url" : "AchievementImage-com.yazdanra.minimatch.achievement.firstWin:es-ES.jpeg"
+        }
+      ],
+      "com.yazdanra.minimatch.achievement.fourPlayerWin" : [
+        {
+          "localID" : "com.yazdanra.minimatch.achievement.fourPlayerWin:en-US",
+          "url" : "AchievementImage-com.yazdanra.minimatch.achievement.fourPlayerWin:en-US.jpeg"
+        },
+        {
+          "localID" : "com.yazdanra.minimatch.achievement.fourPlayerWin:fr-FR",
+          "url" : "AchievementImage-com.yazdanra.minimatch.achievement.fourPlayerWin:fr-FR.jpeg"
+        },
+        {
+          "localID" : "com.yazdanra.minimatch.achievement.fourPlayerWin:es-ES",
+          "url" : "AchievementImage-com.yazdanra.minimatch.achievement.fourPlayerWin:es-ES.jpeg"
+        }
+      ],
+      "com.yazdanra.minimatch.achievement.zeroWin" : [
+        {
+          "localID" : "com.yazdanra.minimatch.achievement.zeroWin:en-US",
+          "url" : "AchievementImage-com.yazdanra.minimatch.achievement.zeroWin:en-US.jpeg"
+        },
+        {
+          "localID" : "com.yazdanra.minimatch.achievement.zeroWin:fr-FR",
+          "url" : "AchievementImage-com.yazdanra.minimatch.achievement.zeroWin:fr-FR.jpeg"
+        },
+        {
+          "localID" : "com.yazdanra.minimatch.achievement.zeroWin:es-ES",
+          "url" : "AchievementImage-com.yazdanra.minimatch.achievement.zeroWin:es-ES.jpeg"
+        }
+      ]
+    },
+    "achievementLocalizations" : {
+      "com.yazdanra.minimatch.achievement.firstWin" : [
+        {
+          "afterEarnedDescription" : "You won your first Mini Match round.",
+          "beforeEarnedDescription" : "Win your first Mini Match round.",
+          "locale" : "en-US",
+          "localID" : "com.yazdanra.minimatch.achievement.firstWin:en-US",
+          "name" : "First Win"
+        },
+        {
+          "afterEarnedDescription" : "Vous avez remporté votre première manche de Mini Match.",
+          "beforeEarnedDescription" : "Remportez votre première manche de Mini Match.",
+          "locale" : "fr-FR",
+          "localID" : "com.yazdanra.minimatch.achievement.firstWin:fr-FR",
+          "name" : "Première victoire"
+        },
+        {
+          "afterEarnedDescription" : "Has ganado tu primera ronda de Mini Match.",
+          "beforeEarnedDescription" : "Gana tu primera ronda de Mini Match.",
+          "locale" : "es-ES",
+          "localID" : "com.yazdanra.minimatch.achievement.firstWin:es-ES",
+          "name" : "Primera victoria"
+        }
+      ],
+      "com.yazdanra.minimatch.achievement.fourPlayerWin" : [
+        {
+          "afterEarnedDescription" : "You won a round with at least four players.",
+          "beforeEarnedDescription" : "Win a round with at least four players.",
+          "locale" : "en-US",
+          "localID" : "com.yazdanra.minimatch.achievement.fourPlayerWin:en-US",
+          "name" : "Full Table"
+        },
+        {
+          "afterEarnedDescription" : "Vous avez remporté une manche avec au moins quatre joueurs.",
+          "beforeEarnedDescription" : "Remportez une manche avec au moins quatre joueurs.",
+          "locale" : "fr-FR",
+          "localID" : "com.yazdanra.minimatch.achievement.fourPlayerWin:fr-FR",
+          "name" : "Table complète"
+        },
+        {
+          "afterEarnedDescription" : "Has ganado una ronda con al menos cuatro jugadores.",
+          "beforeEarnedDescription" : "Gana una ronda con al menos cuatro jugadores.",
+          "locale" : "es-ES",
+          "localID" : "com.yazdanra.minimatch.achievement.fourPlayerWin:es-ES",
+          "name" : "Mesa completa"
+        }
+      ],
+      "com.yazdanra.minimatch.achievement.zeroWin" : [
+        {
+          "afterEarnedDescription" : "You won a round by choosing 0.",
+          "beforeEarnedDescription" : "Win a round by choosing 0.",
+          "locale" : "en-US",
+          "localID" : "com.yazdanra.minimatch.achievement.zeroWin:en-US",
+          "name" : "Perfect Zero"
+        },
+        {
+          "afterEarnedDescription" : "Vous avez remporté une manche en choisissant 0.",
+          "beforeEarnedDescription" : "Remportez une manche en choisissant 0.",
+          "locale" : "fr-FR",
+          "localID" : "com.yazdanra.minimatch.achievement.zeroWin:fr-FR",
+          "name" : "Zéro parfait"
+        },
+        {
+          "afterEarnedDescription" : "Has ganado una ronda eligiendo 0.",
+          "beforeEarnedDescription" : "Gana una ronda eligiendo 0.",
+          "locale" : "es-ES",
+          "localID" : "com.yazdanra.minimatch.achievement.zeroWin:es-ES",
+          "name" : "Cero perfecto"
+        }
+      ]
+    },
+    "achievements" : [
+      {
+        "activityProperties" : {
+
+        },
+        "archived" : false,
+        "points" : 10,
+        "referenceName" : "First Win",
+        "repeatable" : false,
+        "showBeforeEarned" : true,
+        "vendorIdentifier" : "com.yazdanra.minimatch.achievement.firstWin"
+      },
+      {
+        "activityProperties" : {
+
+        },
+        "archived" : false,
+        "points" : 25,
+        "referenceName" : "Perfect Zero",
+        "repeatable" : false,
+        "showBeforeEarned" : true,
+        "vendorIdentifier" : "com.yazdanra.minimatch.achievement.zeroWin"
+      },
+      {
+        "activityProperties" : {
+
+        },
+        "archived" : false,
+        "points" : 25,
+        "referenceName" : "Full Table",
+        "repeatable" : false,
+        "showBeforeEarned" : true,
+        "vendorIdentifier" : "com.yazdanra.minimatch.achievement.fourPlayerWin"
+      }
+    ],
+    "gameActivities" : [
+      {
+        "archived" : false,
+        "maximumPlayersCount" : 16,
+        "minimumPlayersCount" : 2,
+        "playStyle" : "SYNCHRONOUS",
+        "properties" : {
+
+        },
+        "referenceName" : "Play Mini Match",
+        "supportsPartyCode" : true,
+        "vendorIdentifier" : "com.yazdanra.minimatch.play"
+      }
+    ],
+    "gameActivityAssociatedResources" : [
+      "Achievement",
+      {
+        "com.yazdanra.minimatch.play" : [
+          "com.yazdanra.minimatch.achievement.firstWin",
+          "com.yazdanra.minimatch.achievement.zeroWin",
+          "com.yazdanra.minimatch.achievement.fourPlayerWin"
+        ]
+      }
+    ],
+    "gameActivityDefaultImages" : {
+      "com.yazdanra.minimatch.play" : {
+        "localID" : "com.yazdanra.minimatch.play",
+        "url" : "GameActivityImage-com.yazdanra.minimatch.play.jpeg"
+      }
+    },
+    "gameActivityLocalizations" : {
+      "com.yazdanra.minimatch.play" : [
+        {
+          "description" : "Invite friends and play a lowest-unique-number round.",
+          "locale" : "en-US",
+          "localID" : "com.yazdanra.minimatch.play:en-US",
+          "name" : "Play Mini Match"
+        },
+        {
+          "description" : "Invitez des amis et jouez une manche du plus petit nombre unique.",
+          "locale" : "fr-FR",
+          "localID" : "com.yazdanra.minimatch.play:fr-FR",
+          "name" : "Jouer à Mini Match"
+        },
+        {
+          "description" : "Invita a tus amigos y juega una ronda del número único más bajo.",
+          "locale" : "es-ES",
+          "localID" : "com.yazdanra.minimatch.play:es-ES",
+          "name" : "Jugar a Mini Match"
+        }
+      ]
+    }
+  }
+}

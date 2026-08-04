@@ -2,6 +2,8 @@
 #
 # gitignore contributors: remember to update Global/Xcode.gitignore, Objective-C.gitignore & Swift.gitignore
 
+.DS_Store
+
 ## User settings
 xcuserdata/
 
@@ -60,3 +62,13 @@ fastlane/report.xml
 fastlane/Preview.html
 fastlane/screenshots/**/*.png
 fastlane/test_output
+
+# Local cloud configuration
+.env
+.env.*
+.firebase/
+GoogleService-Info.plist
+*service-account*.json
+
+# GitHub Actions Google Cloud authentication
+gha-creds-*.json
