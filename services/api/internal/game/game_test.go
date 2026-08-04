@@ -380,8 +380,11 @@ func TestDeletePlayerProfileRemovesPlayerAndAnonymizesLastResult(t *testing.T) {
 	table, _ := NewTable("table", "Friday", "ACTIVE", "maya", "Maya", "fox")
 	_ = table.Join("zoe", "Zoe", "owl")
 	table.LastResult = &Result{
-		WinnerID:   "maya",
-		Selections: []Selection{{PlayerID: "maya", DisplayName: "Maya", Pick: 2}},
+		WinnerID:            "maya",
+		WinnerTotalWins:     16,
+		WinnerWinStreak:     2,
+		WinnerBestWinStreak: 4,
+		Selections:          []Selection{{PlayerID: "maya", DisplayName: "Maya", Pick: 2}},
 	}
 	if err := table.DeletePlayerProfile("maya", "deleted:table"); err != nil {
 		t.Fatal(err)
@@ -394,14 +397,21 @@ func TestDeletePlayerProfileRemovesPlayerAndAnonymizesLastResult(t *testing.T) {
 		table.LastResult.Selections[0].DisplayName != "" {
 		t.Fatal("last result kept the deleted player ID")
 	}
+	if table.LastResult.WinnerTotalWins != 0 || table.LastResult.WinnerWinStreak != 0 ||
+		table.LastResult.WinnerBestWinStreak != 0 {
+		t.Fatal("last result kept the deleted winner's statistics")
+	}
 }
 
 func TestDeletePlayerProfileAnonymizesResultAfterLeave(t *testing.T) {
 	table, _ := NewTable("table", "Friday", "ACTIVE", "maya", "Maya", "fox")
 	_ = table.Join("zoe", "Zoe", "owl")
 	table.LastResult = &Result{
-		WinnerID:   "maya",
-		Selections: []Selection{{PlayerID: "maya", DisplayName: "Maya", Pick: 2}},
+		WinnerID:            "maya",
+		WinnerTotalWins:     16,
+		WinnerWinStreak:     2,
+		WinnerBestWinStreak: 4,
+		Selections:          []Selection{{PlayerID: "maya", DisplayName: "Maya", Pick: 2}},
 	}
 	_ = table.Leave("maya")
 
@@ -413,4 +423,202 @@ func TestDeletePlayerProfileAnonymizesResultAfterLeave(t *testing.T) {
 		table.LastResult.Selections[0].DisplayName != "" {
 		t.Fatal("departed player remained identifiable in the last result")
 	}
+	if table.LastResult.WinnerTotalWins != 0 || table.LastResult.WinnerWinStreak != 0 ||
+		table.LastResult.WinnerBestWinStreak != 0 {
+		t.Fatal("last result kept the departed winner's statistics")
+	}
+}
+
+func TestApplyRoundStatsTracksWinnerAndResetsOnlyParticipants(t *testing.T) {
+	table, _ := NewTable("table", "Friday", "ACTIVE", "maya", "Maya", "fox")
+	_ = table.SetGameCenterID("maya", "gc-maya")
+	_ = table.Join("zoe", "Zoe", "owl")
+	_ = table.SetGameCenterID("zoe", "gc-zoe")
+	table.LastResult = &Result{
+		WinnerID: "maya",
+		Selections: []Selection{
+			{PlayerID: "maya"},
+			{PlayerID: "zoe"},
+		},
+	}
+	stats := map[string]PlayerStats{
+		"gc-maya": {TotalWins: 15, CurrentWinStreak: 1, BestWinStreak: 3},
+		"gc-zoe":  {TotalWins: 4, CurrentWinStreak: 7, BestWinStreak: 7},
+		"gc-away": {TotalWins: 9, CurrentWinStreak: 4, BestWinStreak: 4},
+	}
+
+	if err := table.ApplyRoundStats(stats); err != nil {
+		t.Fatal(err)
+	}
+	if got := stats["gc-maya"]; got.TotalWins != 16 || got.CurrentWinStreak != 2 || got.BestWinStreak != 3 {
+		t.Fatalf("winner stats = %#v", got)
+	}
+	if got := stats["gc-zoe"]; got.TotalWins != 4 || got.CurrentWinStreak != 0 || got.BestWinStreak != 7 {
+		t.Fatalf("loser stats = %#v", got)
+	}
+	if got := stats["gc-away"]; got.CurrentWinStreak != 4 {
+		t.Fatalf("absent player streak = %d, want 4", got.CurrentWinStreak)
+	}
+	if table.LastResult.WinnerTotalWins != 16 || table.LastResult.WinnerWinStreak != 2 ||
+		table.LastResult.WinnerBestWinStreak != 3 {
+		t.Fatalf("authoritative result stats = %#v", table.LastResult)
+	}
+
+	table.LastResult = &Result{Selections: []Selection{{PlayerID: "maya"}, {PlayerID: "zoe"}}}
+	if err := table.ApplyRoundStats(stats); err != nil {
+		t.Fatal(err)
+	}
+	if stats["gc-maya"].CurrentWinStreak != 0 || stats["gc-zoe"].CurrentWinStreak != 0 {
+		t.Fatal("no-winner round did not reset every participating streak")
+	}
+}
+
+func TestMemoryRepositorySharesRoundStatsAcrossTablesAndDeletesThem(t *testing.T) {
+	ctx := context.Background()
+	repository := NewMemoryRepository()
+
+	first := revealMemoryRound(t, repository, "first", "maya-a", "gc-maya", 1, "zoe-a", "gc-zoe", 5)
+	if first.LastResult.WinnerTotalWins != 1 || first.LastResult.WinnerWinStreak != 1 ||
+		first.LastResult.WinnerBestWinStreak != 1 {
+		t.Fatalf("first result stats = %#v", first.LastResult)
+	}
+	revealMemoryRound(t, repository, "absent", "noah", "gc-noah", 1, "lina", "gc-lina", 5)
+	second := revealMemoryRound(t, repository, "second", "maya-b", "gc-maya", 1, "zoe-b", "gc-zoe", 5)
+	if second.LastResult.WinnerTotalWins != 2 || second.LastResult.WinnerWinStreak != 2 ||
+		second.LastResult.WinnerBestWinStreak != 2 {
+		t.Fatalf("cross-table result stats = %#v", second.LastResult)
+	}
+	revealMemoryRound(t, repository, "loss", "zoe-c", "gc-zoe", 1, "maya-b", "gc-maya", 5)
+	third := revealMemoryRound(t, repository, "third", "maya-a", "gc-maya", 1, "zoe-d", "gc-zoe", 5)
+	if third.LastResult.WinnerTotalWins != 3 || third.LastResult.WinnerWinStreak != 1 ||
+		third.LastResult.WinnerBestWinStreak != 2 {
+		t.Fatalf("post-loss result stats = %#v", third.LastResult)
+	}
+	revealMemoryRound(t, repository, "draw", "maya-a", "gc-maya", 2, "zoe-e", "gc-zoe", 2)
+	if got := repository.stats["gc-maya"]; got.TotalWins != 3 || got.CurrentWinStreak != 0 || got.BestWinStreak != 2 {
+		t.Fatalf("post-draw stats = %#v", got)
+	}
+
+	// Profile deletion must not depend on a current or last-result table reference.
+	for id := range repository.tables {
+		delete(repository.tables, id)
+	}
+	if err := repository.DeleteProfile(ctx, "maya-a"); err != nil {
+		t.Fatal(err)
+	}
+	if _, exists := repository.stats["gc-maya"]; exists {
+		t.Fatal("profile deletion kept durable Game Center statistics")
+	}
+}
+
+func TestMemoryRepositoryDeleteProfileUsesActiveGameCenterIdentity(t *testing.T) {
+	ctx := context.Background()
+	repository := NewMemoryRepository()
+	repository.stats["gc-maya"] = PlayerStats{TotalWins: 16}
+	table, _ := NewTable("table", "Friday", "ACTIVE", "maya-new", "Maya", "fox")
+	if err := table.SetGameCenterID("maya-new", "gc-maya"); err != nil {
+		t.Fatal(err)
+	}
+	if err := repository.Create(ctx, table); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := repository.DeleteProfile(ctx, "maya-new"); err != nil {
+		t.Fatal(err)
+	}
+	if _, exists := repository.stats["gc-maya"]; exists {
+		t.Fatal("profile deletion kept statistics for the active Game Center identity")
+	}
+}
+
+func TestMemoryRepositoryRevealIsAtomicOnStatsOverflow(t *testing.T) {
+	ctx := context.Background()
+	repository := NewMemoryRepository()
+	repository.stats["gc-maya"] = PlayerStats{TotalWins: math.MaxUint64}
+	table := readyTable(t, "overflow", "maya", "gc-maya", 1, "zoe", "gc-zoe", 5)
+	if err := repository.Create(ctx, table); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := repository.RevealRound(ctx, table.ID, func(next *Table) error {
+		next.Name = "changed"
+		return ErrInvalid
+	}); !errors.Is(err, ErrInvalid) {
+		t.Fatalf("callback error = %v, want ErrInvalid", err)
+	}
+	if _, err := repository.RevealRound(ctx, table.ID, func(next *Table) error {
+		return next.RevealRound("maya", 1)
+	}); !errors.Is(err, ErrStatsExhausted) {
+		t.Fatalf("overflow error = %v, want ErrStatsExhausted", err)
+	}
+	stored, err := repository.Get(ctx, table.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if stored.CurrentRound == nil || stored.LastResult != nil || repository.stats["gc-maya"].TotalWins != math.MaxUint64 {
+		t.Fatal("failed reveal changed the table or statistics")
+	}
+}
+
+func revealMemoryRound(
+	t *testing.T,
+	repository *MemoryRepository,
+	tableID, firstID, firstGameCenterID string,
+	firstPick uint64,
+	secondID, secondGameCenterID string,
+	secondPick uint64,
+) *Table {
+	t.Helper()
+	table := readyTable(
+		t,
+		tableID,
+		firstID,
+		firstGameCenterID,
+		firstPick,
+		secondID,
+		secondGameCenterID,
+		secondPick,
+	)
+	if err := repository.Create(context.Background(), table); err != nil {
+		t.Fatal(err)
+	}
+	revealed, err := repository.RevealRound(context.Background(), table.ID, func(next *Table) error {
+		return next.RevealRound(firstID, 1)
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	return revealed
+}
+
+func readyTable(
+	t *testing.T,
+	tableID, firstID, firstGameCenterID string,
+	firstPick uint64,
+	secondID, secondGameCenterID string,
+	secondPick uint64,
+) *Table {
+	t.Helper()
+	table, err := NewTable(tableID, "Friday", "CODE-"+tableID, firstID, "First", "fox")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := table.SetGameCenterID(firstID, firstGameCenterID); err != nil {
+		t.Fatal(err)
+	}
+	if err := table.Join(secondID, "Second", "owl"); err != nil {
+		t.Fatal(err)
+	}
+	if err := table.SetGameCenterID(secondID, secondGameCenterID); err != nil {
+		t.Fatal(err)
+	}
+	if err := table.BeginRound(firstID); err != nil {
+		t.Fatal(err)
+	}
+	if err := table.LockPick(firstID, firstPick, 1); err != nil {
+		t.Fatal(err)
+	}
+	if err := table.LockPick(secondID, secondPick, 1); err != nil {
+		t.Fatal(err)
+	}
+	return table
 }

@@ -46,6 +46,29 @@ struct GameClientDTOTests {
         #expect(table.eventSequence == 0)
         #expect(table.lastResult?.selections.first?.pick == 0)
         #expect(table.lastResult?.selections.first?.displayName == "Maya")
+        #expect(table.lastResult?.winnerAchievementIDs == [])
+    }
+
+    @Test
+    func winnerAchievementsDecodeWithoutPrivateCounters() throws {
+        let json = """
+        {
+          "roundNumber": 5,
+          "selections": [],
+          "winnerPlayerId": "maya",
+          "winnerAchievementIds": [
+            "com.yazdanra.minimatch.achievement.twoWinStreak",
+            "com.yazdanra.minimatch.achievement.sixtyFourRoundWins"
+          ]
+        }
+        """
+
+        let result = try JSONDecoder().decode(ResultDTO.self, from: Data(json.utf8)).model()
+
+        #expect(result.winnerAchievementIDs == [
+            "com.yazdanra.minimatch.achievement.twoWinStreak",
+            "com.yazdanra.minimatch.achievement.sixtyFourRoundWins",
+        ])
     }
 
     @Test

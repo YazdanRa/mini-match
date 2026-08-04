@@ -174,9 +174,7 @@ func (s *Service) StartRound(ctx context.Context, request *connect.Request[minim
 	if request.Msg.GetHostPlayerId() != "" && request.Msg.GetHostPlayerId() != actor {
 		return nil, connect.NewError(connect.CodePermissionDenied, errors.New("host player ID does not match authenticated user"))
 	}
-	table, err := s.updateActiveTable(ctx, request.Msg.GetTableId(), actor, func(table *game.Table) error {
-		return table.RevealRound(actor, request.Msg.GetRoundNumber())
-	})
+	table, err := s.revealRound(ctx, request.Msg.GetTableId(), actor, request.Msg.GetRoundNumber())
 	if err != nil {
 		return nil, rpcError(err)
 	}
@@ -208,9 +206,7 @@ func (s *Service) RevealRound(ctx context.Context, request *connect.Request[mini
 	if request.Msg.GetHostPlayerId() != "" && request.Msg.GetHostPlayerId() != actor {
 		return nil, connect.NewError(connect.CodePermissionDenied, errors.New("host player ID does not match authenticated user"))
 	}
-	table, err := s.updateActiveTable(ctx, request.Msg.GetTableId(), actor, func(table *game.Table) error {
-		return table.RevealRound(actor, request.Msg.GetRoundNumber())
-	})
+	table, err := s.revealRound(ctx, request.Msg.GetTableId(), actor, request.Msg.GetRoundNumber())
 	if err != nil {
 		return nil, rpcError(err)
 	}
@@ -251,6 +247,20 @@ func (s *Service) updateActiveTable(
 			return err
 		}
 		return update(table)
+	})
+}
+
+func (s *Service) revealRound(
+	ctx context.Context,
+	tableID string,
+	actor string,
+	roundNumber uint32,
+) (*game.Table, error) {
+	return s.tables.RevealRound(ctx, tableID, func(table *game.Table) error {
+		if err := table.RefreshPresence(actor, s.now(), playerPresenceDuration); err != nil {
+			return err
+		}
+		return table.RevealRound(actor, roundNumber)
 	})
 }
 
@@ -359,8 +369,9 @@ func toProto(table *game.Table) *minimatchv1.Table {
 	}
 	if table.LastResult != nil {
 		response.LastResult = &minimatchv1.RoundResult{
-			RoundNumber: table.LastResult.RoundNumber,
-			Selections:  make([]*minimatchv1.Selection, 0, len(table.LastResult.Selections)),
+			RoundNumber:          table.LastResult.RoundNumber,
+			Selections:           make([]*minimatchv1.Selection, 0, len(table.LastResult.Selections)),
+			WinnerAchievementIds: winnerAchievementIDs(table.LastResult),
 		}
 		if table.LastResult.WinnerID != "" {
 			winner := table.LastResult.WinnerID
@@ -375,6 +386,27 @@ func toProto(table *game.Table) *minimatchv1.Table {
 		}
 	}
 	return response
+}
+
+func winnerAchievementIDs(result *game.Result) []string {
+	const prefix = "com.yazdanra.minimatch.achievement."
+	ids := make([]string, 0, 5)
+	if result.WinnerBestWinStreak >= 2 {
+		ids = append(ids, prefix+"twoWinStreak")
+	}
+	if result.WinnerBestWinStreak >= 4 {
+		ids = append(ids, prefix+"fourWinStreak")
+	}
+	if result.WinnerTotalWins >= 16 {
+		ids = append(ids, prefix+"sixteenRoundWins")
+	}
+	if result.WinnerTotalWins >= 32 {
+		ids = append(ids, prefix+"thirtyTwoRoundWins")
+	}
+	if result.WinnerTotalWins >= 64 {
+		ids = append(ids, prefix+"sixtyFourRoundWins")
+	}
+	return ids
 }
 
 func rpcError(err error) error {
@@ -393,7 +425,7 @@ func rpcError(err error) error {
 		errors.Is(err, game.ErrRoundActive),
 		errors.Is(err, game.ErrRoundMismatch):
 		code = connect.CodeFailedPrecondition
-	case errors.Is(err, game.ErrRoundExhausted):
+	case errors.Is(err, game.ErrRoundExhausted), errors.Is(err, game.ErrStatsExhausted):
 		code = connect.CodeResourceExhausted
 	}
 	return connect.NewError(code, err)

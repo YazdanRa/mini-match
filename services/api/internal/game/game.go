@@ -26,6 +26,7 @@ var (
 	ErrRoundActive    = errors.New("a round is already active")
 	ErrRoundExhausted = errors.New("round sequence exhausted")
 	ErrRoundMismatch  = errors.New("round number does not match")
+	ErrStatsExhausted = errors.New("player statistics exhausted")
 )
 
 type RoundPhase uint8
@@ -64,15 +65,25 @@ type Round struct {
 }
 
 type Result struct {
-	RoundNumber uint32
-	Selections  []Selection
-	WinnerID    string
+	RoundNumber         uint32
+	Selections          []Selection
+	WinnerID            string
+	WinnerTotalWins     uint64
+	WinnerWinStreak     uint32
+	WinnerBestWinStreak uint32
 }
 
 type Selection struct {
 	PlayerID    string
 	DisplayName string
 	Pick        uint64
+}
+
+type PlayerStats struct {
+	TotalWins        uint64
+	CurrentWinStreak uint32
+	BestWinStreak    uint32
+	PlayerIDs        []string
 }
 
 func NewTable(id, name, joinCode, hostID, hostName, hostAvatar string) (*Table, error) {
@@ -314,6 +325,53 @@ func (t *Table) RevealRound(actorID string, roundNumber uint32) error {
 	return nil
 }
 
+func (t *Table) ApplyRoundStats(stats map[string]PlayerStats) error {
+	if t.LastResult == nil {
+		return ErrNotReady
+	}
+	t.LastResult.WinnerTotalWins = 0
+	t.LastResult.WinnerWinStreak = 0
+	t.LastResult.WinnerBestWinStreak = 0
+	players := make(map[string]*Player, len(t.Players))
+	for _, player := range t.Players {
+		players[player.ID] = player
+	}
+	for _, selection := range t.LastResult.Selections {
+		player := players[selection.PlayerID]
+		if player == nil || player.GameCenterID == "" {
+			continue
+		}
+		current := stats[player.GameCenterID]
+		current.PlayerIDs = appendUnique(current.PlayerIDs, player.ID)
+		if player.ID == t.LastResult.WinnerID {
+			if current.TotalWins == math.MaxUint64 || current.CurrentWinStreak == math.MaxUint32 {
+				return ErrStatsExhausted
+			}
+			current.TotalWins++
+			current.CurrentWinStreak++
+			if current.CurrentWinStreak > current.BestWinStreak {
+				current.BestWinStreak = current.CurrentWinStreak
+			}
+			t.LastResult.WinnerTotalWins = current.TotalWins
+			t.LastResult.WinnerWinStreak = current.CurrentWinStreak
+			t.LastResult.WinnerBestWinStreak = current.BestWinStreak
+		} else {
+			current.CurrentWinStreak = 0
+		}
+		stats[player.GameCenterID] = current
+	}
+	return nil
+}
+
+func appendUnique(values []string, value string) []string {
+	for _, existing := range values {
+		if existing == value {
+			return values
+		}
+	}
+	return append(values, value)
+}
+
 func (t *Table) player(id string) *Player {
 	for _, player := range t.Players {
 		if player.ID == id {
@@ -349,6 +407,9 @@ func (t *Table) DeletePlayerProfile(playerID, replacementID string) error {
 	if t.LastResult != nil {
 		if t.LastResult.WinnerID == playerID {
 			t.LastResult.WinnerID = replacementID
+			t.LastResult.WinnerTotalWins = 0
+			t.LastResult.WinnerWinStreak = 0
+			t.LastResult.WinnerBestWinStreak = 0
 			resultChanged = true
 		}
 		for index := range t.LastResult.Selections {
@@ -404,17 +465,20 @@ type Repository interface {
 	Get(context.Context, string) (*Table, error)
 	GetByJoinCode(context.Context, string) (*Table, error)
 	Update(context.Context, string, func(*Table) error) (*Table, error)
+	RevealRound(context.Context, string, func(*Table) error) (*Table, error)
 	DeleteProfile(context.Context, string) error
 }
 
 type MemoryRepository struct {
 	mu     sync.Mutex
 	tables map[string]*Table
+	stats  map[string]PlayerStats
 }
 
 func NewMemoryRepository() *MemoryRepository {
 	return &MemoryRepository{
 		tables: make(map[string]*Table),
+		stats:  make(map[string]PlayerStats),
 	}
 }
 
@@ -467,16 +531,69 @@ func (r *MemoryRepository) Update(_ context.Context, id string, update func(*Tab
 	return clone(next), nil
 }
 
+func (r *MemoryRepository) RevealRound(
+	_ context.Context,
+	id string,
+	reveal func(*Table) error,
+) (*Table, error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	table, exists := r.tables[id]
+	if !exists {
+		return nil, fmt.Errorf("%w: table %q", ErrNotFound, id)
+	}
+	next := clone(table)
+	previousResult := next.LastResult
+	if err := reveal(next); err != nil {
+		return nil, err
+	}
+	if next.LastResult == nil || next.LastResult == previousResult {
+		return nil, ErrNotReady
+	}
+	nextStats := cloneStats(r.stats)
+	if err := next.ApplyRoundStats(nextStats); err != nil {
+		return nil, err
+	}
+	r.tables[id] = next
+	r.stats = nextStats
+	return clone(next), nil
+}
+
 func (r *MemoryRepository) DeleteProfile(_ context.Context, playerID string) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
+	linkedGameCenterIDs := make(map[string]struct{})
 	for id, table := range r.tables {
+		if player := table.player(playerID); player != nil && player.GameCenterID != "" {
+			linkedGameCenterIDs[player.GameCenterID] = struct{}{}
+		}
 		next := clone(table)
 		if err := next.DeletePlayerProfile(playerID, "deleted:"+id); err == nil {
 			r.tables[id] = next
 		}
 	}
+	for gameCenterID, stats := range r.stats {
+		if _, linked := linkedGameCenterIDs[gameCenterID]; linked {
+			delete(r.stats, gameCenterID)
+			continue
+		}
+		for _, id := range stats.PlayerIDs {
+			if id == playerID {
+				delete(r.stats, gameCenterID)
+				break
+			}
+		}
+	}
 	return nil
+}
+
+func cloneStats(stats map[string]PlayerStats) map[string]PlayerStats {
+	copy := make(map[string]PlayerStats, len(stats))
+	for id, current := range stats {
+		current.PlayerIDs = append([]string(nil), current.PlayerIDs...)
+		copy[id] = current
+	}
+	return copy
 }
 
 func clone(table *Table) *Table {

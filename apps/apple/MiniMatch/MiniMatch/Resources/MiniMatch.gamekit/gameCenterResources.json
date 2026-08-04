@@ -45,6 +45,174 @@
           "localID" : "com.yazdanra.minimatch.achievement.zeroWin:es-ES",
           "url" : "AchievementImage-com.yazdanra.minimatch.achievement.zeroWin:es-ES.jpeg"
         }
+      ],
+      "com.yazdanra.minimatch.achievement.pickFourWin" : [
+        {
+          "localID" : "com.yazdanra.minimatch.achievement.pickFourWin:en-US",
+          "url" : "AchievementImage-com.yazdanra.minimatch.achievement.firstWin:en-US.jpeg"
+        },
+        {
+          "localID" : "com.yazdanra.minimatch.achievement.pickFourWin:fr-FR",
+          "url" : "AchievementImage-com.yazdanra.minimatch.achievement.firstWin:en-US.jpeg"
+        },
+        {
+          "localID" : "com.yazdanra.minimatch.achievement.pickFourWin:es-ES",
+          "url" : "AchievementImage-com.yazdanra.minimatch.achievement.firstWin:en-US.jpeg"
+        }
+      ],
+      "com.yazdanra.minimatch.achievement.pickEightWin" : [
+        {
+          "localID" : "com.yazdanra.minimatch.achievement.pickEightWin:en-US",
+          "url" : "AchievementImage-com.yazdanra.minimatch.achievement.firstWin:en-US.jpeg"
+        },
+        {
+          "localID" : "com.yazdanra.minimatch.achievement.pickEightWin:fr-FR",
+          "url" : "AchievementImage-com.yazdanra.minimatch.achievement.firstWin:en-US.jpeg"
+        },
+        {
+          "localID" : "com.yazdanra.minimatch.achievement.pickEightWin:es-ES",
+          "url" : "AchievementImage-com.yazdanra.minimatch.achievement.firstWin:en-US.jpeg"
+        }
+      ],
+      "com.yazdanra.minimatch.achievement.pickSixteenWin" : [
+        {
+          "localID" : "com.yazdanra.minimatch.achievement.pickSixteenWin:en-US",
+          "url" : "AchievementImage-com.yazdanra.minimatch.achievement.firstWin:en-US.jpeg"
+        },
+        {
+          "localID" : "com.yazdanra.minimatch.achievement.pickSixteenWin:fr-FR",
+          "url" : "AchievementImage-com.yazdanra.minimatch.achievement.firstWin:en-US.jpeg"
+        },
+        {
+          "localID" : "com.yazdanra.minimatch.achievement.pickSixteenWin:es-ES",
+          "url" : "AchievementImage-com.yazdanra.minimatch.achievement.firstWin:en-US.jpeg"
+        }
+      ],
+      "com.yazdanra.minimatch.achievement.twoWinStreak" : [
+        {
+          "localID" : "com.yazdanra.minimatch.achievement.twoWinStreak:en-US",
+          "url" : "AchievementImage-com.yazdanra.minimatch.achievement.firstWin:en-US.jpeg"
+        },
+        {
+          "localID" : "com.yazdanra.minimatch.achievement.twoWinStreak:fr-FR",
+          "url" : "AchievementImage-com.yazdanra.minimatch.achievement.firstWin:en-US.jpeg"
+        },
+        {
+          "localID" : "com.yazdanra.minimatch.achievement.twoWinStreak:es-ES",
+          "url" : "AchievementImage-com.yazdanra.minimatch.achievement.firstWin:en-US.jpeg"
+        }
+      ],
+      "com.yazdanra.minimatch.achievement.fourWinStreak" : [
+        {
+          "localID" : "com.yazdanra.minimatch.achievement.fourWinStreak:en-US",
+          "url" : "AchievementImage-com.yazdanra.minimatch.achievement.firstWin:en-US.jpeg"
+        },
+        {
+          "localID" : "com.yazdanra.minimatch.achievement.fourWinStreak:fr-FR",
+          "url" : "AchievementImage-com.yazdanra.minimatch.achievement.firstWin:en-US.jpeg"
+        },
+        {
+          "localID" : "com.yazdanra.minimatch.achievement.fourWinStreak:es-ES",
+          "url" : "AchievementImage-com.yazdanra.minimatch.achievement.firstWin:en-US.jpeg"
+        }
+      ],
+      "com.yazdanra.minimatch.achievement.sixteenRoundWins" : [
+        {
+          "localID" : "com.yazdanra.minimatch.achievement.sixteenRoundWins:en-US",
+          "url" : "AchievementImage-com.yazdanra.minimatch.achievement.firstWin:en-US.jpeg"
+        },
+        {
+          "localID" : "com.yazdanra.minimatch.achievement.sixteenRoundWins:fr-FR",
+          "url" : "AchievementImage-com.yazdanra.minimatch.achievement.firstWin:en-US.jpeg"
+        },
+        {
+          "localID" : "com.yazdanra.minimatch.achievement.sixteenRoundWins:es-ES",
+          "url" : "AchievementImage-com.yazdanra.minimatch.achievement.firstWin:en-US.jpeg"
+        }
+      ],
+      "com.yazdanra.minimatch.achievement.thirtyTwoRoundWins" : [
+        {
+          "localID" : "com.yazdanra.minimatch.achievement.thirtyTwoRoundWins:en-US",
+          "url" : "AchievementImage-com.yazdanra.minimatch.achievement.firstWin:en-US.jpeg"
+        },
+        {
+          "localID" : "com.yazdanra.minimatch.achievement.thirtyTwoRoundWins:fr-FR",
+          "url" : "AchievementImage-com.yazdanra.minimatch.achievement.firstWin:en-US.jpeg"
+        },
+        {
+          "localID" : "com.yazdanra.minimatch.achievement.thirtyTwoRoundWins:es-ES",
+          "url" : "AchievementImage-com.yazdanra.minimatch.achievement.firstWin:en-US.jpeg"
+        }
+      ],
+      "com.yazdanra.minimatch.achievement.sixtyFourRoundWins" : [
+        {
+          "localID" : "com.yazdanra.minimatch.achievement.sixtyFourRoundWins:en-US",
+          "url" : "AchievementImage-com.yazdanra.minimatch.achievement.firstWin:en-US.jpeg"
+        },
+        {
+          "localID" : "com.yazdanra.minimatch.achievement.sixtyFourRoundWins:fr-FR",
+          "url" : "AchievementImage-com.yazdanra.minimatch.achievement.firstWin:en-US.jpeg"
+        },
+        {
+          "localID" : "com.yazdanra.minimatch.achievement.sixtyFourRoundWins:es-ES",
+          "url" : "AchievementImage-com.yazdanra.minimatch.achievement.firstWin:en-US.jpeg"
+        }
+      ],
+      "com.yazdanra.minimatch.achievement.eightPlayerRound" : [
+        {
+          "localID" : "com.yazdanra.minimatch.achievement.eightPlayerRound:en-US",
+          "url" : "AchievementImage-com.yazdanra.minimatch.achievement.firstWin:en-US.jpeg"
+        },
+        {
+          "localID" : "com.yazdanra.minimatch.achievement.eightPlayerRound:fr-FR",
+          "url" : "AchievementImage-com.yazdanra.minimatch.achievement.firstWin:en-US.jpeg"
+        },
+        {
+          "localID" : "com.yazdanra.minimatch.achievement.eightPlayerRound:es-ES",
+          "url" : "AchievementImage-com.yazdanra.minimatch.achievement.firstWin:en-US.jpeg"
+        }
+      ],
+      "com.yazdanra.minimatch.achievement.sixteenPlayerRound" : [
+        {
+          "localID" : "com.yazdanra.minimatch.achievement.sixteenPlayerRound:en-US",
+          "url" : "AchievementImage-com.yazdanra.minimatch.achievement.firstWin:en-US.jpeg"
+        },
+        {
+          "localID" : "com.yazdanra.minimatch.achievement.sixteenPlayerRound:fr-FR",
+          "url" : "AchievementImage-com.yazdanra.minimatch.achievement.firstWin:en-US.jpeg"
+        },
+        {
+          "localID" : "com.yazdanra.minimatch.achievement.sixteenPlayerRound:es-ES",
+          "url" : "AchievementImage-com.yazdanra.minimatch.achievement.firstWin:en-US.jpeg"
+        }
+      ],
+      "com.yazdanra.minimatch.achievement.eightPlayerWin" : [
+        {
+          "localID" : "com.yazdanra.minimatch.achievement.eightPlayerWin:en-US",
+          "url" : "AchievementImage-com.yazdanra.minimatch.achievement.firstWin:en-US.jpeg"
+        },
+        {
+          "localID" : "com.yazdanra.minimatch.achievement.eightPlayerWin:fr-FR",
+          "url" : "AchievementImage-com.yazdanra.minimatch.achievement.firstWin:en-US.jpeg"
+        },
+        {
+          "localID" : "com.yazdanra.minimatch.achievement.eightPlayerWin:es-ES",
+          "url" : "AchievementImage-com.yazdanra.minimatch.achievement.firstWin:en-US.jpeg"
+        }
+      ],
+      "com.yazdanra.minimatch.achievement.sixteenPlayerWin" : [
+        {
+          "localID" : "com.yazdanra.minimatch.achievement.sixteenPlayerWin:en-US",
+          "url" : "AchievementImage-com.yazdanra.minimatch.achievement.firstWin:en-US.jpeg"
+        },
+        {
+          "localID" : "com.yazdanra.minimatch.achievement.sixteenPlayerWin:fr-FR",
+          "url" : "AchievementImage-com.yazdanra.minimatch.achievement.firstWin:en-US.jpeg"
+        },
+        {
+          "localID" : "com.yazdanra.minimatch.achievement.sixteenPlayerWin:es-ES",
+          "url" : "AchievementImage-com.yazdanra.minimatch.achievement.firstWin:en-US.jpeg"
+        }
       ]
     },
     "achievementLocalizations" : {
@@ -77,21 +245,21 @@
           "beforeEarnedDescription" : "Win a round with at least four players.",
           "locale" : "en-US",
           "localID" : "com.yazdanra.minimatch.achievement.fourPlayerWin:en-US",
-          "name" : "Full Table"
+          "name" : "Party Champion"
         },
         {
           "afterEarnedDescription" : "Vous avez remporté une manche avec au moins quatre joueurs.",
           "beforeEarnedDescription" : "Remportez une manche avec au moins quatre joueurs.",
           "locale" : "fr-FR",
           "localID" : "com.yazdanra.minimatch.achievement.fourPlayerWin:fr-FR",
-          "name" : "Table complète"
+          "name" : "Champion du groupe"
         },
         {
           "afterEarnedDescription" : "Has ganado una ronda con al menos cuatro jugadores.",
           "beforeEarnedDescription" : "Gana una ronda con al menos cuatro jugadores.",
           "locale" : "es-ES",
           "localID" : "com.yazdanra.minimatch.achievement.fourPlayerWin:es-ES",
-          "name" : "Mesa completa"
+          "name" : "Campeón del grupo"
         }
       ],
       "com.yazdanra.minimatch.achievement.zeroWin" : [
@@ -115,6 +283,282 @@
           "locale" : "es-ES",
           "localID" : "com.yazdanra.minimatch.achievement.zeroWin:es-ES",
           "name" : "Cero perfecto"
+        }
+      ],
+      "com.yazdanra.minimatch.achievement.pickFourWin" : [
+        {
+          "afterEarnedDescription" : "You won a round by choosing 4.",
+          "beforeEarnedDescription" : "Win a round by choosing 4.",
+          "locale" : "en-US",
+          "localID" : "com.yazdanra.minimatch.achievement.pickFourWin:en-US",
+          "name" : "High Four"
+        },
+        {
+          "afterEarnedDescription" : "Vous avez remporté une manche en choisissant 4.",
+          "beforeEarnedDescription" : "Remportez une manche en choisissant 4.",
+          "locale" : "fr-FR",
+          "localID" : "com.yazdanra.minimatch.achievement.pickFourWin:fr-FR",
+          "name" : "Quatre en force"
+        },
+        {
+          "afterEarnedDescription" : "Has ganado una ronda eligiendo 4.",
+          "beforeEarnedDescription" : "Gana una ronda eligiendo 4.",
+          "locale" : "es-ES",
+          "localID" : "com.yazdanra.minimatch.achievement.pickFourWin:es-ES",
+          "name" : "Cuatro triunfal"
+        }
+      ],
+      "com.yazdanra.minimatch.achievement.pickEightWin" : [
+        {
+          "afterEarnedDescription" : "You won a round by choosing 8.",
+          "beforeEarnedDescription" : "Win a round by choosing 8.",
+          "locale" : "en-US",
+          "localID" : "com.yazdanra.minimatch.achievement.pickEightWin:en-US",
+          "name" : "Great Eight"
+        },
+        {
+          "afterEarnedDescription" : "Vous avez remporté une manche en choisissant 8.",
+          "beforeEarnedDescription" : "Remportez une manche en choisissant 8.",
+          "locale" : "fr-FR",
+          "localID" : "com.yazdanra.minimatch.achievement.pickEightWin:fr-FR",
+          "name" : "Huit magnifique"
+        },
+        {
+          "afterEarnedDescription" : "Has ganado una ronda eligiendo 8.",
+          "beforeEarnedDescription" : "Gana una ronda eligiendo 8.",
+          "locale" : "es-ES",
+          "localID" : "com.yazdanra.minimatch.achievement.pickEightWin:es-ES",
+          "name" : "Ocho magnífico"
+        }
+      ],
+      "com.yazdanra.minimatch.achievement.pickSixteenWin" : [
+        {
+          "afterEarnedDescription" : "You won a round by choosing 16.",
+          "beforeEarnedDescription" : "Win a round by choosing 16.",
+          "locale" : "en-US",
+          "localID" : "com.yazdanra.minimatch.achievement.pickSixteenWin:en-US",
+          "name" : "Sweet Sixteen"
+        },
+        {
+          "afterEarnedDescription" : "Vous avez remporté une manche en choisissant 16.",
+          "beforeEarnedDescription" : "Remportez une manche en choisissant 16.",
+          "locale" : "fr-FR",
+          "localID" : "com.yazdanra.minimatch.achievement.pickSixteenWin:fr-FR",
+          "name" : "Seize en or"
+        },
+        {
+          "afterEarnedDescription" : "Has ganado una ronda eligiendo 16.",
+          "beforeEarnedDescription" : "Gana una ronda eligiendo 16.",
+          "locale" : "es-ES",
+          "localID" : "com.yazdanra.minimatch.achievement.pickSixteenWin:es-ES",
+          "name" : "Dulces dieciséis"
+        }
+      ],
+      "com.yazdanra.minimatch.achievement.twoWinStreak" : [
+        {
+          "afterEarnedDescription" : "You won two consecutive rounds you played.",
+          "beforeEarnedDescription" : "Win two consecutive rounds you play.",
+          "locale" : "en-US",
+          "localID" : "com.yazdanra.minimatch.achievement.twoWinStreak:en-US",
+          "name" : "Back-to-Back"
+        },
+        {
+          "afterEarnedDescription" : "Vous avez remporté deux manches jouées consécutives.",
+          "beforeEarnedDescription" : "Remportez deux manches jouées consécutives.",
+          "locale" : "fr-FR",
+          "localID" : "com.yazdanra.minimatch.achievement.twoWinStreak:fr-FR",
+          "name" : "Deux de suite"
+        },
+        {
+          "afterEarnedDescription" : "Has ganado dos rondas jugadas consecutivas.",
+          "beforeEarnedDescription" : "Gana dos rondas jugadas consecutivas.",
+          "locale" : "es-ES",
+          "localID" : "com.yazdanra.minimatch.achievement.twoWinStreak:es-ES",
+          "name" : "Dos seguidas"
+        }
+      ],
+      "com.yazdanra.minimatch.achievement.fourWinStreak" : [
+        {
+          "afterEarnedDescription" : "You won four consecutive rounds you played.",
+          "beforeEarnedDescription" : "Win four consecutive rounds you play.",
+          "locale" : "en-US",
+          "localID" : "com.yazdanra.minimatch.achievement.fourWinStreak:en-US",
+          "name" : "Four on Fire"
+        },
+        {
+          "afterEarnedDescription" : "Vous avez remporté quatre manches jouées consécutives.",
+          "beforeEarnedDescription" : "Remportez quatre manches jouées consécutives.",
+          "locale" : "fr-FR",
+          "localID" : "com.yazdanra.minimatch.achievement.fourWinStreak:fr-FR",
+          "name" : "Quatre de suite"
+        },
+        {
+          "afterEarnedDescription" : "Has ganado cuatro rondas jugadas consecutivas.",
+          "beforeEarnedDescription" : "Gana cuatro rondas jugadas consecutivas.",
+          "locale" : "es-ES",
+          "localID" : "com.yazdanra.minimatch.achievement.fourWinStreak:es-ES",
+          "name" : "Cuatro seguidas"
+        }
+      ],
+      "com.yazdanra.minimatch.achievement.sixteenRoundWins" : [
+        {
+          "afterEarnedDescription" : "You won a total of 16 rounds.",
+          "beforeEarnedDescription" : "Win 16 rounds in total.",
+          "locale" : "en-US",
+          "localID" : "com.yazdanra.minimatch.achievement.sixteenRoundWins:en-US",
+          "name" : "Proven Winner"
+        },
+        {
+          "afterEarnedDescription" : "Vous avez remporté 16 manches au total.",
+          "beforeEarnedDescription" : "Remportez 16 manches au total.",
+          "locale" : "fr-FR",
+          "localID" : "com.yazdanra.minimatch.achievement.sixteenRoundWins:fr-FR",
+          "name" : "Victoire confirmée"
+        },
+        {
+          "afterEarnedDescription" : "Has ganado 16 rondas en total.",
+          "beforeEarnedDescription" : "Gana 16 rondas en total.",
+          "locale" : "es-ES",
+          "localID" : "com.yazdanra.minimatch.achievement.sixteenRoundWins:es-ES",
+          "name" : "Victoria confirmada"
+        }
+      ],
+      "com.yazdanra.minimatch.achievement.thirtyTwoRoundWins" : [
+        {
+          "afterEarnedDescription" : "You won a total of 32 rounds.",
+          "beforeEarnedDescription" : "Win 32 rounds in total.",
+          "locale" : "en-US",
+          "localID" : "com.yazdanra.minimatch.achievement.thirtyTwoRoundWins:en-US",
+          "name" : "Round Veteran"
+        },
+        {
+          "afterEarnedDescription" : "Vous avez remporté 32 manches au total.",
+          "beforeEarnedDescription" : "Remportez 32 manches au total.",
+          "locale" : "fr-FR",
+          "localID" : "com.yazdanra.minimatch.achievement.thirtyTwoRoundWins:fr-FR",
+          "name" : "Vétéran des manches"
+        },
+        {
+          "afterEarnedDescription" : "Has ganado 32 rondas en total.",
+          "beforeEarnedDescription" : "Gana 32 rondas en total.",
+          "locale" : "es-ES",
+          "localID" : "com.yazdanra.minimatch.achievement.thirtyTwoRoundWins:es-ES",
+          "name" : "Veterano de las rondas"
+        }
+      ],
+      "com.yazdanra.minimatch.achievement.sixtyFourRoundWins" : [
+        {
+          "afterEarnedDescription" : "You won a total of 64 rounds.",
+          "beforeEarnedDescription" : "Win 64 rounds in total.",
+          "locale" : "en-US",
+          "localID" : "com.yazdanra.minimatch.achievement.sixtyFourRoundWins:en-US",
+          "name" : "Mini Match Legend"
+        },
+        {
+          "afterEarnedDescription" : "Vous avez remporté 64 manches au total.",
+          "beforeEarnedDescription" : "Remportez 64 manches au total.",
+          "locale" : "fr-FR",
+          "localID" : "com.yazdanra.minimatch.achievement.sixtyFourRoundWins:fr-FR",
+          "name" : "Légende de Mini Match"
+        },
+        {
+          "afterEarnedDescription" : "Has ganado 64 rondas en total.",
+          "beforeEarnedDescription" : "Gana 64 rondas en total.",
+          "locale" : "es-ES",
+          "localID" : "com.yazdanra.minimatch.achievement.sixtyFourRoundWins:es-ES",
+          "name" : "Leyenda de Mini Match"
+        }
+      ],
+      "com.yazdanra.minimatch.achievement.eightPlayerRound" : [
+        {
+          "afterEarnedDescription" : "You played a round with at least eight players.",
+          "beforeEarnedDescription" : "Play a round with at least eight players.",
+          "locale" : "en-US",
+          "localID" : "com.yazdanra.minimatch.achievement.eightPlayerRound:en-US",
+          "name" : "Join the Crowd"
+        },
+        {
+          "afterEarnedDescription" : "Vous avez joué une manche avec au moins huit joueurs.",
+          "beforeEarnedDescription" : "Jouez une manche avec au moins huit joueurs.",
+          "locale" : "fr-FR",
+          "localID" : "com.yazdanra.minimatch.achievement.eightPlayerRound:fr-FR",
+          "name" : "Rejoignez la foule"
+        },
+        {
+          "afterEarnedDescription" : "Has jugado una ronda con al menos ocho jugadores.",
+          "beforeEarnedDescription" : "Juega una ronda con al menos ocho jugadores.",
+          "locale" : "es-ES",
+          "localID" : "com.yazdanra.minimatch.achievement.eightPlayerRound:es-ES",
+          "name" : "Únete a la multitud"
+        }
+      ],
+      "com.yazdanra.minimatch.achievement.sixteenPlayerRound" : [
+        {
+          "afterEarnedDescription" : "You played a round with at least 16 players.",
+          "beforeEarnedDescription" : "Play a round with at least 16 players.",
+          "locale" : "en-US",
+          "localID" : "com.yazdanra.minimatch.achievement.sixteenPlayerRound:en-US",
+          "name" : "Packed House"
+        },
+        {
+          "afterEarnedDescription" : "Vous avez joué une manche avec au moins 16 joueurs.",
+          "beforeEarnedDescription" : "Jouez une manche avec au moins 16 joueurs.",
+          "locale" : "fr-FR",
+          "localID" : "com.yazdanra.minimatch.achievement.sixteenPlayerRound:fr-FR",
+          "name" : "Salle comble"
+        },
+        {
+          "afterEarnedDescription" : "Has jugado una ronda con al menos 16 jugadores.",
+          "beforeEarnedDescription" : "Juega una ronda con al menos 16 jugadores.",
+          "locale" : "es-ES",
+          "localID" : "com.yazdanra.minimatch.achievement.sixteenPlayerRound:es-ES",
+          "name" : "Sala llena"
+        }
+      ],
+      "com.yazdanra.minimatch.achievement.eightPlayerWin" : [
+        {
+          "afterEarnedDescription" : "You won a round with at least eight players.",
+          "beforeEarnedDescription" : "Win a round with at least eight players.",
+          "locale" : "en-US",
+          "localID" : "com.yazdanra.minimatch.achievement.eightPlayerWin:en-US",
+          "name" : "Crowd Champion"
+        },
+        {
+          "afterEarnedDescription" : "Vous avez remporté une manche avec au moins huit joueurs.",
+          "beforeEarnedDescription" : "Remportez une manche avec au moins huit joueurs.",
+          "locale" : "fr-FR",
+          "localID" : "com.yazdanra.minimatch.achievement.eightPlayerWin:fr-FR",
+          "name" : "Champion de la foule"
+        },
+        {
+          "afterEarnedDescription" : "Has ganado una ronda con al menos ocho jugadores.",
+          "beforeEarnedDescription" : "Gana una ronda con al menos ocho jugadores.",
+          "locale" : "es-ES",
+          "localID" : "com.yazdanra.minimatch.achievement.eightPlayerWin:es-ES",
+          "name" : "Campeón de la multitud"
+        }
+      ],
+      "com.yazdanra.minimatch.achievement.sixteenPlayerWin" : [
+        {
+          "afterEarnedDescription" : "You won a round with at least 16 players.",
+          "beforeEarnedDescription" : "Win a round with at least 16 players.",
+          "locale" : "en-US",
+          "localID" : "com.yazdanra.minimatch.achievement.sixteenPlayerWin:en-US",
+          "name" : "House Champion"
+        },
+        {
+          "afterEarnedDescription" : "Vous avez remporté une manche avec au moins 16 joueurs.",
+          "beforeEarnedDescription" : "Remportez une manche avec au moins 16 joueurs.",
+          "locale" : "fr-FR",
+          "localID" : "com.yazdanra.minimatch.achievement.sixteenPlayerWin:fr-FR",
+          "name" : "Champion de la salle"
+        },
+        {
+          "afterEarnedDescription" : "Has ganado una ronda con al menos 16 jugadores.",
+          "beforeEarnedDescription" : "Gana una ronda con al menos 16 jugadores.",
+          "locale" : "es-ES",
+          "localID" : "com.yazdanra.minimatch.achievement.sixteenPlayerWin:es-ES",
+          "name" : "Campeón de la sala"
         }
       ]
     },
@@ -147,10 +591,142 @@
         },
         "archived" : false,
         "points" : 25,
-        "referenceName" : "Full Table",
+        "referenceName" : "Party Champion",
         "repeatable" : false,
         "showBeforeEarned" : true,
         "vendorIdentifier" : "com.yazdanra.minimatch.achievement.fourPlayerWin"
+      },
+      {
+        "activityProperties" : {
+
+        },
+        "archived" : false,
+        "points" : 10,
+        "referenceName" : "High Four",
+        "repeatable" : false,
+        "showBeforeEarned" : true,
+        "vendorIdentifier" : "com.yazdanra.minimatch.achievement.pickFourWin"
+      },
+      {
+        "activityProperties" : {
+
+        },
+        "archived" : false,
+        "points" : 10,
+        "referenceName" : "Great Eight",
+        "repeatable" : false,
+        "showBeforeEarned" : true,
+        "vendorIdentifier" : "com.yazdanra.minimatch.achievement.pickEightWin"
+      },
+      {
+        "activityProperties" : {
+
+        },
+        "archived" : false,
+        "points" : 10,
+        "referenceName" : "Sweet Sixteen",
+        "repeatable" : false,
+        "showBeforeEarned" : true,
+        "vendorIdentifier" : "com.yazdanra.minimatch.achievement.pickSixteenWin"
+      },
+      {
+        "activityProperties" : {
+
+        },
+        "archived" : false,
+        "points" : 25,
+        "referenceName" : "Back-to-Back",
+        "repeatable" : false,
+        "showBeforeEarned" : true,
+        "vendorIdentifier" : "com.yazdanra.minimatch.achievement.twoWinStreak"
+      },
+      {
+        "activityProperties" : {
+
+        },
+        "archived" : false,
+        "points" : 50,
+        "referenceName" : "Four on Fire",
+        "repeatable" : false,
+        "showBeforeEarned" : true,
+        "vendorIdentifier" : "com.yazdanra.minimatch.achievement.fourWinStreak"
+      },
+      {
+        "activityProperties" : {
+
+        },
+        "archived" : false,
+        "points" : 25,
+        "referenceName" : "Proven Winner",
+        "repeatable" : false,
+        "showBeforeEarned" : true,
+        "vendorIdentifier" : "com.yazdanra.minimatch.achievement.sixteenRoundWins"
+      },
+      {
+        "activityProperties" : {
+
+        },
+        "archived" : false,
+        "points" : 50,
+        "referenceName" : "Round Veteran",
+        "repeatable" : false,
+        "showBeforeEarned" : true,
+        "vendorIdentifier" : "com.yazdanra.minimatch.achievement.thirtyTwoRoundWins"
+      },
+      {
+        "activityProperties" : {
+
+        },
+        "archived" : false,
+        "points" : 100,
+        "referenceName" : "Mini Match Legend",
+        "repeatable" : false,
+        "showBeforeEarned" : true,
+        "vendorIdentifier" : "com.yazdanra.minimatch.achievement.sixtyFourRoundWins"
+      },
+      {
+        "activityProperties" : {
+
+        },
+        "archived" : false,
+        "points" : 10,
+        "referenceName" : "Join the Crowd",
+        "repeatable" : false,
+        "showBeforeEarned" : true,
+        "vendorIdentifier" : "com.yazdanra.minimatch.achievement.eightPlayerRound"
+      },
+      {
+        "activityProperties" : {
+
+        },
+        "archived" : false,
+        "points" : 25,
+        "referenceName" : "Packed House",
+        "repeatable" : false,
+        "showBeforeEarned" : true,
+        "vendorIdentifier" : "com.yazdanra.minimatch.achievement.sixteenPlayerRound"
+      },
+      {
+        "activityProperties" : {
+
+        },
+        "archived" : false,
+        "points" : 50,
+        "referenceName" : "Crowd Champion",
+        "repeatable" : false,
+        "showBeforeEarned" : true,
+        "vendorIdentifier" : "com.yazdanra.minimatch.achievement.eightPlayerWin"
+      },
+      {
+        "activityProperties" : {
+
+        },
+        "archived" : false,
+        "points" : 100,
+        "referenceName" : "House Champion",
+        "repeatable" : false,
+        "showBeforeEarned" : true,
+        "vendorIdentifier" : "com.yazdanra.minimatch.achievement.sixteenPlayerWin"
       }
     ],
     "gameActivities" : [
@@ -173,7 +749,19 @@
         "com.yazdanra.minimatch.play" : [
           "com.yazdanra.minimatch.achievement.firstWin",
           "com.yazdanra.minimatch.achievement.zeroWin",
-          "com.yazdanra.minimatch.achievement.fourPlayerWin"
+          "com.yazdanra.minimatch.achievement.fourPlayerWin",
+          "com.yazdanra.minimatch.achievement.pickFourWin",
+          "com.yazdanra.minimatch.achievement.pickEightWin",
+          "com.yazdanra.minimatch.achievement.pickSixteenWin",
+          "com.yazdanra.minimatch.achievement.twoWinStreak",
+          "com.yazdanra.minimatch.achievement.fourWinStreak",
+          "com.yazdanra.minimatch.achievement.sixteenRoundWins",
+          "com.yazdanra.minimatch.achievement.thirtyTwoRoundWins",
+          "com.yazdanra.minimatch.achievement.sixtyFourRoundWins",
+          "com.yazdanra.minimatch.achievement.eightPlayerRound",
+          "com.yazdanra.minimatch.achievement.sixteenPlayerRound",
+          "com.yazdanra.minimatch.achievement.eightPlayerWin",
+          "com.yazdanra.minimatch.achievement.sixteenPlayerWin"
         ]
       }
     ],

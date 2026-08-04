@@ -79,6 +79,19 @@ struct GameRoundResult: Equatable, Sendable {
     let roundNumber: UInt32
     let selections: [GameSelection]
     let winnerPlayerID: String?
+    let winnerAchievementIDs: Set<String>
+
+    init(
+        roundNumber: UInt32,
+        selections: [GameSelection],
+        winnerPlayerID: String?,
+        winnerAchievementIDs: Set<String> = []
+    ) {
+        self.roundNumber = roundNumber
+        self.selections = selections
+        self.winnerPlayerID = winnerPlayerID
+        self.winnerAchievementIDs = winnerAchievementIDs
+    }
 }
 
 struct GameSelection: Identifiable, Equatable, Sendable {

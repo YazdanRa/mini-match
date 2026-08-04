@@ -78,6 +78,14 @@ func TestFirestoreDocumentsKeepPicksPrivateAndPreserveUint64(t *testing.T) {
 	if err := table.RevealRound("maya", 1); err != nil {
 		t.Fatal(err)
 	}
+	table.LastResult.WinnerTotalWins = 64
+	table.LastResult.WinnerWinStreak = 4
+	table.LastResult.WinnerBestWinStreak = 8
+	private = privateDocument(table)
+	if private.LastResult.WinnerTotalWins != "64" || private.LastResult.WinnerWinStreak != 4 ||
+		private.LastResult.WinnerBestWinStreak != 8 {
+		t.Fatal("private document discarded authoritative winner statistics")
+	}
 	public = publicDocument(table)
 	if public.CurrentRound != nil || public.State != "active" ||
 		public.WinsToFinish != 0 || public.WinnerPlayerID != "" {
@@ -85,6 +93,10 @@ func TestFirestoreDocumentsKeepPicksPrivateAndPreserveUint64(t *testing.T) {
 	}
 	if got := public.LastResult.Selections[0].Pick; got != "18446744073709551615" {
 		t.Fatalf("revealed pick = %q", got)
+	}
+	if public.LastResult.WinnerTotalWins != "" || public.LastResult.WinnerWinStreak != 0 ||
+		public.LastResult.WinnerBestWinStreak != 0 {
+		t.Fatal("safe document exposed private winner statistics")
 	}
 	if got := public.ResultPlayerIDs; !reflect.DeepEqual(got, []string{"maya", "liam"}) {
 		t.Fatalf("result player IDs = %#v", got)
@@ -118,5 +130,55 @@ func TestLegacyFinishedDocumentReturnsToLobby(t *testing.T) {
 	}
 	if table.CurrentRound.Number != 6 {
 		t.Fatalf("legacy next round = %d, want 6", table.CurrentRound.Number)
+	}
+}
+
+func TestRoundStatsDocumentsPreserveNewCountersAndIgnoreLegacyWins(t *testing.T) {
+	encoded := encodePlayerStats(game.PlayerStats{
+		TotalWins:        math.MaxUint64,
+		CurrentWinStreak: math.MaxUint32,
+		BestWinStreak:    math.MaxUint32,
+		PlayerIDs:        []string{"maya", "maya-new-account"},
+	})
+	if encoded.TotalRoundWins != "18446744073709551615" ||
+		encoded.CurrentWinStreak != math.MaxUint32 ||
+		encoded.BestWinStreak != math.MaxUint32 {
+		t.Fatalf("encoded player stats = %#v", encoded)
+	}
+	decoded, err := decodePlayerStatsDocument(encoded)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if decoded.TotalWins != math.MaxUint64 || decoded.CurrentWinStreak != math.MaxUint32 ||
+		decoded.BestWinStreak != math.MaxUint32 ||
+		!reflect.DeepEqual(decoded.PlayerIDs, []string{"maya", "maya-new-account"}) {
+		t.Fatalf("decoded player stats = %#v", decoded)
+	}
+
+	legacy, err := decodePlayerStatsDocument(playerStatsDocument{LegacyWins: 64})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if legacy.TotalWins != 0 {
+		t.Fatalf("legacy completed-match wins became round wins: %d", legacy.TotalWins)
+	}
+	if _, err := decodePlayerStatsDocument(playerStatsDocument{CurrentWinStreak: -1}); err == nil {
+		t.Fatal("negative streak decoded successfully")
+	}
+
+	result := &game.Result{
+		RoundNumber:         7,
+		Selections:          []game.Selection{},
+		WinnerID:            "maya",
+		WinnerTotalWins:     math.MaxUint64,
+		WinnerWinStreak:     math.MaxUint32,
+		WinnerBestWinStreak: math.MaxUint32,
+	}
+	decodedResult, err := decodeResult(encodeResult(result))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(decodedResult, result) {
+		t.Fatalf("round result = %#v, want %#v", decodedResult, result)
 	}
 }
