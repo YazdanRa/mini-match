@@ -1,0 +1,178 @@
+:root {
+  color-scheme: light dark;
+  font-family: ui-rounded, "SF Pro Rounded", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-synthesis: none;
+  --background: #f2f2f7;
+  --surface: #ffffff;
+  --text: #1c1c1e;
+  --muted: #636366;
+  --blue: #0a4ac2;
+  --coral: #b52e29;
+  --border: rgba(0, 38, 92, 0.12);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  min-height: 100%;
+  background: var(--background);
+}
+
+body {
+  min-height: 100vh;
+  margin: 0;
+  color: var(--text);
+  background:
+    radial-gradient(circle at 10% 0%, rgba(181, 46, 41, 0.09), transparent 26rem),
+    radial-gradient(circle at 100% 25%, rgba(10, 74, 194, 0.11), transparent 30rem),
+    var(--background);
+}
+
+a {
+  color: var(--blue);
+  text-underline-offset: 0.18em;
+}
+
+a:hover {
+  color: var(--coral);
+}
+
+a:focus-visible {
+  border-radius: 0.2rem;
+  outline: 3px solid rgba(10, 74, 194, 0.32);
+  outline-offset: 3px;
+}
+
+.home {
+  display: grid;
+  place-items: center;
+  padding: 2rem;
+}
+
+.home-content {
+  display: grid;
+  justify-items: center;
+  text-align: center;
+}
+
+.logo {
+  width: clamp(9rem, 32vw, 15rem);
+  height: auto;
+  border-radius: 22.5%;
+  box-shadow: 0 1.5rem 4rem rgba(0, 38, 92, 0.18);
+}
+
+.home h1 {
+  margin: 1.5rem 0 0;
+  color: #00265c;
+  font-size: clamp(2.5rem, 8vw, 4.5rem);
+  font-weight: 800;
+  letter-spacing: -0.045em;
+  line-height: 1;
+}
+
+.home p {
+  margin: 0.8rem 0 0;
+  color: var(--muted);
+  font-size: clamp(1.15rem, 3vw, 1.4rem);
+}
+
+.legal-page {
+  width: min(100% - 2rem, 46rem);
+  margin: 0 auto;
+  padding: clamp(2rem, 6vw, 5rem) 0;
+}
+
+.brand {
+  display: inline-block;
+  margin-bottom: 2rem;
+  color: #00265c;
+  font-size: 1.2rem;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  text-decoration: none;
+}
+
+article {
+  padding: clamp(1.5rem, 5vw, 3.5rem);
+  border: 1px solid var(--border);
+  border-radius: 1.5rem;
+  background: var(--surface);
+  box-shadow: 0 1rem 3rem rgba(0, 38, 92, 0.08);
+}
+
+article header {
+  margin-bottom: 2.5rem;
+}
+
+.eyebrow {
+  margin: 0 0 0.5rem;
+  color: var(--coral);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+article h1 {
+  margin: 0;
+  color: #00265c;
+  font-size: clamp(2.25rem, 8vw, 3.5rem);
+  letter-spacing: -0.045em;
+  line-height: 1.05;
+}
+
+.effective-date {
+  margin: 0.75rem 0 0;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+article h2 {
+  margin: 2.25rem 0 0.6rem;
+  color: #00265c;
+  font-size: 1.28rem;
+  letter-spacing: -0.015em;
+}
+
+article p,
+article li {
+  line-height: 1.65;
+}
+
+article ul {
+  padding-left: 1.35rem;
+}
+
+article li + li {
+  margin-top: 0.7rem;
+}
+
+.legal-nav {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.5rem 0 0;
+  font-size: 0.95rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #101114;
+    --surface: #1c1c1e;
+    --text: #f2f2f7;
+    --muted: #aeaeb2;
+    --blue: #6ea0ff;
+    --coral: #ff746c;
+    --border: rgba(255, 255, 255, 0.1);
+  }
+
+  .home h1,
+  .brand,
+  article h1,
+  article h2 {
+    color: #f2f2f7;
+  }
+}
