@@ -81,7 +81,9 @@ struct LobbyView: View {
         }
         .onChange(of: model.table?.lastResult?.roundNumber) { _, roundNumber in
             guard roundNumber != nil, let roundResult = model.table?.lastResult else { return }
-            roundResultSoundPlayer.play(for: roundResult)
+            Task {
+                await roundResultSoundPlayer.play(for: roundResult)
+            }
 
             if let result = model.result {
                 UIAccessibility.post(notification: .announcement, argument: result.accessibilitySummary)
