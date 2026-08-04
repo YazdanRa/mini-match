@@ -159,6 +159,12 @@ message RoundResult {
   uint32 round_number = 1;
   repeated Selection selections = 2;
   optional string winner_player_id = 3;
+  // Deprecated: exact private counters are no longer returned to table participants.
+  uint64 winner_total_wins = 4 [deprecated = true];
+  uint32 winner_win_streak = 5 [deprecated = true];
+  uint32 winner_best_win_streak = 6 [deprecated = true];
+  // Satisfied lifetime/streak achievement identifiers, without exposing exact counters.
+  repeated string winner_achievement_ids = 7;
 }
 
 message Selection {

@@ -6,6 +6,7 @@ import (
 	"net"
 	"net/http"
 	"net/http/httptest"
+	"slices"
 	"testing"
 	"time"
 
@@ -24,6 +25,20 @@ func (v testVerifier) VerifyIDToken(_ context.Context, token string) (string, er
 		return "", errors.New("invalid token")
 	}
 	return uid, nil
+}
+
+type revealTrackingRepository struct {
+	game.Repository
+	reveals int
+}
+
+func (r *revealTrackingRepository) RevealRound(
+	ctx context.Context,
+	id string,
+	reveal func(*game.Table) error,
+) (*game.Table, error) {
+	r.reveals++
+	return r.Repository.RevealRound(ctx, id, reveal)
 }
 
 func TestPartyCodeMatchesGameKitFormat(t *testing.T) {
@@ -100,9 +115,10 @@ func TestJoinTableEnforcesLiveGameCenterIdentityOwnership(t *testing.T) {
 }
 
 func TestConnectAndGRPCKeepPicksPrivateUntilReveal(t *testing.T) {
+	repository := &revealTrackingRepository{Repository: game.NewMemoryRepository()}
 	mux := http.NewServeMux()
 	path, handler := minimatchv1connect.NewMiniMatchServiceHandler(
-		New(game.NewMemoryRepository()),
+		New(repository),
 		connect.WithInterceptors(authn.NewInterceptor(testVerifier{
 			"host-token":     "maya",
 			"player-token":   "liam",
@@ -271,6 +287,9 @@ func TestConnectAndGRPCKeepPicksPrivateUntilReveal(t *testing.T) {
 		revealed.Msg.Table.Players[0].Wins != 0 {
 		t.Fatal("reveal did not return a scoreless active lobby")
 	}
+	if repository.reveals != 1 {
+		t.Fatalf("RevealRound repository calls = %d, want 1", repository.reveals)
+	}
 
 	if _, err := grpcClient.BeginRound(ctx, authenticated(&minimatchv1.BeginRoundRequest{
 		TableId:      tableID,
@@ -302,6 +321,39 @@ func TestConnectAndGRPCKeepPicksPrivateUntilReveal(t *testing.T) {
 	}
 	if legacy.Msg.Table.CurrentRound != nil || legacy.Msg.Table.LastResult.GetRoundNumber() != 2 {
 		t.Fatal("legacy StartRound did not reveal the active round")
+	}
+	if repository.reveals != 2 {
+		t.Fatalf("reveal aliases repository calls = %d, want 2", repository.reveals)
+	}
+}
+
+func TestToProtoRedactsWinnerStatsAndIncludesAchievementEvidence(t *testing.T) {
+	table, _ := game.NewTable("table", "Friday", "ABC-DEF", "maya", "Maya", "fox")
+	table.LastResult = &game.Result{
+		RoundNumber:         9,
+		WinnerID:            "maya",
+		WinnerTotalWins:     64,
+		WinnerWinStreak:     4,
+		WinnerBestWinStreak: 8,
+	}
+
+	result := toProto(table).GetLastResult()
+	if result.GetWinnerTotalWins() != 0 || result.GetWinnerWinStreak() != 0 ||
+		result.GetWinnerBestWinStreak() != 0 {
+		t.Fatalf("exact winner stats leaked into the shared response: %#v", result)
+	}
+	wantAchievements := []string{
+		"com.yazdanra.minimatch.achievement.twoWinStreak",
+		"com.yazdanra.minimatch.achievement.fourWinStreak",
+		"com.yazdanra.minimatch.achievement.sixteenRoundWins",
+		"com.yazdanra.minimatch.achievement.thirtyTwoRoundWins",
+		"com.yazdanra.minimatch.achievement.sixtyFourRoundWins",
+	}
+	if !slices.Equal(result.GetWinnerAchievementIds(), wantAchievements) {
+		t.Fatalf("winner achievements = %v, want %v", result.GetWinnerAchievementIds(), wantAchievements)
+	}
+	if toProto(table).WinnerLifetimeWins != nil {
+		t.Fatal("new round wins leaked into deprecated completed-match totals")
 	}
 }
 

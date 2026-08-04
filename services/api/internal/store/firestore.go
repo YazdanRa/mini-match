@@ -3,8 +3,10 @@ package store
 import (
 	"context"
 	"crypto/sha256"
+	"errors"
 	"fmt"
 	"math"
+	"sort"
 	"strconv"
 	"time"
 
@@ -99,28 +101,109 @@ func (r *FirestoreRepository) Update(ctx context.Context, id string, update func
 	return updated, nil
 }
 
-func (r *FirestoreRepository) DeleteProfile(ctx context.Context, playerID string) error {
-	var snapshots []*firestore.DocumentSnapshot
-	seen := make(map[string]struct{})
-	for _, field := range []string{"player_ids", "result_player_ids"} {
-		matches, err := r.client.Collection(publicTables).
-			Where(field, "array-contains", playerID).
-			Documents(ctx).
-			GetAll()
+func (r *FirestoreRepository) RevealRound(
+	ctx context.Context,
+	id string,
+	reveal func(*game.Table) error,
+) (*game.Table, error) {
+	private := r.client.Collection(privateTables).Doc(id)
+	public := r.client.Collection(publicTables).Doc(id)
+	var updated *game.Table
+	err := r.client.RunTransaction(ctx, func(_ context.Context, tx *firestore.Transaction) error {
+		snapshot, err := tx.Get(private)
 		if err != nil {
-			return translateError(err)
+			return err
 		}
-		for _, snapshot := range matches {
-			if _, exists := seen[snapshot.Ref.ID]; exists {
+		table, err := decodeTable(id, snapshot)
+		if err != nil {
+			return err
+		}
+		previousResult := table.LastResult
+		if err := reveal(table); err != nil {
+			return err
+		}
+		if table.LastResult == nil || table.LastResult == previousResult {
+			return game.ErrNotReady
+		}
+
+		gameCenterIDs := roundGameCenterIDs(table)
+		stats := make(map[string]game.PlayerStats, len(gameCenterIDs))
+		for _, gameCenterID := range gameCenterIDs {
+			reference := r.client.Collection(playerStats).Doc(statsDocumentID(gameCenterID))
+			snapshot, err := tx.Get(reference)
+			if status.Code(err) == codes.NotFound {
 				continue
 			}
-			seen[snapshot.Ref.ID] = struct{}{}
-			snapshots = append(snapshots, snapshot)
+			if err != nil {
+				return err
+			}
+			current, err := decodePlayerStats(snapshot)
+			if err != nil {
+				return err
+			}
+			stats[gameCenterID] = current
 		}
+		if err := table.ApplyRoundStats(stats); err != nil {
+			return err
+		}
+		encodedStats := make(map[string]playerStatsDocument, len(stats))
+		for gameCenterID, current := range stats {
+			encodedStats[gameCenterID] = encodePlayerStats(current)
+		}
+
+		if err := tx.Set(private, privateDocument(table)); err != nil {
+			return err
+		}
+		if err := tx.Set(public, publicDocument(table)); err != nil {
+			return err
+		}
+		for gameCenterID, document := range encodedStats {
+			if err := tx.Set(
+				r.client.Collection(playerStats).Doc(statsDocumentID(gameCenterID)),
+				document,
+			); err != nil {
+				return err
+			}
+		}
+		updated = table
+		return nil
+	})
+	if err != nil {
+		return nil, translateError(err)
 	}
+	return updated, nil
+}
+
+func (r *FirestoreRepository) DeleteProfile(ctx context.Context, playerID string) error {
 	err := r.client.RunTransaction(ctx, func(_ context.Context, tx *firestore.Transaction) error {
+		var snapshots []*firestore.DocumentSnapshot
+		seen := make(map[string]struct{})
+		for _, field := range []string{"player_ids", "result_player_ids"} {
+			matches, err := tx.Documents(
+				r.client.Collection(publicTables).Where(field, "array-contains", playerID),
+			).GetAll()
+			if err != nil {
+				return err
+			}
+			for _, snapshot := range matches {
+				if _, exists := seen[snapshot.Ref.ID]; exists {
+					continue
+				}
+				seen[snapshot.Ref.ID] = struct{}{}
+				snapshots = append(snapshots, snapshot)
+			}
+		}
+		statsMatches, err := tx.Documents(
+			r.client.Collection(playerStats).Where("player_ids", "array-contains", playerID),
+		).GetAll()
+		if err != nil {
+			return err
+		}
 		tables := make([]*game.Table, 0, len(snapshots))
-		gameCenterIDs := make(map[string]struct{})
+		statsReferences := make(map[string]*firestore.DocumentRef, len(statsMatches))
+		for _, snapshot := range statsMatches {
+			statsReferences[snapshot.Ref.ID] = snapshot.Ref
+		}
 		for _, public := range snapshots {
 			private := r.client.Collection(privateTables).Doc(public.Ref.ID)
 			snapshot, err := tx.Get(private)
@@ -134,19 +217,22 @@ func (r *FirestoreRepository) DeleteProfile(ctx context.Context, playerID string
 			tables = append(tables, table)
 			for _, player := range table.Players {
 				if player.ID == playerID && player.GameCenterID != "" {
-					gameCenterIDs[player.GameCenterID] = struct{}{}
+					reference := r.client.Collection(playerStats).Doc(statsDocumentID(player.GameCenterID))
+					statsReferences[reference.ID] = reference
 				}
 			}
 		}
-		for gameCenterID := range gameCenterIDs {
-			stats := r.client.Collection(playerStats).Doc(statsDocumentID(gameCenterID))
-			if _, err := tx.Get(stats); err != nil && status.Code(err) != codes.NotFound {
+		for _, reference := range statsReferences {
+			if _, err := tx.Get(reference); err != nil && status.Code(err) != codes.NotFound {
 				return err
 			}
 		}
 		for _, table := range tables {
 			replacementID := "deleted:" + statsDocumentID(playerID+"\x00"+table.ID)
 			if err := table.DeletePlayerProfile(playerID, replacementID); err != nil {
+				if errors.Is(err, game.ErrNotFound) {
+					continue
+				}
 				return err
 			}
 			if err := tx.Set(
@@ -162,10 +248,8 @@ func (r *FirestoreRepository) DeleteProfile(ctx context.Context, playerID string
 				return err
 			}
 		}
-		for gameCenterID := range gameCenterIDs {
-			if err := tx.Delete(
-				r.client.Collection(playerStats).Doc(statsDocumentID(gameCenterID)),
-			); err != nil {
+		for _, reference := range statsReferences {
+			if err := tx.Delete(reference); err != nil {
 				return err
 			}
 		}
@@ -179,7 +263,11 @@ type joinCodeDocument struct {
 }
 
 type playerStatsDocument struct {
-	Wins int64 `firestore:"wins"`
+	LegacyWins       int64    `firestore:"wins,omitempty"`
+	TotalRoundWins   string   `firestore:"total_round_wins,omitempty"`
+	CurrentWinStreak int64    `firestore:"current_win_streak"`
+	BestWinStreak    int64    `firestore:"best_win_streak"`
+	PlayerIDs        []string `firestore:"player_ids"`
 }
 
 type tableDocument struct {
@@ -212,9 +300,12 @@ type roundDocument struct {
 }
 
 type resultDocument struct {
-	RoundNumber int64               `firestore:"round_number"`
-	Selections  []selectionDocument `firestore:"selections"`
-	WinnerID    string              `firestore:"winner_player_id,omitempty"`
+	RoundNumber         int64               `firestore:"round_number"`
+	Selections          []selectionDocument `firestore:"selections"`
+	WinnerID            string              `firestore:"winner_player_id,omitempty"`
+	WinnerTotalWins     string              `firestore:"winner_total_wins,omitempty"`
+	WinnerWinStreak     int64               `firestore:"winner_win_streak,omitempty"`
+	WinnerBestWinStreak int64               `firestore:"winner_best_win_streak,omitempty"`
 }
 
 type selectionDocument struct {
@@ -287,7 +378,7 @@ func publicDocument(table *game.Table) safeTableDocument {
 		Version:            strconv.FormatUint(table.Version, 10),
 		EventSequence:      strconv.FormatUint(table.EventSequence, 10),
 		WinnerLifetimeWins: optionalUint64(table.WinnerLifetimeWins),
-		LastResult:         encodeResult(table.LastResult),
+		LastResult:         encodePublicResult(table.LastResult),
 	}
 	document.CurrentRound = encodeRound(table.CurrentRound)
 	for _, player := range table.Players {
@@ -330,14 +421,77 @@ func statsDocumentID(gameCenterID string) string {
 	return fmt.Sprintf("%x", sha256.Sum256([]byte(gameCenterID)))
 }
 
+func roundGameCenterIDs(table *game.Table) []string {
+	if table.LastResult == nil {
+		return nil
+	}
+	participants := make(map[string]struct{}, len(table.LastResult.Selections))
+	for _, selection := range table.LastResult.Selections {
+		participants[selection.PlayerID] = struct{}{}
+	}
+	identities := make(map[string]struct{}, len(participants))
+	for _, player := range table.Players {
+		if _, participated := participants[player.ID]; participated && player.GameCenterID != "" {
+			identities[player.GameCenterID] = struct{}{}
+		}
+	}
+	result := make([]string, 0, len(identities))
+	for identity := range identities {
+		result = append(result, identity)
+	}
+	sort.Strings(result)
+	return result
+}
+
+func decodePlayerStats(snapshot *firestore.DocumentSnapshot) (game.PlayerStats, error) {
+	var document playerStatsDocument
+	if err := snapshot.DataTo(&document); err != nil {
+		return game.PlayerStats{}, fmt.Errorf("decode player stats: %w", err)
+	}
+	return decodePlayerStatsDocument(document)
+}
+
+func decodePlayerStatsDocument(document playerStatsDocument) (game.PlayerStats, error) {
+	if document.CurrentWinStreak < 0 || document.CurrentWinStreak > math.MaxUint32 ||
+		document.BestWinStreak < 0 || document.BestWinStreak > math.MaxUint32 {
+		return game.PlayerStats{}, fmt.Errorf("decode player stats: streak counter is out of range")
+	}
+	totalWins := uint64(0)
+	if document.TotalRoundWins != "" {
+		var err error
+		totalWins, err = strconv.ParseUint(document.TotalRoundWins, 10, 64)
+		if err != nil {
+			return game.PlayerStats{}, fmt.Errorf("decode player stats total round wins: %w", err)
+		}
+	}
+	return game.PlayerStats{
+		TotalWins:        totalWins,
+		CurrentWinStreak: uint32(document.CurrentWinStreak),
+		BestWinStreak:    uint32(document.BestWinStreak),
+		PlayerIDs:        document.PlayerIDs,
+	}, nil
+}
+
+func encodePlayerStats(stats game.PlayerStats) playerStatsDocument {
+	return playerStatsDocument{
+		TotalRoundWins:   optionalUint64(stats.TotalWins),
+		CurrentWinStreak: int64(stats.CurrentWinStreak),
+		BestWinStreak:    int64(stats.BestWinStreak),
+		PlayerIDs:        stats.PlayerIDs,
+	}
+}
+
 func encodeResult(result *game.Result) *resultDocument {
 	if result == nil {
 		return nil
 	}
 	document := &resultDocument{
-		RoundNumber: int64(result.RoundNumber),
-		Selections:  make([]selectionDocument, 0, len(result.Selections)),
-		WinnerID:    result.WinnerID,
+		RoundNumber:         int64(result.RoundNumber),
+		Selections:          make([]selectionDocument, 0, len(result.Selections)),
+		WinnerID:            result.WinnerID,
+		WinnerTotalWins:     optionalUint64(result.WinnerTotalWins),
+		WinnerWinStreak:     int64(result.WinnerWinStreak),
+		WinnerBestWinStreak: int64(result.WinnerBestWinStreak),
 	}
 	for _, selection := range result.Selections {
 		document.Selections = append(document.Selections, selectionDocument{
@@ -345,6 +499,16 @@ func encodeResult(result *game.Result) *resultDocument {
 			DisplayName: selection.DisplayName,
 			Pick:        strconv.FormatUint(selection.Pick, 10),
 		})
+	}
+	return document
+}
+
+func encodePublicResult(result *game.Result) *resultDocument {
+	document := encodeResult(result)
+	if document != nil {
+		document.WinnerTotalWins = ""
+		document.WinnerWinStreak = 0
+		document.WinnerBestWinStreak = 0
 	}
 	return document
 }
@@ -449,6 +613,18 @@ func decodeResult(document *resultDocument) (*game.Result, error) {
 		Selections:  make([]game.Selection, 0, len(document.Selections)),
 		WinnerID:    document.WinnerID,
 	}
+	if document.WinnerTotalWins != "" {
+		result.WinnerTotalWins, err = strconv.ParseUint(document.WinnerTotalWins, 10, 64)
+		if err != nil {
+			return nil, fmt.Errorf("decode winner total wins: %w", err)
+		}
+	}
+	if document.WinnerWinStreak < 0 || document.WinnerWinStreak > math.MaxUint32 ||
+		document.WinnerBestWinStreak < 0 || document.WinnerBestWinStreak > math.MaxUint32 {
+		return nil, fmt.Errorf("decode winner win streak: counter is out of range")
+	}
+	result.WinnerWinStreak = uint32(document.WinnerWinStreak)
+	result.WinnerBestWinStreak = uint32(document.WinnerBestWinStreak)
 	for _, selection := range document.Selections {
 		pick, err := strconv.ParseUint(selection.Pick, 10, 64)
 		if err != nil {

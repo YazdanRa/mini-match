@@ -4,6 +4,28 @@ import Testing
 
 struct GameModelTests {
     @Test
+    @MainActor
+    func pendingAchievementReportsSurviveRelaunch() throws {
+        let suiteName = "MiniMatchTests.achievements.\(UUID().uuidString)"
+        let defaults = try #require(UserDefaults(suiteName: suiteName))
+        defer { defaults.removePersistentDomain(forName: suiteName) }
+        let pending: Set<String> = [
+            GameCenterAchievement.pickFourWin.rawValue,
+            GameCenterAchievement.eightPlayerRound.rawValue,
+        ]
+
+        UserDefaultsAchievementPendingStore(defaults: defaults).save(
+            pending,
+            for: "game-player"
+        )
+        let relaunchedStore = UserDefaultsAchievementPendingStore(defaults: defaults)
+
+        #expect(relaunchedStore.load(for: "game-player") == pending)
+        relaunchedStore.save([], for: "game-player")
+        #expect(relaunchedStore.load(for: "game-player").isEmpty)
+    }
+
+    @Test
     func serverConfirmedWinsEarnTheExpectedGameCenterAchievements() {
         var table = PreviewFixtures.lobbyTable
         table.lastResult = GameRoundResult(
@@ -27,6 +49,122 @@ struct GameModelTests {
             selections: table.lastResult?.selections ?? [],
             winnerPlayerID: "zoe"
         )
+        #expect(GameCenterAchievement.earned(
+            in: table,
+            currentPlayerID: PreviewFixtures.currentPlayerID
+        ).isEmpty)
+    }
+
+    @Test
+    func exactWinningPicksEarnTheirAchievements() {
+        for (pick, achievement) in [
+            (UInt64(4), GameCenterAchievement.pickFourWin),
+            (UInt64(8), GameCenterAchievement.pickEightWin),
+            (UInt64(16), GameCenterAchievement.pickSixteenWin),
+        ] {
+            let earned = GameCenterAchievement.earned(
+                in: achievementTable(playerCount: 2, winnerPick: pick),
+                currentPlayerID: PreviewFixtures.currentPlayerID
+            )
+
+            #expect(earned == [.firstWin, achievement])
+        }
+    }
+
+    @Test
+    func serverConfirmedTotalWinMilestonesEarnAchievements() {
+        let cases: [(Set<GameCenterAchievement>, Set<GameCenterAchievement>)] = [
+            ([], [.firstWin]),
+            ([.sixteenRoundWins], [.firstWin, .sixteenRoundWins]),
+            ([.sixteenRoundWins, .thirtyTwoRoundWins], [
+                .firstWin, .sixteenRoundWins, .thirtyTwoRoundWins,
+            ]),
+            ([.sixteenRoundWins, .thirtyTwoRoundWins, .sixtyFourRoundWins], [
+                .firstWin, .sixteenRoundWins, .thirtyTwoRoundWins, .sixtyFourRoundWins,
+            ]),
+        ]
+
+        for (winnerAchievements, expected) in cases {
+            let earned = GameCenterAchievement.earned(
+                in: achievementTable(
+                    playerCount: 2,
+                    winnerPick: 1,
+                    winnerAchievements: winnerAchievements
+                ),
+                currentPlayerID: PreviewFixtures.currentPlayerID
+            )
+
+            #expect(earned == expected)
+        }
+    }
+
+    @Test
+    func serverConfirmedBestStreakMilestonesRecoverAchievements() {
+        let cases: [(Set<GameCenterAchievement>, Set<GameCenterAchievement>)] = [
+            ([], [.firstWin]),
+            ([.twoWinStreak], [.firstWin, .twoWinStreak]),
+            ([.twoWinStreak, .fourWinStreak], [.firstWin, .twoWinStreak, .fourWinStreak]),
+        ]
+
+        for (winnerAchievements, expected) in cases {
+            let earned = GameCenterAchievement.earned(
+                in: achievementTable(
+                    playerCount: 2,
+                    winnerPick: 1,
+                    winnerAchievements: winnerAchievements
+                ),
+                currentPlayerID: PreviewFixtures.currentPlayerID
+            )
+
+            #expect(earned == expected)
+        }
+    }
+
+    @Test
+    func tableSizeAchievementsUseRevealedSelectionThresholds() {
+        let cases: [(Int, Set<GameCenterAchievement>)] = [
+            (7, [.firstWin, .fourPlayerWin]),
+            (8, [.firstWin, .fourPlayerWin, .eightPlayerWin, .eightPlayerRound]),
+            (15, [.firstWin, .fourPlayerWin, .eightPlayerWin, .eightPlayerRound]),
+            (16, [
+                .firstWin,
+                .fourPlayerWin,
+                .eightPlayerWin,
+                .sixteenPlayerWin,
+                .eightPlayerRound,
+                .sixteenPlayerRound,
+            ]),
+        ]
+
+        for (playerCount, expected) in cases {
+            let earned = GameCenterAchievement.earned(
+                in: achievementTable(playerCount: playerCount, winnerPick: 1),
+                currentPlayerID: PreviewFixtures.currentPlayerID
+            )
+
+            #expect(earned == expected)
+        }
+    }
+
+    @Test
+    func nonWinnerEarnsOnlyLargeRoundParticipationAchievements() {
+        let participating = GameCenterAchievement.earned(
+            in: achievementTable(playerCount: 16, winnerPlayerID: "player-1", winnerPick: 1),
+            currentPlayerID: PreviewFixtures.currentPlayerID
+        )
+        #expect(participating == [.eightPlayerRound, .sixteenPlayerRound])
+    }
+
+    @Test
+    func achievementsRequireTheLocalPlayerToParticipateInTheRevealedRound() {
+        var table = achievementTable(playerCount: 8, winnerPick: 1)
+        table.lastResult = GameRoundResult(
+            roundNumber: 1,
+            selections: table.lastResult?.selections.dropFirst().map { $0 } ?? [],
+            winnerPlayerID: PreviewFixtures.currentPlayerID,
+            winnerAchievementIDs: Set(GameCenterAchievement.allCases.map(\.rawValue))
+        )
+
         #expect(GameCenterAchievement.earned(
             in: table,
             currentPlayerID: PreviewFixtures.currentPlayerID
@@ -563,6 +701,30 @@ private func restorableWinningModel() -> GameModel {
         client: PreviewGameClient(table: table),
         sessionStore: store
     )
+}
+
+private func achievementTable(
+    playerCount: Int,
+    winnerPlayerID: String = PreviewFixtures.currentPlayerID,
+    winnerPick: UInt64,
+    winnerAchievements: Set<GameCenterAchievement> = []
+) -> GameTable {
+    var table = PreviewFixtures.lobbyTable
+    let selections = (0..<playerCount).map { index in
+        let playerID = index == 0 ? PreviewFixtures.currentPlayerID : "player-\(index)"
+        return GameSelection(
+            playerID: playerID,
+            displayName: "Player \(index)",
+            pick: playerID == winnerPlayerID ? winnerPick : UInt64(index + 100)
+        )
+    }
+    table.lastResult = GameRoundResult(
+        roundNumber: 1,
+        selections: selections,
+        winnerPlayerID: winnerPlayerID,
+        winnerAchievementIDs: Set(winnerAchievements.map(\.rawValue))
+    )
+    return table
 }
 
 private func gameCenterIdentity(teamPlayerID: String) -> GameCenterIdentityDTO {

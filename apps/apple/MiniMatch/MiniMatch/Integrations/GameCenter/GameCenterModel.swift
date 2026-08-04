@@ -29,11 +29,53 @@ struct ActivityStartGate {
 }
 
 @MainActor
+protocol AchievementPendingPersisting: AnyObject {
+    func load(for playerID: String) -> Set<String>
+    func save(_ achievementIDs: Set<String>, for playerID: String)
+}
+
+@MainActor
+final class UserDefaultsAchievementPendingStore: AchievementPendingPersisting {
+    private let defaults: UserDefaults
+    private let key: String
+
+    init(defaults: UserDefaults = .standard, key: String = "pendingGameCenterAchievements") {
+        self.defaults = defaults
+        self.key = key
+    }
+
+    func load(for playerID: String) -> Set<String> {
+        Set(loadAll()[playerID] ?? [])
+    }
+
+    func save(_ achievementIDs: Set<String>, for playerID: String) {
+        var all = loadAll()
+        if achievementIDs.isEmpty {
+            all.removeValue(forKey: playerID)
+        } else {
+            all[playerID] = achievementIDs.sorted()
+        }
+        if all.isEmpty {
+            defaults.removeObject(forKey: key)
+        } else {
+            defaults.set(try? JSONEncoder().encode(all), forKey: key)
+        }
+    }
+
+    private func loadAll() -> [String: [String]] {
+        defaults.data(forKey: key).flatMap {
+            try? JSONDecoder().decode([String: [String]].self, from: $0)
+        } ?? [:]
+    }
+}
+
+@MainActor
 @Observable
 final class GameCenterModel: NSObject {
     static let activityID = "com.yazdanra.minimatch.play"
 
     private let isEnabled: Bool
+    private let achievementPendingStore: any AchievementPendingPersisting
     private var started = false
     private var listenerIsRegistered = false
     private var achievementPlayerID: String?
@@ -67,8 +109,13 @@ final class GameCenterModel: NSObject {
         gameModel?.isEndingGameCenterSession == true
     }
 
-    init(isEnabled: Bool = true) {
+    init(
+        isEnabled: Bool = true,
+        achievementPendingStore: any AchievementPendingPersisting =
+            UserDefaultsAchievementPendingStore()
+    ) {
         self.isEnabled = isEnabled
+        self.achievementPendingStore = achievementPendingStore
         restrictionIsResolved = !isEnabled
         super.init()
     }
@@ -387,6 +434,10 @@ final class GameCenterModel: NSObject {
         let player = GKLocalPlayer.local
         isAuthenticated = player.isAuthenticated
         authenticatedTeamPlayerID = isAuthenticated ? player.teamPlayerID : nil
+        bindAchievementPlayer(isAuthenticated ? player.gamePlayerID : nil)
+        if isAuthenticated {
+            reportPendingAchievements(for: player)
+        }
     }
 
     private func registerListener() {
@@ -625,6 +676,12 @@ final class GameCenterModel: NSObject {
             in: table,
             currentPlayerID: currentPlayerID
         ).map(\.rawValue))
+        persistPendingAchievements()
+        reportPendingAchievements(for: player)
+    }
+
+    private func reportPendingAchievements(for player: GKLocalPlayer) {
+        guard player.isAuthenticated, achievementPlayerID == player.gamePlayerID else { return }
         let pending = pendingAchievementIDs
             .subtracting(completedAchievementIDs)
             .subtracting(reportingAchievementIDs)
@@ -645,6 +702,7 @@ final class GameCenterModel: NSObject {
                 completedAchievementIDs.formUnion(pending)
                 reportingAchievementIDs.subtract(pending)
                 pendingAchievementIDs.subtract(pending)
+                persistPendingAchievements()
             } catch {
                 guard GKLocalPlayer.local.gamePlayerID == playerID else { return }
                 reportingAchievementIDs.subtract(pending)
@@ -655,9 +713,14 @@ final class GameCenterModel: NSObject {
     private func bindAchievementPlayer(_ playerID: String?) {
         guard achievementPlayerID != playerID else { return }
         achievementPlayerID = playerID
-        pendingAchievementIDs.removeAll()
+        pendingAchievementIDs = playerID.map { achievementPendingStore.load(for: $0) } ?? []
         completedAchievementIDs.removeAll()
         reportingAchievementIDs.removeAll()
+    }
+
+    private func persistPendingAchievements() {
+        guard let achievementPlayerID else { return }
+        achievementPendingStore.save(pendingAchievementIDs, for: achievementPlayerID)
     }
 
 }
@@ -829,21 +892,56 @@ enum GameCenterAchievement: String, CaseIterable {
     case firstWin = "com.yazdanra.minimatch.achievement.firstWin"
     case zeroWin = "com.yazdanra.minimatch.achievement.zeroWin"
     case fourPlayerWin = "com.yazdanra.minimatch.achievement.fourPlayerWin"
+    case pickFourWin = "com.yazdanra.minimatch.achievement.pickFourWin"
+    case pickEightWin = "com.yazdanra.minimatch.achievement.pickEightWin"
+    case pickSixteenWin = "com.yazdanra.minimatch.achievement.pickSixteenWin"
+    case twoWinStreak = "com.yazdanra.minimatch.achievement.twoWinStreak"
+    case fourWinStreak = "com.yazdanra.minimatch.achievement.fourWinStreak"
+    case sixteenRoundWins = "com.yazdanra.minimatch.achievement.sixteenRoundWins"
+    case thirtyTwoRoundWins = "com.yazdanra.minimatch.achievement.thirtyTwoRoundWins"
+    case sixtyFourRoundWins = "com.yazdanra.minimatch.achievement.sixtyFourRoundWins"
+    case eightPlayerWin = "com.yazdanra.minimatch.achievement.eightPlayerWin"
+    case sixteenPlayerWin = "com.yazdanra.minimatch.achievement.sixteenPlayerWin"
+    case eightPlayerRound = "com.yazdanra.minimatch.achievement.eightPlayerRound"
+    case sixteenPlayerRound = "com.yazdanra.minimatch.achievement.sixteenPlayerRound"
 
     static func earned(in table: GameTable, currentPlayerID: String) -> Set<Self> {
         guard table.currentRound == nil,
               let result = table.lastResult,
-              result.winnerPlayerID == currentPlayerID
+              let selection = result.selections.first(where: { $0.playerID == currentPlayerID })
         else {
             return []
         }
-        var earned: Set<Self> = [.firstWin]
-        if result.selections.first(where: { $0.playerID == currentPlayerID })?.pick == 0 {
-            earned.insert(.zeroWin)
+
+        let playerCount = result.selections.count
+        var earned = Set<Self>()
+        if playerCount >= 8 {
+            earned.insert(.eightPlayerRound)
         }
-        if result.selections.count >= 4 {
+        if playerCount >= 16 {
+            earned.insert(.sixteenPlayerRound)
+        }
+
+        guard result.winnerPlayerID == currentPlayerID else { return earned }
+
+        earned.insert(.firstWin)
+        switch selection.pick {
+        case 0: earned.insert(.zeroWin)
+        case 4: earned.insert(.pickFourWin)
+        case 8: earned.insert(.pickEightWin)
+        case 16: earned.insert(.pickSixteenWin)
+        default: break
+        }
+        if playerCount >= 4 {
             earned.insert(.fourPlayerWin)
         }
+        if playerCount >= 8 {
+            earned.insert(.eightPlayerWin)
+        }
+        if playerCount >= 16 {
+            earned.insert(.sixteenPlayerWin)
+        }
+        earned.formUnion(result.winnerAchievementIDs.compactMap(Self.init(rawValue:)))
         return earned
     }
 }
