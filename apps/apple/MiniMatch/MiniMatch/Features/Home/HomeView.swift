@@ -4,22 +4,29 @@ import SwiftUI
 struct HomeView: View {
     let gameCenter: GameCenterModel
     let appleSignIn: AppleSignInModel
+    @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
         ScrollView {
             VStack(spacing: 28) {
-                BrandHeader()
+                BrandHeader(
+                    accessibilityIdentifier: colorScheme == .dark
+                        ? "brand-header-dark"
+                        : "brand-header-light"
+                )
 
                 Spacer(minLength: 72)
 
                 Text("Small game. Big fun.")
                     .font(.title3.bold())
                     .foregroundStyle(MiniMatchColors.ink)
+                    .background(MiniMatchColors.background)
 
                 Text("Pick a positive whole number. Lowest number picked by only one player wins.")
                     .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(MiniMatchColors.ink)
                     .multilineTextAlignment(.center)
+                    .background(MiniMatchColors.background)
 
                 HomeRoundPreview()
                     .padding(.top, 12)
@@ -47,18 +54,7 @@ struct HomeView: View {
             .padding(.bottom, 12)
             .frame(maxWidth: .infinity)
         }
-        .background {
-            LinearGradient(
-                colors: [
-                    MiniMatchColors.coralBrand.opacity(0.06),
-                    .clear,
-                    MiniMatchColors.blueText.opacity(0.07),
-                ],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-            .ignoresSafeArea()
-        }
+        .background(MiniMatchColors.background)
     }
 }
 
@@ -142,8 +138,14 @@ private struct HomeActionSection: View {
                 } label: {
                     Label("Join with a code", systemImage: "number")
                         .frame(maxWidth: .infinity, minHeight: 44)
+                        .foregroundStyle(MiniMatchColors.ink)
+                        .background(MiniMatchColors.surface, in: .rect(cornerRadius: 14))
+                        .overlay {
+                            RoundedRectangle(cornerRadius: 14)
+                                .stroke(MiniMatchColors.blueText, lineWidth: 2)
+                        }
                 }
-                .buttonStyle(.bordered)
+                .buttonStyle(.plain)
                 .disabled(multiplayerIsUnavailable)
             }
             .alert("Join with a code", isPresented: $isJoiningWithCode) {
@@ -213,8 +215,8 @@ private struct HomeStatusSection: View {
             }
         } else {
             Text("Sign in to secure this player account with your Apple account.")
-                .font(.caption)
-                .foregroundStyle(.secondary)
+                .font(.subheadline)
+                .foregroundStyle(MiniMatchColors.ink)
                 .multilineTextAlignment(.center)
         }
     }
@@ -308,6 +310,7 @@ private struct HomeNumberToken: View {
                 guard !reduceMotion else { return }
                 bounceTrigger += 1
             }
+            .accessibilityIdentifier("decorative-home-number")
     }
 }
 

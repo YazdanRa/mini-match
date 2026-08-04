@@ -18,15 +18,15 @@ struct LobbyView: View {
                             .accessibilityAddTraits(.isHeader)
                         if let round = table.currentRound {
                             Text("Round \(round.number)")
-                                .foregroundStyle(.secondary)
+                                .foregroundStyle(MiniMatchColors.ink)
                         } else {
                             Text("Lobby")
-                                .foregroundStyle(.secondary)
+                                .foregroundStyle(MiniMatchColors.ink)
                         }
                         VStack(spacing: 2) {
                             Text("Party code")
                                 .font(.caption)
-                                .foregroundStyle(.secondary)
+                                .foregroundStyle(MiniMatchColors.ink)
                             Text(table.joinCode)
                                 .font(.headline.monospaced())
                                 .textSelection(.enabled)

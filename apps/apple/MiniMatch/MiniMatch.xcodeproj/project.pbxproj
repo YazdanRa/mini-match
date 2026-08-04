@@ -49,10 +49,18 @@
 		A10000000000000000000005 /* no_winner.wav in Resources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000006 /* no_winner.wav */; };
 		E75225F9301C7DE5006B1B4C /* MiniMatch.gamekit in Resources */ = {isa = PBXBuildFile; fileRef = E75225F8301C7DE5006B1B4C /* MiniMatch.gamekit */; };
 		EE5CC43F3F21467F9D07A4E8 /* GameModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8A4EB400AA14E00A31C19EC /* GameModel.swift */; };
+		B20000000000000000000001 /* AccessibilityUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B20000000000000000000003 /* AccessibilityUITests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
 		DE7D5162FB051ACEA343A410 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C0A697D889D4E4EE35032E07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 8AE1524BCC81943FB9CBA1B6;
+			remoteInfo = MiniMatch;
+		};
+		B20000000000000000000002 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = C0A697D889D4E4EE35032E07 /* Project object */;
 			proxyType = 1;
@@ -105,6 +113,8 @@
 		E75225F8301C7DE5006B1B4C /* MiniMatch.gamekit */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = MiniMatch.gamekit; path = MiniMatch/Resources/MiniMatch.gamekit; sourceTree = SOURCE_ROOT; };
 		EDED65F93ED79B532488F42F /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		F292770B1D1C4E6EB44A5F6C /* MiniMatch.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MiniMatch.entitlements; sourceTree = "<group>"; };
+		B20000000000000000000003 /* AccessibilityUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessibilityUITests.swift; sourceTree = "<group>"; };
+		B20000000000000000000004 /* MiniMatchUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MiniMatchUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -114,6 +124,13 @@
 			files = (
 				D0E416549451497B8A9A1272 /* FirebaseAuth in Frameworks */,
 				4C4F5454494553504D000003 /* Lottie in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B20000000000000000000005 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -338,6 +355,7 @@
 			children = (
 				02CD513A8AA6696657A2D72F /* MiniMatch */,
 				EEB89468A18893558A1C9F35 /* MiniMatchTests */,
+				B20000000000000000000006 /* MiniMatchUITests */,
 				DD495DF4AEC04A13FB3EB9F5 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -347,6 +365,7 @@
 			children = (
 				3F9086B3E6EAA8CD569C38C8 /* MiniMatch.app */,
 				559CA31BB186C9DA301F98E5 /* MiniMatchTests.xctest */,
+				B20000000000000000000004 /* MiniMatchUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -359,6 +378,14 @@
 				000000000000000000003011 /* Networking */,
 			);
 			path = MiniMatchTests;
+			sourceTree = "<group>";
+		};
+		B20000000000000000000006 /* MiniMatchUITests */ = {
+			isa = PBXGroup;
+			children = (
+				B20000000000000000000003 /* AccessibilityUITests.swift */,
+			);
+			path = MiniMatchUITests;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -403,6 +430,25 @@
 			productReference = 559CA31BB186C9DA301F98E5 /* MiniMatchTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
+		B20000000000000000000007 /* MiniMatchUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B2000000000000000000000C /* Build configuration list for PBXNativeTarget "MiniMatchUITests" */;
+			buildPhases = (
+				B20000000000000000000008 /* Sources */,
+				B20000000000000000000005 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				B20000000000000000000009 /* PBXTargetDependency */,
+			);
+			name = MiniMatchUITests;
+			packageProductDependencies = (
+			);
+			productName = MiniMatchUITests;
+			productReference = B20000000000000000000004 /* MiniMatchUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -422,6 +468,10 @@
 								enabled = 1;
 							};
 						};
+					};
+					B20000000000000000000007 = {
+						CreatedOnToolsVersion = 27.0;
+						TestTargetID = 8AE1524BCC81943FB9CBA1B6;
 					};
 				};
 			};
@@ -447,6 +497,7 @@
 			targets = (
 				8AE1524BCC81943FB9CBA1B6 /* MiniMatch */,
 				E6DEA2AB9096FC6C3A233937 /* MiniMatchTests */,
+				B20000000000000000000007 /* MiniMatchUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -516,6 +567,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		B20000000000000000000008 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B20000000000000000000001 /* AccessibilityUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -524,9 +583,54 @@
 			target = 8AE1524BCC81943FB9CBA1B6 /* MiniMatch */;
 			targetProxy = DE7D5162FB051ACEA343A410 /* PBXContainerItemProxy */;
 		};
+		B20000000000000000000009 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 8AE1524BCC81943FB9CBA1B6 /* MiniMatch */;
+			targetProxy = B20000000000000000000002 /* PBXContainerItemProxy */;
+		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		B2000000000000000000000A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = F5MV3G97S3;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.yazdanra.minimatch.uitests;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_TARGET_NAME = MiniMatch;
+			};
+			name = Debug;
+		};
+		B2000000000000000000000B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = F5MV3G97S3;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.yazdanra.minimatch.uitests;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_TARGET_NAME = MiniMatch;
+			};
+			name = Release;
+		};
 		162A87097672532CB7775C9D /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -770,6 +874,15 @@
 			buildConfigurations = (
 				162A87097672532CB7775C9D /* Debug */,
 				BF554B6DE2A891D4FAB005E9 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		B2000000000000000000000C /* Build configuration list for PBXNativeTarget "MiniMatchUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B2000000000000000000000A /* Debug */,
+				B2000000000000000000000B /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;

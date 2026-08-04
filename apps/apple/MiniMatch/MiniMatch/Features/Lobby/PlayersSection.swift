@@ -17,7 +17,7 @@ struct PlayersSection: View {
                 Spacer()
                 if roundIsActive {
                     Text("\(table.players.filter(\.isLocked).count) locked")
-                        .foregroundStyle(MiniMatchColors.blueText)
+                        .foregroundStyle(MiniMatchColors.ink)
                 }
             }
 
@@ -27,16 +27,24 @@ struct PlayersSection: View {
                         VStack(spacing: 7) {
                             ZStack(alignment: .bottomTrailing) {
                                 Circle()
-                                    .fill(player.id == currentPlayerID
-                                          ? MiniMatchColors.blue
-                                          : MiniMatchColors.coral.opacity(0.84))
+                                    .fill(MiniMatchColors.surface)
                                     .frame(width: 62, height: 62)
+                                    .overlay {
+                                        Circle()
+                                            .stroke(
+                                                player.id == currentPlayerID
+                                                    ? MiniMatchColors.blue
+                                                    : MiniMatchColors.coral,
+                                                lineWidth: 3
+                                            )
+                                    }
                                     .overlay {
                                         if let image = playerImages[player.id] {
                                             ProfileAvatar(image: image, size: 56)
                                         } else {
                                             Text(player.avatarGlyph)
                                                 .font(.title2.bold())
+                                                .accessibilityIdentifier("decorative-player-avatar")
                                                 .accessibilityHidden(true)
                                         }
                                     }
@@ -70,7 +78,7 @@ struct PlayersSection: View {
 
                             Text(player.id == table.hostPlayerID ? "Host" : player.isLocked ? "Locked" : "Joined")
                                 .font(.caption)
-                                .foregroundStyle(player.id == table.hostPlayerID ? MiniMatchColors.coralText : .secondary)
+                                .foregroundStyle(MiniMatchColors.ink)
                         }
                         .frame(minWidth: 88)
                         .accessibilityElement(children: .ignore)

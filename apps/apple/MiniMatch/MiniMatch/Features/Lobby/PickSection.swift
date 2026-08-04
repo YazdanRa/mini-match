@@ -12,7 +12,7 @@ struct PickSection: View {
 
             Text("Lowest number picked by only one player wins.")
                 .font(.subheadline)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(MiniMatchColors.ink)
                 .multilineTextAlignment(.center)
 
             TextField("1", text: $model.pickText)
@@ -40,7 +40,7 @@ struct PickSection: View {
                     .font(.headline)
                     .foregroundStyle(MiniMatchColors.blueText)
                 Text("Your number stays private until reveal.")
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(MiniMatchColors.ink)
             } else {
                 Button {
                     Task {
@@ -49,7 +49,6 @@ struct PickSection: View {
                 } label: {
                     if model.isWorking {
                         ProgressView("Locking…")
-                            .tint(.white)
                     } else {
                         Label("Lock my number", systemImage: "lock.fill")
                     }

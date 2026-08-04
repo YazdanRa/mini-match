@@ -2,6 +2,7 @@ import SwiftUI
 
 struct BrandHeader: View {
     var compact = false
+    var accessibilityIdentifier = "brand-header"
     @ScaledMetric(relativeTo: .largeTitle) private var heroFontSize = 78
 
     var body: some View {
@@ -18,6 +19,7 @@ struct BrandHeader: View {
         .minimumScaleFactor(0.5)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("Mini Match")
+        .accessibilityIdentifier(accessibilityIdentifier)
     }
 }
 
