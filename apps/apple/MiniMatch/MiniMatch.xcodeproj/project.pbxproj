@@ -42,6 +42,8 @@
 		A40B26B0B6694A4988335295 /* GameClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3447AB36E0634BEDA51A6AEF /* GameClient.swift */; };
 		B8DB8FBADF4702F86057C478 /* MiniMatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BAA5639A2A8BF42643E6AF3 /* MiniMatchApp.swift */; };
 		D0E416549451497B8A9A1272 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = F380CD1A9FEF4AA9A86B8B45 /* FirebaseAuth */; };
+		4C4F5454494553504D000003 /* Lottie in Frameworks */ = {isa = PBXBuildFile; productRef = 4C4F5454494553504D000002 /* Lottie */; };
+		00000000000000000000201D /* trophy.lottie in Resources */ = {isa = PBXBuildFile; fileRef = 00000000000000000000101D /* trophy.lottie */; };
 		E75225F9301C7DE5006B1B4C /* MiniMatch.gamekit in Resources */ = {isa = PBXBuildFile; fileRef = E75225F8301C7DE5006B1B4C /* MiniMatch.gamekit */; };
 		EE5CC43F3F21467F9D07A4E8 /* GameModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8A4EB400AA14E00A31C19EC /* GameModel.swift */; };
 /* End PBXBuildFile section */
@@ -90,6 +92,7 @@
 		6BAA5639A2A8BF42643E6AF3 /* MiniMatchApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MiniMatchApp.swift; sourceTree = "<group>"; };
 		83296CFF50320284730F0D51 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		95B8263978044D02A158AE30 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		00000000000000000000101D /* trophy.lottie */ = {isa = PBXFileReference; lastKnownFileType = file; path = trophy.lottie; sourceTree = "<group>"; };
 		C395C0D8211F4A7BBA1F0065 /* GameModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameModels.swift; sourceTree = "<group>"; };
 		C8A4EB400AA14E00A31C19EC /* GameModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameModel.swift; sourceTree = "<group>"; };
 		E5988938016346E98E3996BC /* AppleSignInModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleSignInModel.swift; sourceTree = "<group>"; };
@@ -104,6 +107,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				D0E416549451497B8A9A1272 /* FirebaseAuth in Frameworks */,
+				4C4F5454494553504D000003 /* Lottie in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -279,6 +283,7 @@
 		000000000000000000003012 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				000000000000000000003014 /* Animations */,
 				83296CFF50320284730F0D51 /* Assets.xcassets */,
 				95B8263978044D02A158AE30 /* GoogleService-Info.plist */,
 				00000000000000000000101B /* Localizable.xcstrings */,
@@ -287,6 +292,14 @@
 				1C9872C6908E4474AB19E42F /* PrivacyInfo.xcprivacy */,
 			);
 			path = Resources;
+			sourceTree = "<group>";
+		};
+		000000000000000000003014 /* Animations */ = {
+			isa = PBXGroup;
+			children = (
+				00000000000000000000101D /* trophy.lottie */,
+			);
+			path = Animations;
 			sourceTree = "<group>";
 		};
 		02CD513A8AA6696657A2D72F /* MiniMatch */ = {
@@ -349,6 +362,7 @@
 			name = MiniMatch;
 			packageProductDependencies = (
 				F380CD1A9FEF4AA9A86B8B45 /* FirebaseAuth */,
+				4C4F5454494553504D000002 /* Lottie */,
 			);
 			productName = MiniMatch;
 			productReference = 3F9086B3E6EAA8CD569C38C8 /* MiniMatch.app */;
@@ -407,6 +421,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				57F73B5C92CB472895AD919A /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				4C4F5454494553504D000001 /* XCRemoteSwiftPackageReference "lottie-spm" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = DD495DF4AEC04A13FB3EB9F5 /* Products */;
@@ -429,6 +444,7 @@
 				00000000000000000000201B /* Localizable.xcstrings in Resources */,
 				E75225F9301C7DE5006B1B4C /* MiniMatch.gamekit in Resources */,
 				7B4940F317DC4A22A42C3D3D /* PrivacyInfo.xcprivacy in Resources */,
+				00000000000000000000201D /* trophy.lottie in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -749,6 +765,14 @@
 				minimumVersion = 12.0.0;
 			};
 		};
+		4C4F5454494553504D000001 /* XCRemoteSwiftPackageReference "lottie-spm" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/airbnb/lottie-spm.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 4.6.1;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -756,6 +780,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 57F73B5C92CB472895AD919A /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseAuth;
+		};
+		4C4F5454494553504D000002 /* Lottie */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4C4F5454494553504D000001 /* XCRemoteSwiftPackageReference "lottie-spm" */;
+			productName = Lottie;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

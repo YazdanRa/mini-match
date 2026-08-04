@@ -5,10 +5,11 @@ struct WinnerCard: View {
 
     var body: some View {
         VStack(spacing: 14) {
-            Image(systemName: result.winnerName == nil ? "equal.circle.fill" : "trophy.fill")
-                .font(.largeTitle)
-                .foregroundStyle(result.winnerName == nil ? .white : Color.yellow)
-                .accessibilityHidden(true)
+            if result.winnerName == nil {
+                Image(systemName: "equal.circle.fill")
+                    .font(.largeTitle)
+                    .accessibilityHidden(true)
+            }
 
             Text(result.winnerName.map { "\($0) wins!" } ?? "No winner")
                 .font(.largeTitle.weight(.black))
