@@ -102,6 +102,7 @@ struct ContentView: View {
         .onChange(
             of: gameCenter.isAuthenticated
                 && model.screen == .home
+                && !isShowingSettings
                 && gameCenter.authentication?.id == nil
                 && gameCenter.matchmaking?.id == nil,
             initial: true
