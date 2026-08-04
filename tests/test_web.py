@@ -10,10 +10,10 @@ from urllib.parse import urlparse
 ROOT = Path(__file__).resolve().parents[1]
 WEB_ROOT = ROOT / "apps" / "web"
 SUPPORT_URL = "https://github.com/YazdanRa/mini-match/issues"
+REPOSITORY_URL = "https://github.com/YazdanRa/mini-match"
 EXPECTED_PAGES = {
     Path("index.html"),
     Path("privacy/index.html"),
-    Path("terms/index.html"),
 }
 
 
@@ -79,16 +79,16 @@ def internal_target(source: Path, href: str) -> Path | None:
 
 
 class WebsiteTests(unittest.TestCase):
-    def test_exactly_three_html_pages_exist(self) -> None:
+    def test_exactly_two_html_pages_exist(self) -> None:
         pages = {path.relative_to(WEB_ROOT) for path in WEB_ROOT.rglob("*.html")}
         self.assertEqual(pages, EXPECTED_PAGES)
 
-    def test_home_contains_only_the_requested_content(self) -> None:
+    def test_home_contains_the_requested_content_and_links(self) -> None:
         page = parse(Path("index.html"))
 
-        self.assertEqual(page.text, ["Mini Match", "Coming soon…"])
-        self.assertEqual(page.body_tags, ["main", "img", "h1", "p"])
-        self.assertEqual(page.links, [])
+        self.assertEqual(page.text, ["Mini Match", "Coming soon…", "GitHub", "Privacy Policy"])
+        self.assertEqual(page.body_tags, ["main", "img", "h1", "p", "nav", "a", "a"])
+        self.assertEqual(page.links, [REPOSITORY_URL, "privacy/"])
         self.assertEqual(
             page.images,
             [{"class": "logo", "src": "assets/mini-match-logo.png", "alt": "Mini Match logo"}],
@@ -105,20 +105,13 @@ class WebsiteTests(unittest.TestCase):
         self.assertEqual(png_dimensions(website_logo), (512, 512))
         self.assertLess(website_logo.stat().st_size, 500 * 1024)
 
-    def test_legal_pages_have_headings_support_and_cross_links(self) -> None:
-        expectations = {
-            Path("privacy/index.html"): ("Privacy Policy", "../terms/"),
-            Path("terms/index.html"): ("Terms of Use", "../privacy/"),
-        }
+    def test_privacy_page_has_support_and_home_links(self) -> None:
+        page = parse(Path("privacy/index.html"))
 
-        for path, (heading, cross_link) in expectations.items():
-            with self.subTest(path=path):
-                page = parse(path)
-                self.assertIn(heading, page.text)
-                self.assertIn("Effective August 4, 2026", page.text)
-                self.assertIn(SUPPORT_URL, page.links)
-                self.assertIn("../", page.links)
-                self.assertIn(cross_link, page.links)
+        self.assertIn("Privacy Policy", page.text)
+        self.assertIn("Effective August 4, 2026", page.text)
+        self.assertIn(SUPPORT_URL, page.links)
+        self.assertIn("../", page.links)
 
     def test_all_internal_references_resolve(self) -> None:
         for page_path in EXPECTED_PAGES:

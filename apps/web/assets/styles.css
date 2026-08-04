@@ -79,6 +79,13 @@ a:focus-visible {
   font-size: clamp(1.15rem, 3vw, 1.4rem);
 }
 
+.home-links {
+  display: flex;
+  gap: 1.25rem;
+  margin-top: 1.5rem;
+  font-size: 0.95rem;
+}
+
 .legal-page {
   width: min(100% - 2rem, 46rem);
   margin: 0 auto;
