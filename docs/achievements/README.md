@@ -1,6 +1,6 @@
 # Game Center achievements
 
-Mini Match has 15 visible, nonrepeatable Game Center achievements worth **525 points**. Every achievement is associated with the `com.yazdanra.minimatch.play` Game Activity.
+Mini Match has 14 active, visible, nonrepeatable Game Center achievements worth **500 points**. Every active achievement is associated with the `com.yazdanra.minimatch.play` Game Activity. The former 25-point **Perfect Zero** achievement is archived because picks must now be positive integers.
 
 `Implemented` below means the app/backend reporting path and local `.gamekit` metadata exist in source. It does not mean the achievement is public: App Store Connect synchronization, review, and physical-device verification remain release gates.
 
@@ -9,7 +9,7 @@ Mini Match has 15 visible, nonrepeatable Game Center achievements worth **525 po
 | Status | Achievement | Localized name (French / Spanish) | Stable identifier | Points | Exact unlock criterion | Future image direction |
 | --- | --- | --- | --- | ---: | --- | --- |
 | Implemented (existing) | First Win | Première victoire / Primera victoria | `com.yazdanra.minimatch.achievement.firstWin` | 10 | The authoritative revealed result names the player as winner for the first time. | A single raised pennant with a bright `1` token. |
-| Implemented (existing) | Perfect Zero | Zéro parfait / Cero perfecto | `com.yazdanra.minimatch.achievement.zeroWin` | 25 | Win an authoritative revealed round with the exact pick `0`. | A polished zero centered like a bullseye. |
+| Retired (archived) | Perfect Zero | Zéro parfait / Cero perfecto | `com.yazdanra.minimatch.achievement.zeroWin` | 25 | No longer earnable; zero is not a valid pick. The identifier remains reserved for historical compatibility. | Existing artwork retained for the archived achievement. |
 | Implemented (renamed) | Party Champion | Champion du groupe / Campeón del grupo | `com.yazdanra.minimatch.achievement.fourPlayerWin` | 25 | Win an authoritative revealed round with at least 4 revealed participants. | A crown above four distinct player tokens. This achievement was previously named **Full Table**; its stable identifier and criterion are unchanged. |
 | Implemented (new) | High Four | Quatre en force / Cuatro triunfal | `com.yazdanra.minimatch.achievement.pickFourWin` | 10 | Win an authoritative revealed round with the exact pick `4`. | A bold `4` token rising above the board. |
 | Implemented (new) | Great Eight | Huit magnifique / Ocho magnífico | `com.yazdanra.minimatch.achievement.pickEightWin` | 10 | Win an authoritative revealed round with the exact pick `8`. | A luminous figure-eight made from two game tokens. |
@@ -31,7 +31,7 @@ The local Game Center bundle provides English, French, and Spanish names plus be
 | Achievement | English before → after | French before → after | Spanish before → after |
 | --- | --- | --- | --- |
 | First Win | Win your first Mini Match round. → You won your first Mini Match round. | Remportez votre première manche de Mini Match. → Vous avez remporté votre première manche de Mini Match. | Gana tu primera ronda de Mini Match. → Has ganado tu primera ronda de Mini Match. |
-| Perfect Zero | Win a round by choosing 0. → You won a round by choosing 0. | Remportez une manche en choisissant 0. → Vous avez remporté une manche en choisissant 0. | Gana una ronda eligiendo 0. → Has ganado una ronda eligiendo 0. |
+| Perfect Zero (archived) | Win a round by choosing 0. → You won a round by choosing 0. | Remportez une manche en choisissant 0. → Vous avez remporté une manche en choisissant 0. | Gana una ronda eligiendo 0. → Has ganado una ronda eligiendo 0. |
 | Party Champion | Win a round with at least four players. → You won a round with at least four players. | Remportez une manche avec au moins quatre joueurs. → Vous avez remporté une manche avec au moins quatre joueurs. | Gana una ronda con al menos cuatro jugadores. → Has ganado una ronda con al menos cuatro jugadores. |
 | High Four | Win a round by choosing 4. → You won a round by choosing 4. | Remportez une manche en choisissant 4. → Vous avez remporté une manche en choisissant 4. | Gana una ronda eligiendo 4. → Has ganado una ronda eligiendo 4. |
 | Great Eight | Win a round by choosing 8. → You won a round by choosing 8. | Remportez une manche en choisissant 8. → Vous avez remporté une manche en choisissant 8. | Gana una ronda eligiendo 8. → Has ganado una ronda eligiendo 8. |
@@ -51,21 +51,21 @@ The local Game Center bundle provides English, French, and Spanish names plus be
 - Only an authoritative backend result after reveal can advance or unlock an achievement. Client polling order and lobby state are not achievement evidence.
 - Revealed participant count is the number of selections in that result, not the number invited or the table's advertised capacity.
 - Player-count achievements are inclusive thresholds. A 16-player round also satisfies the 4- and 8-player criteria; a win counts as participation.
-- Pick achievements require the winning selection to equal the named number exactly.
+- Picks must be positive integers. Pick achievements require the winning selection to equal the named number exactly.
 - Win streaks span tables and sessions for the authenticated player. They count consecutive revealed rounds that player participates in. A participating loss or a participating no-winner round resets the streak; absence from a round does not.
 - Lifetime totals and streaks come from the authoritative persisted player record. Threshold achievements use `>=`, so a counter that passes more than one tier may unlock every newly satisfied tier. Shared table responses carry only satisfied achievement identifiers, not exact private counters.
 - Multiple achievements may unlock from one result. Pending reports are persisted per Game Center player, so reporting is idempotent, retryable across relaunches, and never blocks gameplay.
-- All achievements are visible before earning and nonrepeatable.
+- All active achievements are visible before earning and nonrepeatable. Perfect Zero remains archived under its original identifier for historical compatibility.
 
 ## Artwork status
 
-The three original achievements retain their existing localized artwork files. The 12 new achievements temporarily reference the existing English First Win JPEG so the `.gamekit` bundle remains structurally complete without committing duplicate placeholder files. Replace those shared references with purpose-built artwork following the catalog directions before App Store Connect publication.
+The three original achievements retain their existing localized artwork files, including Perfect Zero's archived assets. The 12 new achievements temporarily reference the existing English First Win JPEG so the `.gamekit` bundle remains structurally complete without committing duplicate placeholder files. Replace those shared references with purpose-built artwork following the catalog directions before App Store Connect publication.
 
 ## Implementation and validation
 
 1. Persist total wins plus current and best win streaks against the verified player identity in the authoritative backend, updating them transactionally during reveal.
 2. Include the winner's satisfied lifetime/streak achievement identifiers in the revealed result without exposing exact counters, and derive local Game Center reports from that snapshot.
 3. Keep the Swift identifier list, `.gamekit` definitions, three localizations, image records, and Game Activity associations in exact parity.
-4. Test positive and negative number picks, cumulative threshold catch-up, 8/16 participant thresholds, cross-table streak continuation, participated-loss/no-winner resets, absence behavior, duplicate reveal handling, and reporting retries.
+4. Test positive picks plus explicit zero and negative rejection, cumulative threshold catch-up, 8/16 participant thresholds, cross-table streak continuation, participated-loss/no-winner resets, absence behavior, duplicate reveal handling, and reporting retries.
 5. Validate JSON, referenced artwork, the installed Xcode GameKit model decoder, Swift tests, Go race tests, protobuf lint/build, and repository hooks.
 6. As a separate release step, replace placeholder art, push the `.gamekit` configuration to App Store Connect, submit it for review, and verify it with Game Progress Manager and a physical Game Center account. Do not infer public availability from local validation alone.

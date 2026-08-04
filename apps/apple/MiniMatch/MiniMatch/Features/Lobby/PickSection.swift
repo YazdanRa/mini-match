@@ -15,7 +15,7 @@ struct PickSection: View {
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
 
-            TextField("0", text: $model.pickText)
+            TextField("1", text: $model.pickText)
                 .font(.largeTitle.bold().monospacedDigit())
                 .multilineTextAlignment(.center)
                 .keyboardType(.numberPad)
@@ -30,7 +30,7 @@ struct PickSection: View {
                 .accessibilityLabel("Your number")
 
             if !model.pickText.isEmpty && !model.canLockPick {
-                Text("Enter a non-negative whole number.")
+                Text("Enter a positive whole number.")
                     .font(.footnote)
                     .foregroundStyle(.red)
             }

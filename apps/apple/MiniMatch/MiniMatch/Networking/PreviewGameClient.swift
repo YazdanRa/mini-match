@@ -142,7 +142,7 @@ actor PreviewGameClient: GameClient {
         }
 
         let winnerID = "liam"
-        let winnerPick = localPick <= UInt64.max - 3 ? localPick + 3 : 0
+        let winnerPick = localPick <= UInt64.max - 3 ? localPick + 3 : 1
         let selections = table.players.map { player in
             GameSelection(
                 playerID: player.id,

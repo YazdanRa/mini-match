@@ -31,10 +31,10 @@ struct GameModelTests {
         table.lastResult = GameRoundResult(
             roundNumber: 1,
             selections: [
-                GameSelection(playerID: PreviewFixtures.currentPlayerID, displayName: "Maya", pick: 0),
-                GameSelection(playerID: "zoe", displayName: "Zoe", pick: 1),
-                GameSelection(playerID: "liam", displayName: "Liam", pick: 2),
-                GameSelection(playerID: "noah", displayName: "Noah", pick: 3),
+                GameSelection(playerID: PreviewFixtures.currentPlayerID, displayName: "Maya", pick: 1),
+                GameSelection(playerID: "zoe", displayName: "Zoe", pick: 2),
+                GameSelection(playerID: "liam", displayName: "Liam", pick: 3),
+                GameSelection(playerID: "noah", displayName: "Noah", pick: 4),
             ],
             winnerPlayerID: PreviewFixtures.currentPlayerID
         )
@@ -42,7 +42,7 @@ struct GameModelTests {
         #expect(GameCenterAchievement.earned(
             in: table,
             currentPlayerID: PreviewFixtures.currentPlayerID
-        ) == [.firstWin, .zeroWin, .fourPlayerWin])
+        ) == [.firstWin, .fourPlayerWin])
 
         table.lastResult = GameRoundResult(
             roundNumber: 2,
@@ -80,6 +80,16 @@ struct GameModelTests {
 
             #expect(earned == [.firstWin, achievement])
         }
+    }
+
+    @Test
+    func legacyZeroResultDoesNotEarnTheRetiredAchievement() {
+        let earned = GameCenterAchievement.earned(
+            in: achievementTable(playerCount: 2, winnerPick: 0),
+            currentPlayerID: PreviewFixtures.currentPlayerID
+        )
+
+        #expect(earned == [.firstWin])
     }
 
     @Test
@@ -198,7 +208,7 @@ struct GameModelTests {
 
     @Test
     @MainActor
-    func pickStartsEmptyAndOnlyAcceptsUInt64Values() async {
+    func pickStartsEmptyAndOnlyAcceptsPositiveUInt64Values() async {
         let model = GameModel(client: PreviewGameClient())
 
         #expect(model.pickText.isEmpty)
@@ -208,6 +218,9 @@ struct GameModelTests {
         #expect(!model.canLockPick)
 
         model.pickText = "0"
+        #expect(!model.canLockPick)
+
+        model.pickText = "1"
         #expect(model.canLockPick)
 
         #expect(await model.createTable(name: "Friday Mini Match", displayName: "Maya"))
@@ -230,7 +243,7 @@ struct GameModelTests {
         await model.startRound()
         #expect(model.table?.currentRound?.number == 1)
 
-        model.pickText = "-1"
+        model.pickText = "0"
         await model.lockPick()
         #expect(model.isShowingError)
         #expect(!model.currentPlayerIsLocked)
@@ -731,10 +744,10 @@ private func restorableWinningModel() -> GameModel {
             GameSelection(
                 playerID: PreviewFixtures.currentPlayerID,
                 displayName: "Maya",
-                pick: 0
+                pick: 1
             ),
-            GameSelection(playerID: "zoe", displayName: "Zoe", pick: 1),
-            GameSelection(playerID: "liam", displayName: "Liam", pick: 2),
+            GameSelection(playerID: "zoe", displayName: "Zoe", pick: 2),
+            GameSelection(playerID: "liam", displayName: "Liam", pick: 3),
         ],
         winnerPlayerID: PreviewFixtures.currentPlayerID
     )

@@ -232,6 +232,14 @@ func TestConnectAndGRPCKeepPicksPrivateUntilReveal(t *testing.T) {
 	if _, err := connectClient.LockPick(ctx, authenticated(&minimatchv1.LockPickRequest{
 		TableId:     tableID,
 		PlayerId:    created.Msg.PlayerId,
+		Pick:        &minimatchv1.Pick{Value: 0},
+		RoundNumber: 1,
+	}, "host-token")); connect.CodeOf(err) != connect.CodeInvalidArgument {
+		t.Fatalf("zero pick code = %v, want invalid argument", connect.CodeOf(err))
+	}
+	if _, err := connectClient.LockPick(ctx, authenticated(&minimatchv1.LockPickRequest{
+		TableId:     tableID,
+		PlayerId:    created.Msg.PlayerId,
 		Pick:        &minimatchv1.Pick{Value: 2},
 		RoundNumber: 1,
 	}, "host-token")); err != nil {

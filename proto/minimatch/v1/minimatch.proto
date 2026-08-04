@@ -174,7 +174,7 @@ message Selection {
   string display_name = 3;
 }
 
-// uint64 rejects negative picks at the transport boundary.
+// Picks must be positive; the server rejects zero.
 message Pick {
   uint64 value = 1;
 }

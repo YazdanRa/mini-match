@@ -890,6 +890,7 @@ private enum GameCenterError: LocalizedError {
 
 enum GameCenterAchievement: String, CaseIterable {
     case firstWin = "com.yazdanra.minimatch.achievement.firstWin"
+    // Retained so a report queued before positive-only picks can still complete.
     case zeroWin = "com.yazdanra.minimatch.achievement.zeroWin"
     case fourPlayerWin = "com.yazdanra.minimatch.achievement.fourPlayerWin"
     case pickFourWin = "com.yazdanra.minimatch.achievement.pickFourWin"
@@ -925,7 +926,6 @@ enum GameCenterAchievement: String, CaseIterable {
 
         earned.insert(.firstWin)
         switch selection.pick {
-        case 0: earned.insert(.zeroWin)
         case 4: earned.insert(.pickFourWin)
         case 8: earned.insert(.pickEightWin)
         case 16: earned.insert(.pickSixteenWin)

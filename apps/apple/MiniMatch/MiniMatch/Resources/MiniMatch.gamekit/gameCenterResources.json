@@ -578,7 +578,7 @@
         "activityProperties" : {
 
         },
-        "archived" : false,
+        "archived" : true,
         "points" : 25,
         "referenceName" : "Perfect Zero",
         "repeatable" : false,

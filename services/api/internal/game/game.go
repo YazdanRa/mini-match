@@ -214,6 +214,9 @@ func (t *Table) RefreshPresence(playerID string, now time.Time, duration time.Du
 }
 
 func (t *Table) LockPick(playerID string, pick uint64, roundNumber uint32) error {
+	if pick == 0 {
+		return ErrInvalid
+	}
 	player := t.player(playerID)
 	if player == nil {
 		return ErrNotFound

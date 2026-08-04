@@ -147,18 +147,18 @@
         }
       }
     },
-    "0" : {
+    "1" : {
       "localizations" : {
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "0"
+            "value" : "1"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "0"
+            "value" : "1"
           }
         }
       }
@@ -524,18 +524,18 @@
         }
       }
     },
-    "Enter a non-negative whole number." : {
+    "Enter a positive whole number." : {
       "localizations" : {
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Introduce un número entero no negativo."
+            "value" : "Introduce un número entero positivo."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Saisissez un nombre entier positif ou nul."
+            "value" : "Saisissez un nombre entier strictement positif."
           }
         }
       }
@@ -1288,18 +1288,18 @@
         }
       }
     },
-    "Pick a non-negative whole number. Lowest number picked by only one player wins." : {
+    "Pick a positive whole number. Lowest number picked by only one player wins." : {
       "localizations" : {
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Elige un número entero no negativo. Gana el número más bajo elegido por un solo jugador."
+            "value" : "Elige un número entero positivo. Gana el número más bajo elegido por un solo jugador."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Choisissez un nombre entier positif ou nul. Le plus petit nombre choisi par un seul joueur gagne."
+            "value" : "Choisissez un nombre entier strictement positif. Le plus petit nombre choisi par un seul joueur gagne."
           }
         }
       }

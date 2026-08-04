@@ -16,7 +16,7 @@ struct HomeView: View {
                     .font(.title3.bold())
                     .foregroundStyle(MiniMatchColors.ink)
 
-                Text("Pick a non-negative whole number. Lowest number picked by only one player wins.")
+                Text("Pick a positive whole number. Lowest number picked by only one player wins.")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)

@@ -100,7 +100,12 @@ final class GameModel {
     }
 
     var canLockPick: Bool {
-        UInt64(pickText) != nil
+        validPick != nil
+    }
+
+    private var validPick: UInt64? {
+        guard let pick = UInt64(pickText), pick > 0 else { return nil }
+        return pick
     }
 
     var result: ResultPresentation? {
@@ -210,9 +215,9 @@ final class GameModel {
         guard let table,
               let currentPlayerID,
               let roundNumber = table.currentRound?.number,
-              let pick = UInt64(pickText)
+              let pick = validPick
         else {
-            showError(String(localized: "Enter a non-negative whole number."))
+            showError(String(localized: "Enter a positive whole number."))
             return
         }
         let generation = sessionGeneration

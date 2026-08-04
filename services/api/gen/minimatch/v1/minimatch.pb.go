@@ -1566,7 +1566,7 @@ func (x *Selection) GetDisplayName() string {
 	return ""
 }
 
-// uint64 rejects negative picks at the transport boundary.
+// Picks must be positive; the server rejects zero.
 type Pick struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Value         uint64                 `protobuf:"varint,1,opt,name=value,proto3" json:"value,omitempty"`

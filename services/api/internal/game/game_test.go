@@ -64,7 +64,7 @@ func TestTableRules(t *testing.T) {
 		}
 	}
 	version := table.Version
-	if err := table.LockPick("maya", 0, 1); !errors.Is(err, ErrNotReady) {
+	if err := table.LockPick("maya", 1, 1); !errors.Is(err, ErrNotReady) {
 		t.Fatalf("lobby lock error = %v, want ErrNotReady", err)
 	}
 	if table.player("maya").Locked || table.Version != version {
@@ -78,7 +78,7 @@ func TestTableRules(t *testing.T) {
 		for _, id := range []string{"maya", "zoe", "liam"} {
 			pick := uint64(1)
 			if id == "liam" {
-				pick = 0
+				pick = 2
 			}
 			if err := table.LockPick(id, pick, uint32(round)); err != nil {
 				t.Fatalf("round %d lock: %v", round, err)
@@ -93,6 +93,20 @@ func TestTableRules(t *testing.T) {
 	}
 	if err := table.BeginRound("maya"); err != nil {
 		t.Fatalf("table did not allow an independent seventh round: %v", err)
+	}
+}
+
+func TestLockPickRejectsZero(t *testing.T) {
+	table, _ := NewTable("table", "Friday", "ABC123", "maya", "Maya", "")
+	_ = table.Join("zoe", "Zoe", "")
+	_ = table.BeginRound("maya")
+	version := table.Version
+
+	if err := table.LockPick("maya", 0, 1); !errors.Is(err, ErrInvalid) {
+		t.Fatalf("zero pick error = %v, want ErrInvalid", err)
+	}
+	if table.player("maya").Locked || table.Version != version {
+		t.Fatal("rejected zero pick changed table state")
 	}
 }
 

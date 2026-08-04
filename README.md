@@ -1,10 +1,10 @@
 # Mini Match
 
-Mini Match is a real-time social number game for iPhone. The host starts each independent round, players privately lock a non-negative integer, and the lowest number chosen exactly once wins.
+Mini Match is a real-time social number game for iPhone. The host starts each independent round, players privately lock a positive integer, and the lowest number chosen exactly once wins.
 
 ## Game theory background
 
-Mini Match is based on a zero-indexed variant of the well-studied **Lowest Unique Positive Integer (LUPI)** game. In the classic game, players independently and simultaneously choose a positive integer. Duplicate choices are eliminated, and the player with the lowest remaining unique number wins. If every choice is duplicated, nobody wins. Mini Match keeps that strategic core while allowing non-negative integers, including zero. A large-scale Swedish version of LUPI was offered under the name **Limbo**.
+Mini Match is based on the well-studied **Lowest Unique Positive Integer (LUPI)** game. Players independently and simultaneously choose a positive integer. Duplicate choices are eliminated, and the player with the lowest remaining unique number wins. If every choice is duplicated, nobody wins. A large-scale Swedish version of LUPI was offered under the name **Limbo**.
 
 The puzzle is the tension between choosing low and staying unique: obvious low numbers attract collisions, while a high unique number can still be beaten. The papers below study randomized symmetric mixed-strategy equilibria rather than one always-best pick. Some large-population asymptotic models spread choices across a low range with an effective cutoff on the order of `N / log(N)`. This is not a universal rule: the exact equilibrium depends on the number of players, allowed range, and assumptions of the model. In the unbounded, exactly-three-player formulation, the unique symmetric equilibrium has full support and a constant hazard rate.
 

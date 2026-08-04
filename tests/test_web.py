@@ -125,6 +125,12 @@ class WebsiteTests(unittest.TestCase):
         self.assertIn("Why the obvious answer is not obvious", page.text)
         self.assertIn("Research papers", page.text)
         self.assertIn("Community discussions", page.text)
+        self.assertIn(
+            "If no number is unique, nobody wins. Mini Match follows the same positive-integer "
+            "rule, so the smallest valid choice is 1.",
+            page.text,
+        )
+        self.assertNotIn("zero is also available.", page.text)
         self.assertIn("https://www.stat.berkeley.edu/~aldous/157/Papers/ostling.pdf", page.links)
         self.assertIn("https://arxiv.org/pdf/1001.1065", page.links)
         self.assertIn(
