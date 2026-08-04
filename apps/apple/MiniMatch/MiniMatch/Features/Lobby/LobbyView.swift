@@ -5,6 +5,7 @@ struct LobbyView: View {
     let model: GameModel
     let playerImages: [String: UIImage]
     @Environment(\.scenePhase) private var scenePhase
+    private let roundResultSoundPlayer = RoundResultSoundPlayer.shared
 
     var body: some View {
         ScrollView {
@@ -78,9 +79,13 @@ struct LobbyView: View {
                 )
             )
         }
-        .onChange(of: model.table?.lastResult?.roundNumber) {
-            guard let result = model.result else { return }
-            UIAccessibility.post(notification: .announcement, argument: result.accessibilitySummary)
+        .onChange(of: model.table?.lastResult?.roundNumber) { _, roundNumber in
+            guard roundNumber != nil, let roundResult = model.table?.lastResult else { return }
+            roundResultSoundPlayer.play(for: roundResult)
+
+            if let result = model.result {
+                UIAccessibility.post(notification: .announcement, argument: result.accessibilitySummary)
+            }
         }
     }
 }
