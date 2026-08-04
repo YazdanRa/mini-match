@@ -41,18 +41,21 @@ a:hover {
 
 a:focus-visible {
   border-radius: 0.2rem;
-  outline: 3px solid rgba(10, 74, 194, 0.32);
+  outline: 3px solid var(--blue);
   outline-offset: 3px;
 }
 
 .home {
   display: grid;
-  place-items: center;
-  padding: 2rem;
+  grid-template-rows: 1fr auto;
+  min-height: 100svh;
+  padding: clamp(1.25rem, 4vw, 2rem);
 }
 
 .home-content {
   display: grid;
+  align-self: center;
+  justify-self: center;
   justify-items: center;
   text-align: center;
 }
@@ -81,9 +84,38 @@ a:focus-visible {
 
 .home-links {
   display: flex;
-  gap: 1.25rem;
-  margin-top: 1.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-top: 1.75rem;
+  justify-self: center;
+}
+
+.home-links a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0.7rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 0.875rem;
+  background: var(--surface);
+  color: var(--text);
   font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1;
+  text-decoration: none;
+  white-space: nowrap;
+  box-shadow: 0 0.25rem 1rem rgba(0, 38, 92, 0.06);
+}
+
+.home-links a:hover {
+  border-color: var(--blue);
+  color: var(--blue);
+}
+
+.home-links a:focus-visible {
+  border-radius: 0.875rem;
 }
 
 .legal-page {
