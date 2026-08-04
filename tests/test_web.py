@@ -11,6 +11,7 @@ ROOT = Path(__file__).resolve().parents[1]
 WEB_ROOT = ROOT / "apps" / "web"
 SUPPORT_URL = "https://github.com/YazdanRa/mini-match/issues"
 REPOSITORY_URL = "https://github.com/YazdanRa/mini-match"
+TESTFLIGHT_URL = "https://testflight.apple.com/join/595Sp2DW"
 EXPECTED_PAGES = {
     Path("background/index.html"),
     Path("index.html"),
@@ -89,13 +90,28 @@ class WebsiteTests(unittest.TestCase):
 
         self.assertEqual(
             page.text,
-            ["Mini Match", "Coming soon…", "GitHub", "Background", "Privacy Policy"],
+            ["Mini Match", "GitHub", "Background", "Privacy Policy"],
         )
-        self.assertEqual(page.body_tags, ["main", "img", "h1", "p", "nav", "a", "a", "a"])
-        self.assertEqual(page.links, [REPOSITORY_URL, "background/", "privacy/"])
+        self.assertEqual(
+            page.body_tags,
+            ["main", "img", "h1", "a", "img", "nav", "a", "a", "a"],
+        )
+        self.assertEqual(
+            page.links,
+            [TESTFLIGHT_URL, REPOSITORY_URL, "background/", "privacy/"],
+        )
         self.assertEqual(
             page.images,
-            [{"class": "logo", "src": "assets/mini-match-logo.png", "alt": "Mini Match logo"}],
+            [
+                {"class": "logo", "src": "assets/mini-match-logo.png", "alt": "Mini Match logo"},
+                {
+                    "class": "testflight-badge",
+                    "src": "assets/available-on-testflight.png",
+                    "alt": "Available on TestFlight",
+                    "width": "440",
+                    "height": "150",
+                },
+            ],
         )
 
     def test_website_logo_is_web_ready(self) -> None:
@@ -108,6 +124,12 @@ class WebsiteTests(unittest.TestCase):
         self.assertEqual(png_dimensions(app_icon), (1024, 1024))
         self.assertEqual(png_dimensions(website_logo), (512, 512))
         self.assertLess(website_logo.stat().st_size, 500 * 1024)
+
+    def test_testflight_badge_is_web_ready(self) -> None:
+        badge = WEB_ROOT / "assets/available-on-testflight.png"
+
+        self.assertEqual(png_dimensions(badge), (440, 150))
+        self.assertLess(badge.stat().st_size, 100 * 1024)
 
     def test_privacy_page_has_support_and_home_links(self) -> None:
         page = parse(Path("privacy/index.html"))
