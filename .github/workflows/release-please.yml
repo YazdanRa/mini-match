@@ -14,5 +14,32 @@ permissions:
 jobs:
   release-please:
     runs-on: ubuntu-latest
+    outputs:
+      server_released: ${{ steps.release.outputs['services/api--release_created'] }}
+      server_sha: ${{ steps.release.outputs['services/api--sha'] }}
+      web_released: ${{ steps.release.outputs['apps/web--release_created'] }}
+      web_sha: ${{ steps.release.outputs['apps/web--sha'] }}
     steps:
       - uses: googleapis/release-please-action@v5
+        id: release
+
+  deploy-server:
+    needs: release-please
+    if: needs.release-please.outputs.server_released == 'true'
+    permissions:
+      contents: read
+      id-token: write
+    uses: ./.github/workflows/deploy-server.yml
+    with:
+      ref: ${{ needs.release-please.outputs.server_sha }}
+
+  deploy-website:
+    needs: release-please
+    if: needs.release-please.outputs.web_released == 'true'
+    permissions:
+      contents: read
+      id-token: write
+      pages: write
+    uses: ./.github/workflows/deploy-website.yml
+    with:
+      ref: ${{ needs.release-please.outputs.web_sha }}
