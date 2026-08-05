@@ -165,6 +165,8 @@ message RoundResult {
   uint32 winner_best_win_streak = 6 [deprecated = true];
   // Satisfied lifetime/streak achievement identifiers, without exposing exact counters.
   repeated string winner_achievement_ids = 7;
+  // Present only when the authenticated player won, for Game Center leaderboard reporting.
+  optional uint64 local_player_leaderboard_score = 8;
 }
 
 message Selection {

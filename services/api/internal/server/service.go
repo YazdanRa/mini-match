@@ -78,7 +78,7 @@ func (s *Service) CreateTable(ctx context.Context, request *connect.Request[mini
 			return nil, rpcError(err)
 		}
 		return connect.NewResponse(&minimatchv1.CreateTableResponse{
-			Table:    toProto(table),
+			Table:    toProto(table, actor),
 			PlayerId: actor,
 		}), nil
 	}
@@ -111,7 +111,7 @@ func (s *Service) JoinTable(ctx context.Context, request *connect.Request[minima
 		return nil, rpcError(err)
 	}
 	return connect.NewResponse(&minimatchv1.JoinTableResponse{
-		Table:    toProto(table),
+		Table:    toProto(table, actor),
 		PlayerId: actor,
 	}), nil
 }
@@ -143,7 +143,7 @@ func (s *Service) LeaveTable(ctx context.Context, request *connect.Request[minim
 	if err != nil {
 		return nil, rpcError(err)
 	}
-	return connect.NewResponse(&minimatchv1.LeaveTableResponse{Table: toProto(table)}), nil
+	return connect.NewResponse(&minimatchv1.LeaveTableResponse{Table: toProto(table, actor)}), nil
 }
 
 func (s *Service) LockPick(ctx context.Context, request *connect.Request[minimatchv1.LockPickRequest]) (*connect.Response[minimatchv1.LockPickResponse], error) {
@@ -163,7 +163,7 @@ func (s *Service) LockPick(ctx context.Context, request *connect.Request[minimat
 	if err != nil {
 		return nil, rpcError(err)
 	}
-	return connect.NewResponse(&minimatchv1.LockPickResponse{Table: toProto(table)}), nil
+	return connect.NewResponse(&minimatchv1.LockPickResponse{Table: toProto(table, actor)}), nil
 }
 
 func (s *Service) StartRound(ctx context.Context, request *connect.Request[minimatchv1.StartRoundRequest]) (*connect.Response[minimatchv1.StartRoundResponse], error) {
@@ -178,7 +178,7 @@ func (s *Service) StartRound(ctx context.Context, request *connect.Request[minim
 	if err != nil {
 		return nil, rpcError(err)
 	}
-	return connect.NewResponse(&minimatchv1.StartRoundResponse{Table: toProto(table)}), nil
+	return connect.NewResponse(&minimatchv1.StartRoundResponse{Table: toProto(table, actor)}), nil
 }
 
 func (s *Service) BeginRound(ctx context.Context, request *connect.Request[minimatchv1.BeginRoundRequest]) (*connect.Response[minimatchv1.BeginRoundResponse], error) {
@@ -195,7 +195,7 @@ func (s *Service) BeginRound(ctx context.Context, request *connect.Request[minim
 	if err != nil {
 		return nil, rpcError(err)
 	}
-	return connect.NewResponse(&minimatchv1.BeginRoundResponse{Table: toProto(table)}), nil
+	return connect.NewResponse(&minimatchv1.BeginRoundResponse{Table: toProto(table, actor)}), nil
 }
 
 func (s *Service) RevealRound(ctx context.Context, request *connect.Request[minimatchv1.RevealRoundRequest]) (*connect.Response[minimatchv1.RevealRoundResponse], error) {
@@ -210,7 +210,7 @@ func (s *Service) RevealRound(ctx context.Context, request *connect.Request[mini
 	if err != nil {
 		return nil, rpcError(err)
 	}
-	return connect.NewResponse(&minimatchv1.RevealRoundResponse{Table: toProto(table)}), nil
+	return connect.NewResponse(&minimatchv1.RevealRoundResponse{Table: toProto(table, actor)}), nil
 }
 
 func (s *Service) GetTable(ctx context.Context, request *connect.Request[minimatchv1.GetTableRequest]) (*connect.Response[minimatchv1.GetTableResponse], error) {
@@ -233,7 +233,7 @@ func (s *Service) GetTable(ctx context.Context, request *connect.Request[minimat
 			return nil, rpcError(err)
 		}
 	}
-	return connect.NewResponse(&minimatchv1.GetTableResponse{Table: toProto(table)}), nil
+	return connect.NewResponse(&minimatchv1.GetTableResponse{Table: toProto(table, actor)}), nil
 }
 
 func (s *Service) updateActiveTable(
@@ -335,7 +335,7 @@ func validPartyCode(code string) bool {
 	return true
 }
 
-func toProto(table *game.Table) *minimatchv1.Table {
+func toProto(table *game.Table, actor string) *minimatchv1.Table {
 	response := &minimatchv1.Table{
 		Id:            table.ID,
 		Name:          table.Name,
@@ -345,10 +345,6 @@ func toProto(table *game.Table) *minimatchv1.Table {
 		StateVersion:  table.Version,
 		EventSequence: table.EventSequence,
 		Players:       make([]*minimatchv1.Player, 0, len(table.Players)),
-	}
-	if table.WinnerLifetimeWins > 0 {
-		wins := table.WinnerLifetimeWins
-		response.WinnerLifetimeWins = &wins
 	}
 	for _, player := range table.Players {
 		response.Players = append(response.Players, &minimatchv1.Player{
@@ -376,6 +372,10 @@ func toProto(table *game.Table) *minimatchv1.Table {
 		if table.LastResult.WinnerID != "" {
 			winner := table.LastResult.WinnerID
 			response.LastResult.WinnerPlayerId = &winner
+		}
+		if table.LastResult.WinnerID == actor && table.LastResult.WinnerTotalWins > 0 {
+			score := table.LastResult.WinnerTotalWins
+			response.LastResult.LocalPlayerLeaderboardScore = &score
 		}
 		for _, selection := range table.LastResult.Selections {
 			response.LastResult.Selections = append(response.LastResult.Selections, &minimatchv1.Selection{

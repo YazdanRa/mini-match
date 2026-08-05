@@ -56,6 +56,7 @@ struct GameClientDTOTests {
           "roundNumber": 5,
           "selections": [],
           "winnerPlayerId": "maya",
+          "localPlayerLeaderboardScore": "64",
           "winnerAchievementIds": [
             "com.yazdanra.minimatch.achievement.twoWinStreak",
             "com.yazdanra.minimatch.achievement.sixtyFourRoundWins"
@@ -69,6 +70,7 @@ struct GameClientDTOTests {
             "com.yazdanra.minimatch.achievement.twoWinStreak",
             "com.yazdanra.minimatch.achievement.sixtyFourRoundWins",
         ])
+        #expect(result.localPlayerLeaderboardScore == 64)
     }
 
     @Test
