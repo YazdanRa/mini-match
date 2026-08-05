@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.1](https://github.com/YazdanRa/mini-match/compare/server-v0.1.0...server-v0.1.1) (2026-08-05)
+
+
+### Bug Fixes
+
+* **game-center:** update leaderboard from authoritative wins ([#22](https://github.com/YazdanRa/mini-match/issues/22)) ([e8bd9a5](https://github.com/YazdanRa/mini-match/commit/e8bd9a506ceaefbd2dc9f1dfd8bbd15fb0a575e0))
+
 ## 0.1.0 (2026-08-05)
 
 
