@@ -67,7 +67,7 @@ Use Conventional Commits for commit messages.
 
 ## Apple app setup
 
-Open `apps/apple/MiniMatch/MiniMatch.xcodeproj` in Xcode. The app uses bundle identifier `com.yazdanra.minimatch` and expects `GoogleService-Info.plist` in the `MiniMatch` target; the file is excluded from source control. A clean checkout also needs valid signing for the configured team and App ID.
+Open `apps/apple/MiniMatch/MiniMatch.xcodeproj` in Xcode. The app uses bundle identifier `com.yazdanra.minimatch` and includes `GoogleService-Info.plist` in the `MiniMatch` target. This is public, non-secret Firebase client configuration: the API key identifies the Firebase project, while bundle-ID and API restrictions limit its use. Firebase Authentication, server-side authorization, and Security Rules—not the key—control backend and data access. Never add service-account keys, server credentials, or private keys to this file. A clean checkout also needs valid signing for the configured team and App ID.
 
 The App ID and provisioning profile require Game Center, Group Activities, and Sign in with Apple. Configure the matching iOS app in Firebase, enable anonymous authentication and the Apple provider, and use the same bundle identifier. The client sends Connect JSON commands to the production Cloud Run origin.
 

@@ -67,7 +67,6 @@ fastlane/test_output
 .env
 .env.*
 .firebase/
-GoogleService-Info.plist
 *service-account*.json
 
 # GitHub Actions Google Cloud authentication
