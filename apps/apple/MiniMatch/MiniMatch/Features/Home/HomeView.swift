@@ -128,7 +128,11 @@ private struct HomeActionSection: View {
                 Button {
                     gameCenter.startActivity()
                 } label: {
-                    Label("Play together", systemImage: "person.3.fill")
+                    if gameCenter.isStartingActivity {
+                        ProgressView("Starting…")
+                    } else {
+                        Label("Play together", systemImage: "person.3.fill")
+                    }
                 }
                 .buttonStyle(PrimaryButtonStyle(color: MiniMatchColors.blue))
                 .disabled(multiplayerIsUnavailable)
