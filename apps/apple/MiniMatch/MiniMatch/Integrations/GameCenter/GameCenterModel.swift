@@ -81,6 +81,8 @@ final class GameCenterModel: NSObject {
     private var achievementPlayerID: String?
     private weak var gameModel: GameModel?
     private var match: GKMatch?
+    private var expectedPlayerCount = 0
+    private var connectedPlayerCount = 0
     private var createsTable = false
     private var hostPlayerID: String?
     private var joinCode: String?
@@ -105,6 +107,11 @@ final class GameCenterModel: NSObject {
     private(set) var errorMessage = ""
     var isShowingError = false
     var isStartingActivity: Bool { activityStartGate.isActive }
+    var isPreparingLobby: Bool {
+        guard match != nil else { return false }
+        return expectedPlayerCount > 0
+            || (gameModel?.table?.players.count ?? 0) < connectedPlayerCount + 1
+    }
     var isTransitioningPlayerSession: Bool {
         gameModel?.isEndingGameCenterSession == true
     }
@@ -357,6 +364,7 @@ final class GameCenterModel: NSObject {
         match?.delegate = nil
         match?.disconnect()
         match = nil
+        updateMatchRoster(from: nil)
         createsTable = false
         hostPlayerID = nil
         joinCode = nil
@@ -454,6 +462,7 @@ final class GameCenterModel: NSObject {
         matchmaking?.viewController.matchmakerDelegate = nil
         matchmaking = nil
         match = foundMatch
+        updateMatchRoster(from: foundMatch)
         self.createsTable = createsTable
         self.hostPlayerID = hostPlayerID
         foundMatch.delegate = self
@@ -575,6 +584,7 @@ final class GameCenterModel: NSObject {
         else {
             return
         }
+        updateMatchRoster(from: match)
         switch message {
         case .ready:
             if createsTable, let joinCode {
@@ -639,6 +649,11 @@ final class GameCenterModel: NSObject {
 
     private func randomAvatarID() -> String {
         PlayerAvatar.allCases.randomElement()?.rawValue ?? PlayerAvatar.spark.rawValue
+    }
+
+    private func updateMatchRoster(from match: GKMatch?) {
+        expectedPlayerCount = match?.expectedPlayerCount ?? 0
+        connectedPlayerCount = match?.players.count ?? 0
     }
 
     private func showError(_ message: String) {
@@ -805,14 +820,16 @@ extension GameCenterModel: GKMatchDelegate {
         player: GKPlayer,
         didChange state: GKPlayerConnectionState
     ) {
-        guard state == .disconnected else { return }
         let matchID = ObjectIdentifier(match)
+        let disconnected = state == .disconnected
         Task { @MainActor [weak self] in
             guard let self, let match = self.match,
                   ObjectIdentifier(match) == matchID
             else {
                 return
             }
+            updateMatchRoster(from: match)
+            guard disconnected else { return }
             if gameModel?.screen == .home {
                 showError(String(localized: "A player disconnected from the Game Center match."))
                 endMatch()

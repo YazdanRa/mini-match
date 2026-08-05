@@ -19,17 +19,24 @@ struct ContentView: View {
                 MiniMatchColors.background
                     .ignoresSafeArea()
 
-                switch model.screen {
-                case .home:
-                    HomeView(
-                        gameCenter: gameCenter,
-                        appleSignIn: appleSignIn
-                    )
-                case .lobby:
-                    LobbyView(
+                if gameCenter.isPreparingLobby {
+                    LobbyLoadingView(
                         model: model,
-                        playerImages: gameCenter.playerImages
+                        cancel: gameCenter.endMatch
                     )
+                } else {
+                    switch model.screen {
+                    case .home:
+                        HomeView(
+                            gameCenter: gameCenter,
+                            appleSignIn: appleSignIn
+                        )
+                    case .lobby:
+                        LobbyView(
+                            model: model,
+                            playerImages: gameCenter.playerImages
+                        )
+                    }
                 }
             }
             .navigationBarTitleDisplayMode(.inline)
@@ -48,11 +55,13 @@ struct ContentView: View {
                         }
                         .disabled(model.isWorking)
                     }
-                    ToolbarItem(placement: .principal) {
-                        BrandHeader(compact: true)
+                    if !gameCenter.isPreparingLobby {
+                        ToolbarItem(placement: .principal) {
+                            BrandHeader(compact: true)
+                        }
                     }
                 }
-                if gameCenter.isAuthenticated {
+                if gameCenter.isAuthenticated && !gameCenter.isPreparingLobby {
                     if model.screen == .lobby {
                         ToolbarItem(placement: .topBarTrailing) {
                             Button {
@@ -104,7 +113,8 @@ struct ContentView: View {
                 && model.screen == .home
                 && !isShowingSettings
                 && gameCenter.authentication?.id == nil
-                && gameCenter.matchmaking?.id == nil,
+                && gameCenter.matchmaking?.id == nil
+                && !gameCenter.isPreparingLobby,
             initial: true
         ) { _, shouldActivateAccessPoint in
             gameCenter.setAccessPointActive(shouldActivateAccessPoint)
@@ -222,10 +232,54 @@ struct ContentView: View {
     }
 }
 
+private struct LobbyLoadingView: View {
+    let model: GameModel
+    let cancel: () -> Void
+    @Environment(\.scenePhase) private var scenePhase
+
+    var body: some View {
+        ScrollView {
+            VStack(spacing: 20) {
+                BrandHeader()
+
+                Spacer(minLength: 72)
+
+                Text("Lobby")
+                    .font(.title.bold())
+                    .foregroundStyle(MiniMatchColors.ink)
+                    .accessibilityAddTraits(.isHeader)
+
+                ProgressView("Starting…")
+                    .controlSize(.large)
+                    .foregroundStyle(MiniMatchColors.ink)
+
+                if model.screen == .home {
+                    Button("Cancel", role: .cancel, action: cancel)
+                        .buttonStyle(.bordered)
+                        .controlSize(.large)
+                }
+            }
+            .frame(maxWidth: 480)
+            .padding(.horizontal, 28)
+            .padding(.vertical, 36)
+            .frame(maxWidth: .infinity)
+        }
+        .task(id: scenePhase) {
+            guard scenePhase == .active else { return }
+            await model.observeTable()
+        }
+    }
+}
+
 #Preview {
     ContentView(
         model: GameModel.preview(),
         gameCenter: GameCenterModel.preview(),
         appleSignIn: AppleSignInModel()
     )
+}
+
+#Preview("Lobby loading") {
+    LobbyLoadingView(model: GameModel.preview(), cancel: {})
+        .background(MiniMatchColors.background)
 }
