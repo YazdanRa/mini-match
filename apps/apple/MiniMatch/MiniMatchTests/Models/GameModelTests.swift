@@ -26,6 +26,21 @@ struct GameModelTests {
     }
 
     @Test
+    @MainActor
+    func pendingLeaderboardScoreSurvivesRelaunch() throws {
+        let suiteName = "MiniMatchTests.leaderboard.\(UUID().uuidString)"
+        let defaults = try #require(UserDefaults(suiteName: suiteName))
+        defer { defaults.removePersistentDomain(forName: suiteName) }
+
+        UserDefaultsLeaderboardScorePendingStore(defaults: defaults).save(64, for: "game-player")
+        let relaunchedStore = UserDefaultsLeaderboardScorePendingStore(defaults: defaults)
+
+        #expect(relaunchedStore.load(for: "game-player") == 64)
+        relaunchedStore.save(nil, for: "game-player")
+        #expect(relaunchedStore.load(for: "game-player") == nil)
+    }
+
+    @Test
     func serverConfirmedWinsEarnTheExpectedGameCenterAchievements() {
         var table = PreviewFixtures.lobbyTable
         table.lastResult = GameRoundResult(

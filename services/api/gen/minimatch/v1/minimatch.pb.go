@@ -1419,8 +1419,10 @@ type RoundResult struct {
 	WinnerBestWinStreak uint32 `protobuf:"varint,6,opt,name=winner_best_win_streak,json=winnerBestWinStreak,proto3" json:"winner_best_win_streak,omitempty"`
 	// Satisfied lifetime/streak achievement identifiers, without exposing exact counters.
 	WinnerAchievementIds []string `protobuf:"bytes,7,rep,name=winner_achievement_ids,json=winnerAchievementIds,proto3" json:"winner_achievement_ids,omitempty"`
-	unknownFields        protoimpl.UnknownFields
-	sizeCache            protoimpl.SizeCache
+	// Present only when the authenticated player won, for Game Center leaderboard reporting.
+	LocalPlayerLeaderboardScore *uint64 `protobuf:"varint,8,opt,name=local_player_leaderboard_score,json=localPlayerLeaderboardScore,proto3,oneof" json:"local_player_leaderboard_score,omitempty"`
+	unknownFields               protoimpl.UnknownFields
+	sizeCache                   protoimpl.SizeCache
 }
 
 func (x *RoundResult) Reset() {
@@ -1503,6 +1505,13 @@ func (x *RoundResult) GetWinnerAchievementIds() []string {
 		return x.WinnerAchievementIds
 	}
 	return nil
+}
+
+func (x *RoundResult) GetLocalPlayerLeaderboardScore() uint64 {
+	if x != nil && x.LocalPlayerLeaderboardScore != nil {
+		return *x.LocalPlayerLeaderboardScore
+	}
+	return 0
 }
 
 type Selection struct {
@@ -1701,7 +1710,7 @@ const file_minimatch_v1_minimatch_proto_rawDesc = "" +
 	"\x06avatar\x18\x05 \x01(\tR\x06avatar\"O\n" +
 	"\x05Round\x12\x16\n" +
 	"\x06number\x18\x01 \x01(\rR\x06number\x12.\n" +
-	"\x05phase\x18\x02 \x01(\x0e2\x18.minimatch.v1.RoundPhaseR\x05phase\"\xfc\x02\n" +
+	"\x05phase\x18\x02 \x01(\x0e2\x18.minimatch.v1.RoundPhaseR\x05phase\"\xe9\x03\n" +
 	"\vRoundResult\x12!\n" +
 	"\fround_number\x18\x01 \x01(\rR\vroundNumber\x127\n" +
 	"\n" +
@@ -1711,8 +1720,10 @@ const file_minimatch_v1_minimatch_proto_rawDesc = "" +
 	"\x11winner_total_wins\x18\x04 \x01(\x04B\x02\x18\x01R\x0fwinnerTotalWins\x12.\n" +
 	"\x11winner_win_streak\x18\x05 \x01(\rB\x02\x18\x01R\x0fwinnerWinStreak\x127\n" +
 	"\x16winner_best_win_streak\x18\x06 \x01(\rB\x02\x18\x01R\x13winnerBestWinStreak\x124\n" +
-	"\x16winner_achievement_ids\x18\a \x03(\tR\x14winnerAchievementIdsB\x13\n" +
-	"\x11_winner_player_id\"s\n" +
+	"\x16winner_achievement_ids\x18\a \x03(\tR\x14winnerAchievementIds\x12H\n" +
+	"\x1elocal_player_leaderboard_score\x18\b \x01(\x04H\x01R\x1blocalPlayerLeaderboardScore\x88\x01\x01B\x13\n" +
+	"\x11_winner_player_idB!\n" +
+	"\x1f_local_player_leaderboard_score\"s\n" +
 	"\tSelection\x12\x1b\n" +
 	"\tplayer_id\x18\x01 \x01(\tR\bplayerId\x12&\n" +
 	"\x04pick\x18\x02 \x01(\v2\x12.minimatch.v1.PickR\x04pick\x12!\n" +

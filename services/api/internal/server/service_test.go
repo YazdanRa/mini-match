@@ -215,6 +215,14 @@ func TestConnectAndGRPCKeepPicksPrivateUntilReveal(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	if _, err := repository.Update(ctx, tableID, func(table *game.Table) error {
+		if err := table.SetGameCenterID(created.Msg.PlayerId, "game-center-host"); err != nil {
+			return err
+		}
+		return table.SetGameCenterID(joined.Msg.PlayerId, "game-center-player")
+	}); err != nil {
+		t.Fatal(err)
+	}
 	if _, err := connectClient.BeginRound(ctx, authenticated(&minimatchv1.BeginRoundRequest{
 		TableId:      tableID,
 		HostPlayerId: created.Msg.PlayerId,
@@ -309,7 +317,7 @@ func TestConnectAndGRPCKeepPicksPrivateUntilReveal(t *testing.T) {
 		playerID string
 		value    uint64
 		token    string
-	}{{created.Msg.PlayerId, 2, "host-token"}, {joined.Msg.PlayerId, 5, "player-token"}} {
+	}{{created.Msg.PlayerId, 5, "host-token"}, {joined.Msg.PlayerId, 2, "player-token"}} {
 		if _, err := connectClient.LockPick(ctx, authenticated(&minimatchv1.LockPickRequest{
 			TableId:     tableID,
 			PlayerId:    pick.playerID,
@@ -330,12 +338,32 @@ func TestConnectAndGRPCKeepPicksPrivateUntilReveal(t *testing.T) {
 	if legacy.Msg.Table.CurrentRound != nil || legacy.Msg.Table.LastResult.GetRoundNumber() != 2 {
 		t.Fatal("legacy StartRound did not reveal the active round")
 	}
+	guestPoll, err := grpcClient.GetTable(ctx, authenticated(
+		&minimatchv1.GetTableRequest{TableId: tableID},
+		"player-token",
+	))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := guestPoll.Msg.Table.LastResult.GetLocalPlayerLeaderboardScore(); got != 1 {
+		t.Fatalf("guest winner leaderboard score = %d, want 1", got)
+	}
+	hostPoll, err := connectClient.GetTable(ctx, authenticated(
+		&minimatchv1.GetTableRequest{TableId: tableID},
+		"host-token",
+	))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if hostPoll.Msg.Table.LastResult.LocalPlayerLeaderboardScore != nil {
+		t.Fatal("guest winner leaderboard score leaked to the host")
+	}
 	if repository.reveals != 2 {
 		t.Fatalf("reveal aliases repository calls = %d, want 2", repository.reveals)
 	}
 }
 
-func TestToProtoRedactsWinnerStatsAndIncludesAchievementEvidence(t *testing.T) {
+func TestToProtoReturnsLeaderboardScoreOnlyToWinner(t *testing.T) {
 	table, _ := game.NewTable("table", "Friday", "ABC-DEF", "maya", "Maya", "fox")
 	table.LastResult = &game.Result{
 		RoundNumber:         9,
@@ -344,11 +372,18 @@ func TestToProtoRedactsWinnerStatsAndIncludesAchievementEvidence(t *testing.T) {
 		WinnerWinStreak:     4,
 		WinnerBestWinStreak: 8,
 	}
+	table.WinnerLifetimeWins = 64
 
-	result := toProto(table).GetLastResult()
+	result := toProto(table, "maya").GetLastResult()
 	if result.GetWinnerTotalWins() != 0 || result.GetWinnerWinStreak() != 0 ||
 		result.GetWinnerBestWinStreak() != 0 {
 		t.Fatalf("exact winner stats leaked into the shared response: %#v", result)
+	}
+	if result.GetLocalPlayerLeaderboardScore() != 64 {
+		t.Fatalf("winner leaderboard score = %d, want 64", result.GetLocalPlayerLeaderboardScore())
+	}
+	if toProto(table, "zoe").GetLastResult().LocalPlayerLeaderboardScore != nil {
+		t.Fatal("winner leaderboard score leaked to another player")
 	}
 	wantAchievements := []string{
 		"com.yazdanra.minimatch.achievement.twoWinStreak",
@@ -360,7 +395,7 @@ func TestToProtoRedactsWinnerStatsAndIncludesAchievementEvidence(t *testing.T) {
 	if !slices.Equal(result.GetWinnerAchievementIds(), wantAchievements) {
 		t.Fatalf("winner achievements = %v, want %v", result.GetWinnerAchievementIds(), wantAchievements)
 	}
-	if toProto(table).WinnerLifetimeWins != nil {
+	if toProto(table, "maya").WinnerLifetimeWins != nil {
 		t.Fatal("new round wins leaked into deprecated completed-match totals")
 	}
 }

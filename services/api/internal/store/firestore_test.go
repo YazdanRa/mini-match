@@ -53,8 +53,8 @@ func TestFirestoreDocumentsKeepPicksPrivateAndPreserveUint64(t *testing.T) {
 		t.Fatal("player profiles did not round-trip through the private Firestore document")
 	}
 	public := publicDocument(table)
-	if public.WinnerLifetimeWins != "18446744073709551615" {
-		t.Fatal("public document truncated winner lifetime wins")
+	if _, exposed := reflect.TypeOf(public).FieldByName("WinnerLifetimeWins"); exposed {
+		t.Fatal("safe table document exposes deprecated winner totals")
 	}
 	if private.Players[0].Name != "Maya" || private.Players[0].Avatar != "fox" ||
 		private.Players[1].Name != "Liam" || private.Players[1].Avatar != "owl" ||

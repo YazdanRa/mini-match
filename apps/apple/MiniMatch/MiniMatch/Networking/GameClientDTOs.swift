@@ -158,13 +158,19 @@ struct ResultDTO: Decodable {
     let selections: [SelectionDTO]
     let winnerPlayerId: String?
     let winnerAchievementIds: [String]?
+    let localPlayerLeaderboardScore: String?
 
     func model() throws -> GameRoundResult {
+        let leaderboardScore = try localPlayerLeaderboardScore.map {
+            guard let score = UInt64($0) else { throw GameClientError.invalidResponse }
+            return score
+        }
         return GameRoundResult(
             roundNumber: roundNumber,
             selections: try selections.map { try $0.model() },
             winnerPlayerID: winnerPlayerId,
-            winnerAchievementIDs: Set(winnerAchievementIds ?? [])
+            winnerAchievementIDs: Set(winnerAchievementIds ?? []),
+            localPlayerLeaderboardScore: leaderboardScore
         )
     }
 }

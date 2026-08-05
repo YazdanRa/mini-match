@@ -70,15 +70,55 @@ final class UserDefaultsAchievementPendingStore: AchievementPendingPersisting {
 }
 
 @MainActor
+protocol LeaderboardScorePendingPersisting: AnyObject {
+    func load(for playerID: String) -> Int?
+    func save(_ score: Int?, for playerID: String)
+}
+
+@MainActor
+final class UserDefaultsLeaderboardScorePendingStore: LeaderboardScorePendingPersisting {
+    private let defaults: UserDefaults
+    private let key: String
+
+    init(defaults: UserDefaults = .standard, key: String = "pendingGameCenterLeaderboardScores") {
+        self.defaults = defaults
+        self.key = key
+    }
+
+    func load(for playerID: String) -> Int? {
+        loadAll()[playerID]
+    }
+
+    func save(_ score: Int?, for playerID: String) {
+        var all = loadAll()
+        all[playerID] = score
+        if all.isEmpty {
+            defaults.removeObject(forKey: key)
+        } else {
+            defaults.set(try? JSONEncoder().encode(all), forKey: key)
+        }
+    }
+
+    private func loadAll() -> [String: Int] {
+        defaults.data(forKey: key).flatMap {
+            try? JSONDecoder().decode([String: Int].self, from: $0)
+        } ?? [:]
+    }
+}
+
+@MainActor
 @Observable
 final class GameCenterModel: NSObject {
     static let activityID = "com.yazdanra.minimatch.play"
+    static let leaderboardID = "com.yazdanra.minimatch.wins"
+    static let leaderboardMaximumScore: UInt64 = 999_999_999
 
     private let isEnabled: Bool
     private let achievementPendingStore: any AchievementPendingPersisting
+    private let leaderboardScorePendingStore: any LeaderboardScorePendingPersisting
     private var started = false
     private var listenerIsRegistered = false
-    private var achievementPlayerID: String?
+    private var reportingPlayerID: String?
     private weak var gameModel: GameModel?
     private var match: GKMatch?
     private var expectedPlayerCount = 0
@@ -92,6 +132,8 @@ final class GameCenterModel: NSObject {
     private var pendingAchievementIDs = Set<String>()
     private var completedAchievementIDs = Set<String>()
     private var reportingAchievementIDs = Set<String>()
+    private var pendingLeaderboardScore: Int?
+    private var isReportingLeaderboardScore = false
     private var activityStartGate = ActivityStartGate()
 
     var authentication: GameCenterAuthentication?
@@ -119,10 +161,13 @@ final class GameCenterModel: NSObject {
     init(
         isEnabled: Bool = true,
         achievementPendingStore: any AchievementPendingPersisting =
-            UserDefaultsAchievementPendingStore()
+            UserDefaultsAchievementPendingStore(),
+        leaderboardScorePendingStore: any LeaderboardScorePendingPersisting =
+            UserDefaultsLeaderboardScorePendingStore()
     ) {
         self.isEnabled = isEnabled
         self.achievementPendingStore = achievementPendingStore
+        self.leaderboardScorePendingStore = leaderboardScorePendingStore
         restrictionIsResolved = !isEnabled
         super.init()
     }
@@ -153,7 +198,7 @@ final class GameCenterModel: NSObject {
     func attach(to gameModel: GameModel) {
         self.gameModel = gameModel
         gameModel.roundResultHandler = { [weak self] table, playerID in
-            self?.reportAchievements(for: table, currentPlayerID: playerID)
+            self?.reportRoundResult(for: table, currentPlayerID: playerID)
         }
     }
 
@@ -357,7 +402,7 @@ final class GameCenterModel: NSObject {
         activity?.end()
         activity = nil
         canShareActivity = false
-        bindAchievementPlayer(nil)
+        bindReportingPlayer(nil)
     }
 
     private func endControlMatch() {
@@ -376,11 +421,11 @@ final class GameCenterModel: NSObject {
     func identityVerification() async throws -> GameCenterIdentityDTO? {
         let player = GKLocalPlayer.local
         guard player.isAuthenticated else {
-            bindAchievementPlayer(nil)
+            bindReportingPlayer(nil)
             return nil
         }
         let playerID = player.gamePlayerID
-        bindAchievementPlayer(playerID)
+        bindReportingPlayer(playerID)
         let items: GameCenterVerificationItems = try await withCheckedThrowingContinuation {
             continuation in
             player.fetchItems(forIdentityVerificationSignature: {
@@ -442,9 +487,10 @@ final class GameCenterModel: NSObject {
         let player = GKLocalPlayer.local
         isAuthenticated = player.isAuthenticated
         authenticatedTeamPlayerID = isAuthenticated ? player.teamPlayerID : nil
-        bindAchievementPlayer(isAuthenticated ? player.gamePlayerID : nil)
+        bindReportingPlayer(isAuthenticated ? player.gamePlayerID : nil)
         if isAuthenticated {
             reportPendingAchievements(for: player)
+            reportPendingLeaderboardScore(for: player)
         }
     }
 
@@ -679,24 +725,31 @@ final class GameCenterModel: NSObject {
         }
     }
 
-    private func reportAchievements(for table: GameTable, currentPlayerID: String) {
+    private func reportRoundResult(for table: GameTable, currentPlayerID: String) {
         let player = GKLocalPlayer.local
         guard player.isAuthenticated,
               gameModel?.gameCenterTeamPlayerID == player.teamPlayerID
         else {
             return
         }
-        bindAchievementPlayer(player.gamePlayerID)
+        bindReportingPlayer(player.gamePlayerID)
         pendingAchievementIDs.formUnion(GameCenterAchievement.earned(
             in: table,
             currentPlayerID: currentPlayerID
         ).map(\.rawValue))
         persistPendingAchievements()
         reportPendingAchievements(for: player)
+        if table.lastResult?.winnerPlayerID == currentPlayerID,
+           let value = table.lastResult?.localPlayerLeaderboardScore {
+            let score = Int(min(value, Self.leaderboardMaximumScore))
+            pendingLeaderboardScore = max(pendingLeaderboardScore ?? score, score)
+            persistPendingLeaderboardScore()
+            reportPendingLeaderboardScore(for: player)
+        }
     }
 
     private func reportPendingAchievements(for player: GKLocalPlayer) {
-        guard player.isAuthenticated, achievementPlayerID == player.gamePlayerID else { return }
+        guard player.isAuthenticated, reportingPlayerID == player.gamePlayerID else { return }
         let pending = pendingAchievementIDs
             .subtracting(completedAchievementIDs)
             .subtracting(reportingAchievementIDs)
@@ -725,17 +778,57 @@ final class GameCenterModel: NSObject {
         }
     }
 
-    private func bindAchievementPlayer(_ playerID: String?) {
-        guard achievementPlayerID != playerID else { return }
-        achievementPlayerID = playerID
+    private func reportPendingLeaderboardScore(for player: GKLocalPlayer) {
+        guard player.isAuthenticated,
+              reportingPlayerID == player.gamePlayerID,
+              let score = pendingLeaderboardScore,
+              !isReportingLeaderboardScore
+        else {
+            return
+        }
+
+        isReportingLeaderboardScore = true
+        let playerID = player.gamePlayerID
+        Task {
+            do {
+                try await GKLeaderboard.submitScore(
+                    score,
+                    context: 0,
+                    player: player,
+                    leaderboardIDs: [Self.leaderboardID]
+                )
+                guard GKLocalPlayer.local.gamePlayerID == playerID else { return }
+                if pendingLeaderboardScore == score {
+                    pendingLeaderboardScore = nil
+                    persistPendingLeaderboardScore()
+                }
+                isReportingLeaderboardScore = false
+                reportPendingLeaderboardScore(for: player)
+            } catch {
+                guard GKLocalPlayer.local.gamePlayerID == playerID else { return }
+                isReportingLeaderboardScore = false
+            }
+        }
+    }
+
+    private func bindReportingPlayer(_ playerID: String?) {
+        guard reportingPlayerID != playerID else { return }
+        reportingPlayerID = playerID
         pendingAchievementIDs = playerID.map { achievementPendingStore.load(for: $0) } ?? []
+        pendingLeaderboardScore = playerID.flatMap { leaderboardScorePendingStore.load(for: $0) }
         completedAchievementIDs.removeAll()
         reportingAchievementIDs.removeAll()
+        isReportingLeaderboardScore = false
     }
 
     private func persistPendingAchievements() {
-        guard let achievementPlayerID else { return }
-        achievementPendingStore.save(pendingAchievementIDs, for: achievementPlayerID)
+        guard let reportingPlayerID else { return }
+        achievementPendingStore.save(pendingAchievementIDs, for: reportingPlayerID)
+    }
+
+    private func persistPendingLeaderboardScore() {
+        guard let reportingPlayerID else { return }
+        leaderboardScorePendingStore.save(pendingLeaderboardScore, for: reportingPlayerID)
     }
 
 }

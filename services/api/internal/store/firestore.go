@@ -315,21 +315,20 @@ type selectionDocument struct {
 }
 
 type safeTableDocument struct {
-	ID                 string               `firestore:"id"`
-	Name               string               `firestore:"name"`
-	JoinCode           string               `firestore:"join_code"`
-	HostID             string               `firestore:"host_player_id"`
-	PlayerIDs          []string             `firestore:"player_ids"`
-	ResultPlayerIDs    []string             `firestore:"result_player_ids,omitempty"`
-	Players            []safePlayerDocument `firestore:"players"`
-	State              string               `firestore:"state"`
-	CurrentRound       *roundDocument       `firestore:"current_round,omitempty"`
-	LastResult         *resultDocument      `firestore:"last_result,omitempty"`
-	WinsToFinish       int64                `firestore:"wins_to_finish,omitempty"`
-	Version            string               `firestore:"state_version"`
-	EventSequence      string               `firestore:"event_sequence"`
-	WinnerPlayerID     string               `firestore:"winner_player_id,omitempty"`
-	WinnerLifetimeWins string               `firestore:"winner_lifetime_wins,omitempty"`
+	ID              string               `firestore:"id"`
+	Name            string               `firestore:"name"`
+	JoinCode        string               `firestore:"join_code"`
+	HostID          string               `firestore:"host_player_id"`
+	PlayerIDs       []string             `firestore:"player_ids"`
+	ResultPlayerIDs []string             `firestore:"result_player_ids,omitempty"`
+	Players         []safePlayerDocument `firestore:"players"`
+	State           string               `firestore:"state"`
+	CurrentRound    *roundDocument       `firestore:"current_round,omitempty"`
+	LastResult      *resultDocument      `firestore:"last_result,omitempty"`
+	WinsToFinish    int64                `firestore:"wins_to_finish,omitempty"`
+	Version         string               `firestore:"state_version"`
+	EventSequence   string               `firestore:"event_sequence"`
+	WinnerPlayerID  string               `firestore:"winner_player_id,omitempty"`
 }
 
 type safePlayerDocument struct {
@@ -368,17 +367,16 @@ func privateDocument(table *game.Table) tableDocument {
 
 func publicDocument(table *game.Table) safeTableDocument {
 	document := safeTableDocument{
-		ID:                 table.ID,
-		Name:               table.Name,
-		JoinCode:           table.JoinCode,
-		HostID:             table.HostID,
-		PlayerIDs:          make([]string, 0, len(table.Players)),
-		Players:            make([]safePlayerDocument, 0, len(table.Players)),
-		State:              "active",
-		Version:            strconv.FormatUint(table.Version, 10),
-		EventSequence:      strconv.FormatUint(table.EventSequence, 10),
-		WinnerLifetimeWins: optionalUint64(table.WinnerLifetimeWins),
-		LastResult:         encodePublicResult(table.LastResult),
+		ID:            table.ID,
+		Name:          table.Name,
+		JoinCode:      table.JoinCode,
+		HostID:        table.HostID,
+		PlayerIDs:     make([]string, 0, len(table.Players)),
+		Players:       make([]safePlayerDocument, 0, len(table.Players)),
+		State:         "active",
+		Version:       strconv.FormatUint(table.Version, 10),
+		EventSequence: strconv.FormatUint(table.EventSequence, 10),
+		LastResult:    encodePublicResult(table.LastResult),
 	}
 	document.CurrentRound = encodeRound(table.CurrentRound)
 	for _, player := range table.Players {

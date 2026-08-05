@@ -80,17 +80,20 @@ struct GameRoundResult: Equatable, Sendable {
     let selections: [GameSelection]
     let winnerPlayerID: String?
     let winnerAchievementIDs: Set<String>
+    let localPlayerLeaderboardScore: UInt64?
 
     init(
         roundNumber: UInt32,
         selections: [GameSelection],
         winnerPlayerID: String?,
-        winnerAchievementIDs: Set<String> = []
+        winnerAchievementIDs: Set<String> = [],
+        localPlayerLeaderboardScore: UInt64? = nil
     ) {
         self.roundNumber = roundNumber
         self.selections = selections
         self.winnerPlayerID = winnerPlayerID
         self.winnerAchievementIDs = winnerAchievementIDs
+        self.localPlayerLeaderboardScore = localPlayerLeaderboardScore
     }
 }
 
