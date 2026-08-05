@@ -1595,6 +1595,22 @@
         }
       }
     },
+    "Sound effects" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Efectos de sonido"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Effets sonores"
+          }
+        }
+      }
+    },
     "Spark" : {
       "localizations" : {
         "es" : {

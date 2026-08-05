@@ -9,6 +9,7 @@ struct SettingsView: View {
         ScrollView {
             VStack(spacing: 20) {
                 SettingsHeader()
+                SoundEffectsSettingsCard()
                 LanguageSettingsCard()
 
                 if appleSignIn.isSignedIn {
@@ -35,6 +36,22 @@ struct SettingsView: View {
         .navigationTitle("Settings")
         .navigationBarTitleDisplayMode(.inline)
         .accessibilityIdentifier("settings-page")
+    }
+}
+
+private struct SoundEffectsSettingsCard: View {
+    @AppStorage("soundEffectsEnabled") private var isEnabled = true
+
+    var body: some View {
+        SettingsCard(accent: MiniMatchColors.blueText) {
+            Toggle(isOn: $isEnabled) {
+                Label("Sound effects", systemImage: "speaker.wave.2.fill")
+                    .font(.headline)
+                    .foregroundStyle(MiniMatchColors.ink)
+            }
+            .tint(MiniMatchColors.blueText)
+            .accessibilityIdentifier("sound-effects-toggle")
+        }
     }
 }
 

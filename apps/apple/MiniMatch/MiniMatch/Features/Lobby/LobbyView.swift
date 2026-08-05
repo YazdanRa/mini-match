@@ -5,6 +5,7 @@ struct LobbyView: View {
     let model: GameModel
     let playerImages: [String: UIImage]
     @Environment(\.scenePhase) private var scenePhase
+    @AppStorage("soundEffectsEnabled") private var soundEffectsEnabled = true
     private let roundResultSoundPlayer = RoundResultSoundPlayer.shared
 
     var body: some View {
@@ -81,8 +82,10 @@ struct LobbyView: View {
         }
         .onChange(of: model.table?.lastResult?.roundNumber) { _, roundNumber in
             guard roundNumber != nil, let roundResult = model.table?.lastResult else { return }
-            Task {
-                await roundResultSoundPlayer.play(for: roundResult)
+            if soundEffectsEnabled {
+                Task {
+                    await roundResultSoundPlayer.play(for: roundResult)
+                }
             }
 
             if let result = model.result {
