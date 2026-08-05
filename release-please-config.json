@@ -1,0 +1,27 @@
+{
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
+  "release-type": "simple",
+  "bootstrap-sha": "37394010310d55d45043c40abfc6c6fc7ebd6418",
+  "initial-version": "0.1.0",
+  "include-component-in-tag": true,
+  "include-v-in-tag": true,
+  "tag-separator": "-",
+  "separate-pull-requests": true,
+  "packages": {
+    "services/api": {
+      "component": "server"
+    },
+    "apps/apple/MiniMatch": {
+      "component": "apple",
+      "extra-files": [
+        {
+          "type": "generic",
+          "path": "MiniMatch.xcodeproj/project.pbxproj"
+        }
+      ]
+    },
+    "apps/web": {
+      "component": "web"
+    }
+  }
+}
