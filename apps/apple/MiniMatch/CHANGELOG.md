@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.1](https://github.com/YazdanRa/mini-match/compare/apple-v0.1.0...apple-v0.1.1) (2026-08-05)
+
+
+### Bug Fixes
+
+* **apple:** restore compatible audio session activation ([#19](https://github.com/YazdanRa/mini-match/issues/19)) ([12790f1](https://github.com/YazdanRa/mini-match/commit/12790f1218153ee37d9f8d038f9467a293ee9e18))
+
 ## 0.1.0 (2026-08-05)
 
 
