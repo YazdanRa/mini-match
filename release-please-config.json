@@ -7,6 +7,48 @@
   "include-v-in-tag": true,
   "tag-separator": "-",
   "separate-pull-requests": true,
+  "changelog-sections": [
+    {
+      "type": "feat",
+      "section": "Features"
+    },
+    {
+      "type": "fix",
+      "section": "Bug Fixes"
+    },
+    {
+      "type": "perf",
+      "section": "Performance Improvements"
+    },
+    {
+      "type": "build",
+      "section": "Dependencies and Build"
+    },
+    {
+      "type": "ci",
+      "section": "Continuous Integration"
+    },
+    {
+      "type": "docs",
+      "section": "Documentation"
+    },
+    {
+      "type": "chore",
+      "section": "Chores"
+    },
+    {
+      "type": "refactor",
+      "section": "Code Refactoring"
+    },
+    {
+      "type": "bump",
+      "section": "Version Bumps"
+    },
+    {
+      "type": "revert",
+      "section": "Reverts"
+    }
+  ],
   "packages": {
     "services/api": {
       "component": "server"
