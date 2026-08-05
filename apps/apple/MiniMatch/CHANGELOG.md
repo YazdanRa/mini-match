@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.2.0](https://github.com/YazdanRa/mini-match/compare/apple-v0.1.1...apple-v0.2.0) (2026-08-05)
+
+
+### Features
+
+* **home:** show activity start progress ([57d2897](https://github.com/YazdanRa/mini-match/commit/57d28979c3213d1198512b7fe968ddcc33e13088))
+* **ios:** add sound effects setting ([#24](https://github.com/YazdanRa/mini-match/issues/24)) ([086cafe](https://github.com/YazdanRa/mini-match/commit/086cafef61f018932cf8738ab03b12938e9250ea))
+
+
+### Bug Fixes
+
+* **apple:** show loading state while preparing Game Center lobby ([aeef7cb](https://github.com/YazdanRa/mini-match/commit/aeef7cbbd90fe15ad9f06d017bff30b9b9c15287))
+* **game-center:** update leaderboard from authoritative wins ([#22](https://github.com/YazdanRa/mini-match/issues/22)) ([e8bd9a5](https://github.com/YazdanRa/mini-match/commit/e8bd9a506ceaefbd2dc9f1dfd8bbd15fb0a575e0))
+
 ## [0.1.1](https://github.com/YazdanRa/mini-match/compare/apple-v0.1.0...apple-v0.1.1) (2026-08-05)
 
 
