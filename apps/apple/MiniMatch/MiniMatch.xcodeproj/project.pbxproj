@@ -488,6 +488,7 @@
 				Base,
 				fr,
 				es,
+				it,
 				en,
 			);
 			mainGroup = 05C95AD6E2DB9F3DE9BFF203;
