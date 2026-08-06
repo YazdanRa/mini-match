@@ -1,5 +1,5 @@
 {
   "services/api": "0.2.0",
-  "apps/apple/MiniMatch": "0.2.0",
+  "apps/apple/MiniMatch": "0.3.0",
   "apps/web": "0.1.0"
 }

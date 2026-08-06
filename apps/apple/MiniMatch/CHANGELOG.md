@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.3.0](https://github.com/YazdanRa/mini-match/compare/apple-v0.2.0...apple-v0.3.0) (2026-08-06)
+
+
+### Features
+
+* **game:** show per-table round win counts ([#28](https://github.com/YazdanRa/mini-match/issues/28)) ([62553f2](https://github.com/YazdanRa/mini-match/commit/62553f2a8d4771cbc0ba50c950a4156b2f4c7d07))
+* **i18n:** add Italian localization ([#30](https://github.com/YazdanRa/mini-match/issues/30)) ([4b29582](https://github.com/YazdanRa/mini-match/commit/4b295822efae4ada0dd9adcc631bdfab3f37fad1))
+* **ios:** add main button sound effect ([#25](https://github.com/YazdanRa/mini-match/issues/25)) ([94d84d6](https://github.com/YazdanRa/mini-match/commit/94d84d6c41070b059c786a236f949d7363dedddb))
+* **ios:** redesign join-code entry as a sheet ([#27](https://github.com/YazdanRa/mini-match/issues/27)) ([b79a2b7](https://github.com/YazdanRa/mini-match/commit/b79a2b7a624bcfdecbb6fa62c833dc061aad538f))
+
 ## [0.2.0](https://github.com/YazdanRa/mini-match/compare/apple-v0.1.1...apple-v0.2.0) (2026-08-05)
 
 
