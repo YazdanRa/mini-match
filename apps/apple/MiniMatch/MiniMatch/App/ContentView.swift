@@ -8,6 +8,7 @@ struct ContentView: View {
     @Environment(\.scenePhase) private var scenePhase
     @State private var isConfirmingLeave = false
     @State private var isShowingSettings = false
+    private let soundEffectPlayer = SoundEffectPlayer.shared
 
     var body: some View {
         @Bindable var model = model
@@ -76,6 +77,7 @@ struct ContentView: View {
                         ProfileMenu(
                             gameCenter: gameCenter,
                             showSettings: {
+                                soundEffectPlayer.play(.mainButton)
                                 appleSignIn.refreshProfileAvailability()
                                 isShowingSettings = true
                             }
