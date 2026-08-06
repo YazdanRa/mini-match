@@ -104,12 +104,12 @@ Grant only the permissions needed by the workflow:
 - The deployment service account needs `roles/iam.serviceAccountUser` on the build and runtime service accounts.
 - The build service account needs `roles/run.builder` on the project.
 
-### Firestore rules
+### Firestore configuration
 
-The server workflow does not deploy Firestore security rules. Deploy them separately when `services/api/firestore.rules` changes:
+The server workflow does not deploy Firestore configuration. Deploy the rules and indexes separately when `services/api/firestore.rules` or `services/api/firestore.indexes.json` changes. The index configuration enables seven-day cleanup through TTL policies on the private Daily entry and claim collection groups.
 
 ```sh
-firebase deploy --only firestore:rules --project mini-match-20260729
+firebase deploy --only firestore --project mini-match-20260729
 ```
 
 ### Dispatch
