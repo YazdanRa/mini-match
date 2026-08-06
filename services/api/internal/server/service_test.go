@@ -411,7 +411,8 @@ func TestToProtoReturnsLeaderboardScoreOnlyToWinner(t *testing.T) {
 
 func TestPollingExpiresStaleMemberAndAllowsRejoin(t *testing.T) {
 	now := time.Date(2026, time.August, 3, 12, 0, 0, 0, time.UTC)
-	service := New(game.NewMemoryRepository())
+	repository := game.NewMemoryRepository()
+	service := New(repository)
 	service.now = func() time.Time { return now }
 	path, handler := minimatchv1connect.NewMiniMatchServiceHandler(
 		service,
@@ -447,6 +448,12 @@ func TestPollingExpiresStaleMemberAndAllowsRejoin(t *testing.T) {
 		}
 	}
 	tableID := created.Msg.Table.Id
+	if _, err := repository.Update(ctx, tableID, func(table *game.Table) error {
+		table.PlayerWins["liam"] = 5
+		return nil
+	}); err != nil {
+		t.Fatal(err)
+	}
 	if _, err := client.BeginRound(ctx, authenticated(&minimatchv1.BeginRoundRequest{
 		TableId: tableID, HostPlayerId: "maya",
 	}, "host-token")); err != nil {
@@ -500,8 +507,8 @@ func TestPollingExpiresStaleMemberAndAllowsRejoin(t *testing.T) {
 	if err != nil {
 		t.Fatalf("evicted member rejoin: %v", err)
 	}
-	if len(rejoined.Msg.Table.Players) != 3 {
-		t.Fatalf("rejoined players = %d, want 3", len(rejoined.Msg.Table.Players))
+	if len(rejoined.Msg.Table.Players) != 3 || rejoined.Msg.Table.Players[2].Wins != 5 {
+		t.Fatalf("rejoined table = %#v, want three players and five retained wins", rejoined.Msg.Table)
 	}
 }
 

@@ -154,9 +154,12 @@ func TestRevealedResultKeepsPlayerNamesAfterLeave(t *testing.T) {
 	if got := table.LastResult.Selections[1].Wins; got != 1 {
 		t.Fatalf("departed player result wins = %d, want 1", got)
 	}
+	if _, retained := table.PlayerWins["liam"]; retained {
+		t.Fatal("departed player remained in table win history")
+	}
 	_ = table.Join("liam", "Liam", "")
-	if got := table.PlayerWins["liam"]; got != 1 {
-		t.Fatalf("rejoined player table wins = %d, want 1", got)
+	if got := table.PlayerWins["liam"]; got != 0 {
+		t.Fatalf("rejoined player table wins = %d, want 0", got)
 	}
 }
 
@@ -332,6 +335,7 @@ func TestPresenceExpiryUnblocksReveal(t *testing.T) {
 	table, _ := NewTable("table", "Friday", "ABC123", "maya", "Maya", "fox")
 	_ = table.Join("zoe", "Zoe", "owl")
 	_ = table.Join("liam", "Liam", "frog")
+	table.PlayerWins["liam"] = 5
 	_ = table.RefreshPresence("maya", now, duration)
 	_ = table.RefreshPresence("zoe", now, duration)
 	_ = table.RefreshPresence("liam", now, duration)
@@ -348,8 +352,28 @@ func TestPresenceExpiryUnblocksReveal(t *testing.T) {
 	if table.HasPlayer("liam") || len(table.Players) != 2 || table.CurrentRound.Phase != RoundReady {
 		t.Fatalf("expiry result = players %#v, phase %v", table.Players, table.CurrentRound.Phase)
 	}
+	if got := table.RetainedPlayerWins["liam"]; got != 5 {
+		t.Fatalf("expired player retained wins = %d, want 5", got)
+	}
 	if err := table.RevealRound("maya", 1); err != nil {
 		t.Fatalf("remaining players could not reveal: %v", err)
+	}
+	_ = table.Join("liam", "Liam", "frog")
+	if got := table.PlayerWins["liam"]; got != 5 {
+		t.Fatalf("rejoined expired player wins = %d, want 5", got)
+	}
+}
+
+func TestBeginRoundDiscardsExpiredPlayerWinCounts(t *testing.T) {
+	table, _ := NewTable("table", "Friday", "ABC123", "maya", "Maya", "fox")
+	_ = table.Join("zoe", "Zoe", "owl")
+	table.RetainedPlayerWins["departed"] = 5
+
+	if err := table.BeginRound("maya"); err != nil {
+		t.Fatal(err)
+	}
+	if len(table.RetainedPlayerWins) != 0 {
+		t.Fatalf("retained player wins = %#v, want empty", table.RetainedPlayerWins)
 	}
 }
 

@@ -44,6 +44,7 @@ type Table struct {
 	HostID             string
 	Players            []*Player
 	PlayerWins         map[string]uint32
+	RetainedPlayerWins map[string]uint32
 	CurrentRound       *Round
 	LastResult         *Result
 	WinnerLifetimeWins uint64
@@ -103,14 +104,15 @@ func NewTable(id, name, joinCode, hostID, hostName, hostAvatar string) (*Table, 
 		return nil, err
 	}
 	return &Table{
-		ID:            id,
-		Name:          name,
-		JoinCode:      joinCode,
-		HostID:        hostID,
-		Players:       []*Player{{ID: hostID, Name: hostName, Avatar: avatar}},
-		PlayerWins:    make(map[string]uint32),
-		Version:       1,
-		EventSequence: 1,
+		ID:                 id,
+		Name:               name,
+		JoinCode:           joinCode,
+		HostID:             hostID,
+		Players:            []*Player{{ID: hostID, Name: hostName, Avatar: avatar}},
+		PlayerWins:         make(map[string]uint32),
+		RetainedPlayerWins: make(map[string]uint32),
+		Version:            1,
+		EventSequence:      1,
 	}, nil
 }
 
@@ -132,6 +134,10 @@ func (t *Table) Join(playerID, name, avatarID string) error {
 		return nil
 	}
 	t.Players = append(t.Players, &Player{ID: playerID, Name: name, Avatar: avatar})
+	if wins := t.RetainedPlayerWins[playerID]; wins != 0 {
+		t.PlayerWins[playerID] = wins
+	}
+	delete(t.RetainedPlayerWins, playerID)
 	if len(t.Players) == 1 {
 		t.HostID = playerID
 		t.CurrentRound = nil
@@ -145,11 +151,24 @@ func (t *Table) Join(playerID, name, avatarID string) error {
 }
 
 func (t *Table) Leave(playerID string) error {
+	return t.removePlayer(playerID, false)
+}
+
+func (t *Table) removePlayer(playerID string, retainWins bool) error {
 	for index, player := range t.Players {
 		if player.ID != playerID {
 			continue
 		}
 		t.Players = append(t.Players[:index], t.Players[index+1:]...)
+		if retainWins && t.PlayerWins[playerID] != 0 {
+			if t.RetainedPlayerWins == nil {
+				t.RetainedPlayerWins = make(map[string]uint32)
+			}
+			t.RetainedPlayerWins[playerID] = t.PlayerWins[playerID]
+		} else {
+			delete(t.RetainedPlayerWins, playerID)
+		}
+		delete(t.PlayerWins, playerID)
 		if playerID == t.HostID {
 			t.HostID = ""
 			if len(t.Players) != 0 {
@@ -176,6 +195,7 @@ func (t *Table) Leave(playerID string) error {
 			t.LastResult = nil
 			t.WinnerLifetimeWins = 0
 			clear(t.PlayerWins)
+			clear(t.RetainedPlayerWins)
 		}
 		t.changed()
 		return nil
@@ -210,7 +230,7 @@ func (t *Table) RefreshPresence(playerID string, now time.Time, duration time.Du
 	for index := len(t.Players) - 1; index >= 0; index-- {
 		player := t.Players[index]
 		if player.ID != playerID && !player.PresenceExpiresAt.After(now) {
-			if err := t.Leave(player.ID); err != nil {
+			if err := t.removePlayer(player.ID, true); err != nil {
 				return err
 			}
 		}
@@ -265,6 +285,7 @@ func (t *Table) BeginRound(actorID string) error {
 		}
 		expectedRound = t.LastResult.RoundNumber + 1
 	}
+	clear(t.RetainedPlayerWins)
 	t.CurrentRound = &Round{Number: expectedRound, Phase: RoundOpen}
 	t.changed()
 	return nil
@@ -420,7 +441,7 @@ func (t *Table) SetGameCenterID(playerID, gameCenterID string) error {
 }
 
 func (t *Table) DeletePlayerProfile(playerID, replacementID string) error {
-	_, winsExist := t.PlayerWins[playerID]
+	_, retainedWinsExist := t.RetainedPlayerWins[playerID]
 	playerIsPresent := t.player(playerID) != nil
 	resultChanged := false
 	if t.LastResult != nil {
@@ -440,13 +461,12 @@ func (t *Table) DeletePlayerProfile(playerID, replacementID string) error {
 		}
 	}
 	if playerIsPresent {
-		delete(t.PlayerWins, playerID)
 		return t.Leave(playerID)
 	}
-	if !resultChanged && !winsExist {
+	if !resultChanged && !retainedWinsExist {
 		return ErrNotFound
 	}
-	delete(t.PlayerWins, playerID)
+	delete(t.RetainedPlayerWins, playerID)
 	t.changed()
 	return nil
 }
@@ -620,6 +640,7 @@ func cloneStats(stats map[string]PlayerStats) map[string]PlayerStats {
 func clone(table *Table) *Table {
 	copy := *table
 	copy.PlayerWins = maps.Clone(table.PlayerWins)
+	copy.RetainedPlayerWins = maps.Clone(table.RetainedPlayerWins)
 	if table.CurrentRound != nil {
 		round := *table.CurrentRound
 		copy.CurrentRound = &round

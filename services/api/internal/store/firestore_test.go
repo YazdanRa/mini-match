@@ -27,7 +27,7 @@ func TestFirestoreDocumentsKeepPicksPrivateAndPreserveUint64(t *testing.T) {
 	table.EventSequence = math.MaxUint64
 	table.WinnerLifetimeWins = math.MaxUint64
 	table.PlayerWins["maya"] = 5
-	table.PlayerWins["departed"] = 3
+	table.RetainedPlayerWins["departed"] = 3
 	table.Players[0].GameCenterID = "game-center-maya"
 	table.Players[0].PresenceExpiresAt = time.Date(2026, time.August, 3, 12, 2, 0, 0, time.UTC)
 
@@ -48,15 +48,12 @@ func TestFirestoreDocumentsKeepPicksPrivateAndPreserveUint64(t *testing.T) {
 		decoded.WinnerLifetimeWins != math.MaxUint64 {
 		t.Fatal("private document did not round-trip uint64 values")
 	}
-	if private.Players[0].Score != 5 || decoded.PlayerWins["maya"] != 5 ||
-		decoded.PlayerWins["departed"] != 3 {
+	if private.Players[0].Score != 5 || decoded.PlayerWins["maya"] != 5 {
 		t.Fatal("private document did not round-trip table wins")
 	}
-	if _, retained := decoded.PlayerWins["liam"]; retained {
-		t.Fatal("zero-win player was retained in private win history")
-	}
-	if got := private.HistoricalPlayerIDs; !reflect.DeepEqual(got, []string{"departed", "maya"}) {
-		t.Fatalf("historical player IDs = %#v", got)
+	if decoded.RetainedPlayerWins["departed"] != 3 ||
+		!reflect.DeepEqual(private.RetainedPlayerIDs, []string{"departed"}) {
+		t.Fatal("private document did not round-trip bounded reconnect wins")
 	}
 	if decoded.Players[0].Name != "Maya" || decoded.Players[0].Avatar != "fox" ||
 		decoded.Players[0].GameCenterID != "game-center-maya" ||
@@ -70,6 +67,9 @@ func TestFirestoreDocumentsKeepPicksPrivateAndPreserveUint64(t *testing.T) {
 	}
 	if _, exposed := reflect.TypeOf(public).FieldByName("PlayerWins"); exposed {
 		t.Fatal("safe table document exposes departed player win history")
+	}
+	if _, exposed := reflect.TypeOf(public).FieldByName("RetainedPlayerWins"); exposed {
+		t.Fatal("safe table document exposes reconnect win history")
 	}
 	if private.Players[0].Name != "Maya" || private.Players[0].Avatar != "fox" ||
 		private.Players[1].Name != "Liam" || private.Players[1].Avatar != "owl" ||
