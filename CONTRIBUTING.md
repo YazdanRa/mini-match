@@ -21,6 +21,8 @@ Active authenticated table traffic renews a private two-minute membership lease.
 
 Firestore uses server-only `tables` documents and client-readable `table_views` projections because security rules cannot hide selected fields within one readable document. Every RPC requires a Firebase ID token, and the verified Firebase UID identifies the table player. Game Center players also send Apple's signed identity payload so the backend can bind them to the current Game Center participant. Firestore transactions update both views atomically; the in-memory repository keeps domain tests fast.
 
+The Daily Table is a separate hostless domain. The server derives its UTC date and cutoff, stores one immutable private pick per verified Game Center identity, and settles overdue rounds on the first Daily request after cutoff. Daily responses expose only aggregate results and the requesting player's own pick and outcome. Private entries and per-UID claims expire seven days after settlement; aggregate summaries and pseudonymous Daily-win totals remain. Daily RPCs also require Firebase App Check.
+
 ## Requirements
 
 - Go 1.25 or later
@@ -69,7 +71,7 @@ Use Conventional Commits for commit messages.
 
 Open `apps/apple/MiniMatch/MiniMatch.xcodeproj` in Xcode. The app uses bundle identifier `com.yazdanra.minimatch` and includes `GoogleService-Info.plist` in the `MiniMatch` target. This is public, non-secret Firebase client configuration: the API key identifies the Firebase project, while bundle-ID and API restrictions limit its use. Firebase Authentication, server-side authorization, and Security Rules—not the key—control backend and data access. Never add service-account keys, server credentials, or private keys to this file. A clean checkout also needs valid signing for the configured team and App ID.
 
-The App ID and provisioning profile require Game Center, Group Activities, and Sign in with Apple. Configure the matching iOS app in Firebase, enable anonymous authentication and the Apple provider, and use the same bundle identifier. The client sends Connect JSON commands to the production Cloud Run origin.
+The App ID and provisioning profile require Game Center, Group Activities, Sign in with Apple, and App Attest. Configure the matching iOS app in Firebase, enable anonymous authentication and the Apple provider, register App Attest for App Check, and use the same bundle identifier. The client sends Connect JSON commands to the production Cloud Run origin. Daily Table requests require an Apple-linked Firebase account, a fresh Game Center identity signature, and an App Check token.
 
 ## Production server deployment
 
@@ -118,4 +120,4 @@ After the workflow reaches the default branch, open **Actions → Deploy server 
 
 Confirm that the Release configuration signs with the intended Apple team and that the App ID has Game Center, Group Activities, and Sign in with Apple enabled. Archive the app in Xcode and distribute it through App Store Connect or an equivalent Xcode Cloud archive workflow.
 
-Before broad public release, enable Firebase App Check and an application-level abuse limit.
+Before broad public release, enable App Check enforcement for the registered iOS app and add application-level abuse limits.

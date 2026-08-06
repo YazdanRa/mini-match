@@ -965,6 +965,40 @@
       ]
     },
     "leaderboardLocalizations" : {
+      "com.yazdanra.minimatch.dailyGlobalWins" : [
+        {
+          "formatterOverride" : "INTEGER",
+          "formatterSuffix" : "daily wins",
+          "formatterSuffixSingular" : "daily win",
+          "locale" : "en-US",
+          "localID" : "com.yazdanra.minimatch.dailyGlobalWins-en-US",
+          "name" : "Most Daily Wins"
+        },
+        {
+          "formatterOverride" : "INTEGER",
+          "formatterSuffix" : "victoires quotidiennes",
+          "formatterSuffixSingular" : "victoire quotidienne",
+          "locale" : "fr-FR",
+          "localID" : "com.yazdanra.minimatch.dailyGlobalWins-fr-FR",
+          "name" : "Plus de victoires quotidiennes"
+        },
+        {
+          "formatterOverride" : "INTEGER",
+          "formatterSuffix" : "victorias diarias",
+          "formatterSuffixSingular" : "victoria diaria",
+          "locale" : "es-ES",
+          "localID" : "com.yazdanra.minimatch.dailyGlobalWins-es-ES",
+          "name" : "Más victorias diarias"
+        },
+        {
+          "formatterOverride" : "INTEGER",
+          "formatterSuffix" : "vittorie giornaliere",
+          "formatterSuffixSingular" : "vittoria giornaliera",
+          "locale" : "it-IT",
+          "localID" : "com.yazdanra.minimatch.dailyGlobalWins-it-IT",
+          "name" : "Più vittorie giornaliere"
+        }
+      ],
       "com.yazdanra.minimatch.wins" : [
         {
           "formatterOverride" : "INTEGER",
@@ -1001,6 +1035,20 @@
       ]
     },
     "leaderboards" : [
+      {
+        "activityProperties" : {
+
+        },
+        "archived" : false,
+        "defaultFormatter" : "INTEGER",
+        "referenceName" : "Daily Global Wins",
+        "scoreRangeEnd" : "999999999",
+        "scoreRangeStart" : "0",
+        "scoreSortType" : "DESC",
+        "submissionType" : "BEST_SCORE",
+        "vendorIdentifier" : "com.yazdanra.minimatch.dailyGlobalWins",
+        "visibility" : "SHOW_FOR_ALL"
+      },
       {
         "activityProperties" : {
 

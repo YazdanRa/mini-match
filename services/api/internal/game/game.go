@@ -507,19 +507,25 @@ type Repository interface {
 	GetByJoinCode(context.Context, string) (*Table, error)
 	Update(context.Context, string, func(*Table) error) (*Table, error)
 	RevealRound(context.Context, string, func(*Table) error) (*Table, error)
+	GetDailyGlobalTable(context.Context, string, string, time.Time) (*DailyGlobalTable, error)
+	LockDailyGlobalPick(context.Context, string, string, string, uint64, time.Time) (*DailyGlobalTable, error)
 	DeleteProfile(context.Context, string) error
 }
 
 type MemoryRepository struct {
-	mu     sync.Mutex
-	tables map[string]*Table
-	stats  map[string]PlayerStats
+	mu          sync.Mutex
+	tables      map[string]*Table
+	stats       map[string]PlayerStats
+	dailyRounds map[string]*dailyRound
+	dailyStats  map[string]uint64
 }
 
 func NewMemoryRepository() *MemoryRepository {
 	return &MemoryRepository{
-		tables: make(map[string]*Table),
-		stats:  make(map[string]PlayerStats),
+		tables:      make(map[string]*Table),
+		stats:       make(map[string]PlayerStats),
+		dailyRounds: make(map[string]*dailyRound),
+		dailyStats:  make(map[string]uint64),
 	}
 }
 
@@ -623,6 +629,12 @@ func (r *MemoryRepository) DeleteProfile(_ context.Context, playerID string) err
 				delete(r.stats, gameCenterID)
 				break
 			}
+		}
+	}
+	accountHash := dailyIdentityHash("account", playerID)
+	for _, round := range r.dailyRounds {
+		if _, claimed := round.Claims[accountHash]; claimed {
+			round.Claims[accountHash] = ""
 		}
 	}
 	return nil

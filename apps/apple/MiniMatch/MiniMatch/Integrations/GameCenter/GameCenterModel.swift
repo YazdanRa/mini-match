@@ -28,6 +28,73 @@ struct ActivityStartGate {
     }
 }
 
+struct PendingLeaderboardScore {
+    private(set) var value: Int?
+
+    init(_ value: Int? = nil) {
+        self.value = value
+    }
+
+    mutating func enqueue(_ score: UInt64, maximum: UInt64) {
+        let score = Int(min(score, maximum))
+        value = max(value ?? score, score)
+    }
+
+    mutating func complete(_ score: Int) {
+        guard value == score else { return }
+        value = nil
+    }
+}
+
+struct PlayerScopedGeneration {
+    private(set) var playerID: String?
+    private(set) var value = 0
+
+    @discardableResult
+    mutating func bind(to playerID: String?) -> Bool {
+        guard self.playerID != playerID else { return false }
+        self.playerID = playerID
+        value &+= 1
+        return true
+    }
+
+    func matches(_ generation: Int, playerID: String) -> Bool {
+        value == generation && self.playerID == playerID
+    }
+}
+
+struct DailyLeaderboardEntry: Identifiable, Equatable {
+    let playerID: String
+    let rank: Int
+    let displayName: String
+    let score: Int
+    let isLocalPlayer: Bool
+
+    var id: String { playerID }
+
+    init(
+        playerID: String,
+        rank: Int,
+        displayName: String,
+        score: Int,
+        isLocalPlayer: Bool
+    ) {
+        self.playerID = playerID
+        self.rank = rank
+        self.displayName = displayName
+        self.score = score
+        self.isLocalPlayer = isLocalPlayer
+    }
+
+    init(_ entry: GKLeaderboard.Entry, localPlayerID: String) {
+        playerID = entry.player.gamePlayerID
+        rank = entry.rank
+        displayName = entry.player.displayName
+        score = entry.score
+        isLocalPlayer = playerID == localPlayerID
+    }
+}
+
 @MainActor
 protocol AchievementPendingPersisting: AnyObject {
     func load(for playerID: String) -> Set<String>
@@ -111,14 +178,17 @@ final class UserDefaultsLeaderboardScorePendingStore: LeaderboardScorePendingPer
 final class GameCenterModel: NSObject {
     static let activityID = "com.yazdanra.minimatch.play"
     static let leaderboardID = "com.yazdanra.minimatch.wins"
+    static let dailyLeaderboardID = "com.yazdanra.minimatch.dailyGlobalWins"
     static let leaderboardMaximumScore: UInt64 = 999_999_999
 
     private let isEnabled: Bool
     private let achievementPendingStore: any AchievementPendingPersisting
     private let leaderboardScorePendingStore: any LeaderboardScorePendingPersisting
+    private let dailyLeaderboardScorePendingStore: any LeaderboardScorePendingPersisting
     private var started = false
     private var listenerIsRegistered = false
     private var reportingPlayerID: String?
+    private var dailyReportingSession = PlayerScopedGeneration()
     private weak var gameModel: GameModel?
     private var match: GKMatch?
     private var expectedPlayerCount = 0
@@ -132,8 +202,11 @@ final class GameCenterModel: NSObject {
     private var pendingAchievementIDs = Set<String>()
     private var completedAchievementIDs = Set<String>()
     private var reportingAchievementIDs = Set<String>()
-    private var pendingLeaderboardScore: Int?
+    private var pendingLeaderboardScore = PendingLeaderboardScore()
+    private var pendingDailyLeaderboardScore = PendingLeaderboardScore()
     private var isReportingLeaderboardScore = false
+    private var isReportingDailyLeaderboardScore = false
+    private var dailyLeaderboardLoadGeneration = 0
     private var activityStartGate = ActivityStartGate()
 
     var authentication: GameCenterAuthentication?
@@ -147,6 +220,10 @@ final class GameCenterModel: NSObject {
     private(set) var isMultiplayerRestricted = false
     private(set) var restrictionIsResolved: Bool
     private(set) var errorMessage = ""
+    private(set) var dailyLeaderboardEntries = [DailyLeaderboardEntry]()
+    private(set) var dailyLocalLeaderboardEntry: DailyLeaderboardEntry?
+    private(set) var isLoadingDailyLeaderboard = false
+    private(set) var dailyLeaderboardErrorMessage: String?
     var isShowingError = false
     var isStartingActivity: Bool { activityStartGate.isActive }
     var isPreparingLobby: Bool {
@@ -163,11 +240,16 @@ final class GameCenterModel: NSObject {
         achievementPendingStore: any AchievementPendingPersisting =
             UserDefaultsAchievementPendingStore(),
         leaderboardScorePendingStore: any LeaderboardScorePendingPersisting =
-            UserDefaultsLeaderboardScorePendingStore()
+            UserDefaultsLeaderboardScorePendingStore(),
+        dailyLeaderboardScorePendingStore: any LeaderboardScorePendingPersisting =
+            UserDefaultsLeaderboardScorePendingStore(
+                key: "pendingGameCenterDailyLeaderboardScores"
+            )
     ) {
         self.isEnabled = isEnabled
         self.achievementPendingStore = achievementPendingStore
         self.leaderboardScorePendingStore = leaderboardScorePendingStore
+        self.dailyLeaderboardScorePendingStore = dailyLeaderboardScorePendingStore
         restrictionIsResolved = !isEnabled
         super.init()
     }
@@ -422,6 +504,7 @@ final class GameCenterModel: NSObject {
         let player = GKLocalPlayer.local
         guard player.isAuthenticated else {
             bindReportingPlayer(nil)
+            bindDailyReportingPlayer(nil)
             return nil
         }
         let playerID = player.gamePlayerID
@@ -462,6 +545,87 @@ final class GameCenterModel: NSObject {
         )
     }
 
+    func requiredIdentityVerification() async throws -> GameCenterIdentityDTO {
+        guard let identity = try await identityVerification() else {
+            throw GameCenterError.authenticationRequired
+        }
+        return identity
+    }
+
+    func reportDailyWins(_ total: UInt64, verifiedBy identity: GameCenterIdentityDTO) {
+        let player = GKLocalPlayer.local
+        guard player.isAuthenticated, player.teamPlayerID == identity.teamPlayerId else {
+            bindDailyReportingPlayer(player.isAuthenticated ? player.gamePlayerID : nil)
+            return
+        }
+        bindDailyReportingPlayer(player.gamePlayerID)
+        pendingDailyLeaderboardScore.enqueue(total, maximum: Self.leaderboardMaximumScore)
+        persistPendingDailyLeaderboardScore()
+        reportPendingDailyLeaderboardScore(for: player)
+    }
+
+    func loadDailyLeaderboard() async {
+        let player = GKLocalPlayer.local
+        guard player.isAuthenticated else {
+            bindDailyReportingPlayer(nil)
+            dailyLeaderboardErrorMessage = GameCenterError.authenticationRequired.errorDescription
+            return
+        }
+
+        let playerID = player.gamePlayerID
+        bindDailyReportingPlayer(playerID)
+        dailyLeaderboardLoadGeneration &+= 1
+        let generation = dailyLeaderboardLoadGeneration
+        isLoadingDailyLeaderboard = true
+        dailyLeaderboardErrorMessage = nil
+
+        do {
+            let leaderboards = try await GKLeaderboard.loadLeaderboards(
+                IDs: [Self.dailyLeaderboardID]
+            )
+            guard dailyLeaderboardLoadIsCurrent(generation, playerID: playerID) else {
+                refreshLocalPlayerIdentity()
+                return
+            }
+            guard let leaderboard = leaderboards.first(where: {
+                $0.baseLeaderboardID == Self.dailyLeaderboardID
+            }) else {
+                throw GameCenterError.leaderboardUnavailable
+            }
+            let (localPlayerEntry, entries, _) = try await leaderboard.loadEntries(
+                for: .global,
+                timeScope: .allTime,
+                range: NSRange(location: 1, length: 100)
+            )
+            guard dailyLeaderboardLoadIsCurrent(generation, playerID: playerID) else {
+                refreshLocalPlayerIdentity()
+                return
+            }
+            dailyLeaderboardEntries = entries.map {
+                DailyLeaderboardEntry($0, localPlayerID: playerID)
+            }
+            dailyLocalLeaderboardEntry = localPlayerEntry.map {
+                DailyLeaderboardEntry($0, localPlayerID: playerID)
+            }
+        } catch {
+            guard dailyLeaderboardLoadIsCurrent(generation, playerID: playerID) else {
+                refreshLocalPlayerIdentity()
+                return
+            }
+            dailyLeaderboardErrorMessage = error.localizedDescription
+        }
+
+        guard dailyLeaderboardLoadIsCurrent(generation, playerID: playerID) else { return }
+        isLoadingDailyLeaderboard = false
+    }
+
+    private func dailyLeaderboardLoadIsCurrent(_ generation: Int, playerID: String) -> Bool {
+        generation == dailyLeaderboardLoadGeneration
+            && dailyReportingSession.playerID == playerID
+            && GKLocalPlayer.local.isAuthenticated
+            && GKLocalPlayer.local.gamePlayerID == playerID
+    }
+
     func dismissAuthentication() {
         authentication = nil
         refreshRestrictions()
@@ -488,9 +652,11 @@ final class GameCenterModel: NSObject {
         isAuthenticated = player.isAuthenticated
         authenticatedTeamPlayerID = isAuthenticated ? player.teamPlayerID : nil
         bindReportingPlayer(isAuthenticated ? player.gamePlayerID : nil)
+        bindDailyReportingPlayer(isAuthenticated ? player.gamePlayerID : nil)
         if isAuthenticated {
             reportPendingAchievements(for: player)
             reportPendingLeaderboardScore(for: player)
+            reportPendingDailyLeaderboardScore(for: player)
         }
     }
 
@@ -741,8 +907,7 @@ final class GameCenterModel: NSObject {
         reportPendingAchievements(for: player)
         if table.lastResult?.winnerPlayerID == currentPlayerID,
            let value = table.lastResult?.localPlayerLeaderboardScore {
-            let score = Int(min(value, Self.leaderboardMaximumScore))
-            pendingLeaderboardScore = max(pendingLeaderboardScore ?? score, score)
+            pendingLeaderboardScore.enqueue(value, maximum: Self.leaderboardMaximumScore)
             persistPendingLeaderboardScore()
             reportPendingLeaderboardScore(for: player)
         }
@@ -781,7 +946,7 @@ final class GameCenterModel: NSObject {
     private func reportPendingLeaderboardScore(for player: GKLocalPlayer) {
         guard player.isAuthenticated,
               reportingPlayerID == player.gamePlayerID,
-              let score = pendingLeaderboardScore,
+              let score = pendingLeaderboardScore.value,
               !isReportingLeaderboardScore
         else {
             return
@@ -798,8 +963,8 @@ final class GameCenterModel: NSObject {
                     leaderboardIDs: [Self.leaderboardID]
                 )
                 guard GKLocalPlayer.local.gamePlayerID == playerID else { return }
-                if pendingLeaderboardScore == score {
-                    pendingLeaderboardScore = nil
+                if pendingLeaderboardScore.value == score {
+                    pendingLeaderboardScore.complete(score)
                     persistPendingLeaderboardScore()
                 }
                 isReportingLeaderboardScore = false
@@ -811,14 +976,75 @@ final class GameCenterModel: NSObject {
         }
     }
 
+    private func reportPendingDailyLeaderboardScore(for player: GKLocalPlayer) {
+        guard player.isAuthenticated,
+              dailyReportingSession.playerID == player.gamePlayerID,
+              let score = pendingDailyLeaderboardScore.value,
+              !isReportingDailyLeaderboardScore
+        else {
+            return
+        }
+
+        isReportingDailyLeaderboardScore = true
+        let playerID = player.gamePlayerID
+        let reportingGeneration = dailyReportingSession.value
+        Task {
+            do {
+                try await GKLeaderboard.submitScore(
+                    score,
+                    context: 0,
+                    player: player,
+                    leaderboardIDs: [Self.dailyLeaderboardID]
+                )
+                guard dailyReportingSession.matches(reportingGeneration, playerID: playerID),
+                      GKLocalPlayer.local.isAuthenticated,
+                      GKLocalPlayer.local.gamePlayerID == playerID
+                else {
+                    refreshLocalPlayerIdentity()
+                    return
+                }
+                if pendingDailyLeaderboardScore.value == score {
+                    pendingDailyLeaderboardScore.complete(score)
+                    persistPendingDailyLeaderboardScore()
+                }
+                isReportingDailyLeaderboardScore = false
+                reportPendingDailyLeaderboardScore(for: player)
+            } catch {
+                guard dailyReportingSession.matches(reportingGeneration, playerID: playerID),
+                      GKLocalPlayer.local.isAuthenticated,
+                      GKLocalPlayer.local.gamePlayerID == playerID
+                else {
+                    refreshLocalPlayerIdentity()
+                    return
+                }
+                isReportingDailyLeaderboardScore = false
+            }
+        }
+    }
+
     private func bindReportingPlayer(_ playerID: String?) {
         guard reportingPlayerID != playerID else { return }
         reportingPlayerID = playerID
         pendingAchievementIDs = playerID.map { achievementPendingStore.load(for: $0) } ?? []
-        pendingLeaderboardScore = playerID.flatMap { leaderboardScorePendingStore.load(for: $0) }
+        pendingLeaderboardScore = PendingLeaderboardScore(
+            playerID.flatMap { leaderboardScorePendingStore.load(for: $0) }
+        )
         completedAchievementIDs.removeAll()
         reportingAchievementIDs.removeAll()
         isReportingLeaderboardScore = false
+    }
+
+    private func bindDailyReportingPlayer(_ playerID: String?) {
+        guard dailyReportingSession.bind(to: playerID) else { return }
+        pendingDailyLeaderboardScore = PendingLeaderboardScore(
+            playerID.flatMap { dailyLeaderboardScorePendingStore.load(for: $0) }
+        )
+        isReportingDailyLeaderboardScore = false
+        dailyLeaderboardLoadGeneration &+= 1
+        dailyLeaderboardEntries.removeAll()
+        dailyLocalLeaderboardEntry = nil
+        isLoadingDailyLeaderboard = false
+        dailyLeaderboardErrorMessage = nil
     }
 
     private func persistPendingAchievements() {
@@ -828,7 +1054,15 @@ final class GameCenterModel: NSObject {
 
     private func persistPendingLeaderboardScore() {
         guard let reportingPlayerID else { return }
-        leaderboardScorePendingStore.save(pendingLeaderboardScore, for: reportingPlayerID)
+        leaderboardScorePendingStore.save(pendingLeaderboardScore.value, for: reportingPlayerID)
+    }
+
+    private func persistPendingDailyLeaderboardScore() {
+        guard let playerID = dailyReportingSession.playerID else { return }
+        dailyLeaderboardScorePendingStore.save(
+            pendingDailyLeaderboardScore.value,
+            for: playerID
+        )
     }
 
 }
@@ -984,7 +1218,9 @@ private enum GameCenterMatchMessage: Codable {
 private enum GameCenterError: LocalizedError {
     case activityUnavailable
     case accountChanged
+    case authenticationRequired
     case invalidIdentity
+    case leaderboardUnavailable
 
     var errorDescription: String? {
         switch self {
@@ -992,8 +1228,12 @@ private enum GameCenterError: LocalizedError {
             String(localized: "This Game Center activity is unavailable.")
         case .accountChanged:
             String(localized: "The Game Center account changed. Try again.")
+        case .authenticationRequired:
+            String(localized: "Sign in to Game Center to continue.")
         case .invalidIdentity:
             String(localized: "Game Center couldn’t verify this player. Try again.")
+        case .leaderboardUnavailable:
+            String(localized: "The Daily Wins leaderboard is unavailable.")
         }
     }
 }

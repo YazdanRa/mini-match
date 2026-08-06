@@ -212,8 +212,16 @@ func (r *FirestoreRepository) DeleteProfile(ctx context.Context, playerID string
 		if err != nil {
 			return err
 		}
+		dailyClaimMatches, err := tx.Documents(
+			r.client.Collection(dailyClaims).Doc(dailyAccountDocumentID(playerID)).Collection(dailyClaimRounds),
+		).GetAll()
+		if err != nil {
+			return err
+		}
 		tables := make([]*game.Table, 0, len(snapshots))
 		statsReferences := make(map[string]*firestore.DocumentRef, len(statsMatches))
+		dailyEntryReferences := make(map[string]*firestore.DocumentRef, len(dailyClaimMatches))
+		dailyClaimExpirations := make(map[string]time.Time, len(dailyClaimMatches))
 		for _, snapshot := range statsMatches {
 			statsReferences[snapshot.Ref.ID] = snapshot.Ref
 		}
@@ -240,6 +248,32 @@ func (r *FirestoreRepository) DeleteProfile(ctx context.Context, playerID string
 				return err
 			}
 		}
+		for _, claim := range dailyClaimMatches {
+			var document dailyClaimDocument
+			if err := claim.DataTo(&document); err != nil {
+				return fmt.Errorf("decode daily claim: %w", err)
+			}
+			round := r.client.Collection(dailyRounds).Doc(claim.Ref.ID)
+			roundSnapshot, err := tx.Get(round)
+			if err != nil {
+				return err
+			}
+			roundDocument, err := decodeDailyRound(round.ID, roundSnapshot)
+			if err != nil {
+				return err
+			}
+			dailyClaimExpirations[claim.Ref.Path] = roundDocument.ClosesAt.Add(dailyRetention)
+			if document.PlayerHash == "" {
+				continue
+			}
+			entry := round.Collection(dailyEntries).Doc(document.PlayerHash)
+			if _, err := tx.Get(entry); status.Code(err) == codes.NotFound {
+				continue
+			} else if err != nil {
+				return err
+			}
+			dailyEntryReferences[entry.Path] = entry
+		}
 		for _, table := range tables {
 			replacementID := "deleted:" + statsDocumentID(playerID+"\x00"+table.ID)
 			if err := table.DeletePlayerProfile(playerID, replacementID); err != nil {
@@ -263,6 +297,21 @@ func (r *FirestoreRepository) DeleteProfile(ctx context.Context, playerID string
 		}
 		for _, reference := range statsReferences {
 			if err := tx.Delete(reference); err != nil {
+				return err
+			}
+		}
+		for _, claim := range dailyClaimMatches {
+			if err := tx.Update(claim.Ref, []firestore.Update{
+				{Path: "account_hash", Value: firestore.Delete},
+				{Path: "player_hash", Value: firestore.Delete},
+				{Path: "pick", Value: firestore.Delete},
+				{Path: "expires_at", Value: dailyClaimExpirations[claim.Ref.Path]},
+			}); err != nil {
+				return err
+			}
+		}
+		for _, entry := range dailyEntryReferences {
+			if err := tx.Update(entry, []firestore.Update{{Path: "account_hash", Value: firestore.Delete}}); err != nil {
 				return err
 			}
 		}

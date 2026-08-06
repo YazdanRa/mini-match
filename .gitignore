@@ -67,6 +67,7 @@ fastlane/test_output
 .env
 .env.*
 .firebase/
+firestore-debug.log
 *service-account*.json
 
 # GitHub Actions Google Cloud authentication

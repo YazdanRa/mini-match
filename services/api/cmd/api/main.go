@@ -33,6 +33,10 @@ func main() {
 	if err != nil {
 		log.Fatalf("initialize Firebase Auth: %v", err)
 	}
+	appCheckClient, err := app.AppCheck(ctx)
+	if err != nil {
+		log.Fatalf("initialize Firebase App Check: %v", err)
+	}
 	firestoreClient, err := app.Firestore(ctx)
 	if err != nil {
 		log.Fatalf("initialize Firestore: %v", err)
@@ -41,7 +45,10 @@ func main() {
 
 	path, handler := minimatchv1connect.NewMiniMatchServiceHandler(
 		server.New(store.NewFirestoreRepository(firestoreClient)),
-		connect.WithInterceptors(authn.NewInterceptor(authn.NewFirebaseVerifier(authClient))),
+		connect.WithInterceptors(authn.NewDailyProtectedInterceptor(
+			authn.NewFirebaseVerifier(authClient),
+			authn.NewFirebaseAppCheckVerifier(appCheckClient),
+		)),
 	)
 
 	protocols := new(http.Protocols)

@@ -1,6 +1,17 @@
 import Foundation
 
-protocol GameClient: Sendable {
+protocol DailyGlobalClient: Sendable {
+    func getDailyGlobalTable(
+        gameCenterIdentity: GameCenterIdentityDTO
+    ) async throws -> DailyGlobalTable
+    func lockDailyGlobalPick(
+        roundDate: String,
+        pick: UInt64,
+        gameCenterIdentity: GameCenterIdentityDTO
+    ) async throws -> DailyGlobalTable
+}
+
+protocol GameClient: DailyGlobalClient, Sendable {
     func createTable(
         name: String,
         displayName: String,
@@ -38,6 +49,7 @@ enum GameClientError: Error, LocalizedError, Sendable {
     case invalidResponse
     case notFound
     case alreadyExists
+    case failedPrecondition
     case permissionDenied
     case unauthenticated
     case server(String)
@@ -50,6 +62,8 @@ enum GameClientError: Error, LocalizedError, Sendable {
             String(localized: "Table not found.")
         case .alreadyExists:
             String(localized: "That table already exists.")
+        case .failedPrecondition:
+            String(localized: "The table is not ready.")
         case .permissionDenied:
             String(localized: "You don’t have permission to do that.")
         case .unauthenticated:

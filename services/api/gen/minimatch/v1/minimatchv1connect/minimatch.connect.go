@@ -57,6 +57,12 @@ const (
 	// MiniMatchServiceGetTableProcedure is the fully-qualified name of the MiniMatchService's GetTable
 	// RPC.
 	MiniMatchServiceGetTableProcedure = "/minimatch.v1.MiniMatchService/GetTable"
+	// MiniMatchServiceGetDailyGlobalTableProcedure is the fully-qualified name of the
+	// MiniMatchService's GetDailyGlobalTable RPC.
+	MiniMatchServiceGetDailyGlobalTableProcedure = "/minimatch.v1.MiniMatchService/GetDailyGlobalTable"
+	// MiniMatchServiceLockDailyGlobalPickProcedure is the fully-qualified name of the
+	// MiniMatchService's LockDailyGlobalPick RPC.
+	MiniMatchServiceLockDailyGlobalPickProcedure = "/minimatch.v1.MiniMatchService/LockDailyGlobalPick"
 	// MiniMatchServiceDeleteProfileProcedure is the fully-qualified name of the MiniMatchService's
 	// DeleteProfile RPC.
 	MiniMatchServiceDeleteProfileProcedure = "/minimatch.v1.MiniMatchService/DeleteProfile"
@@ -77,6 +83,8 @@ type MiniMatchServiceClient interface {
 	// Reveals the named round and returns the table to the lobby.
 	RevealRound(context.Context, *connect.Request[v1.RevealRoundRequest]) (*connect.Response[v1.RevealRoundResponse], error)
 	GetTable(context.Context, *connect.Request[v1.GetTableRequest]) (*connect.Response[v1.GetTableResponse], error)
+	GetDailyGlobalTable(context.Context, *connect.Request[v1.GetDailyGlobalTableRequest]) (*connect.Response[v1.GetDailyGlobalTableResponse], error)
+	LockDailyGlobalPick(context.Context, *connect.Request[v1.LockDailyGlobalPickRequest]) (*connect.Response[v1.LockDailyGlobalPickResponse], error)
 	DeleteProfile(context.Context, *connect.Request[v1.DeleteProfileRequest]) (*connect.Response[v1.DeleteProfileResponse], error)
 }
 
@@ -139,6 +147,18 @@ func NewMiniMatchServiceClient(httpClient connect.HTTPClient, baseURL string, op
 			connect.WithSchema(miniMatchServiceMethods.ByName("GetTable")),
 			connect.WithClientOptions(opts...),
 		),
+		getDailyGlobalTable: connect.NewClient[v1.GetDailyGlobalTableRequest, v1.GetDailyGlobalTableResponse](
+			httpClient,
+			baseURL+MiniMatchServiceGetDailyGlobalTableProcedure,
+			connect.WithSchema(miniMatchServiceMethods.ByName("GetDailyGlobalTable")),
+			connect.WithClientOptions(opts...),
+		),
+		lockDailyGlobalPick: connect.NewClient[v1.LockDailyGlobalPickRequest, v1.LockDailyGlobalPickResponse](
+			httpClient,
+			baseURL+MiniMatchServiceLockDailyGlobalPickProcedure,
+			connect.WithSchema(miniMatchServiceMethods.ByName("LockDailyGlobalPick")),
+			connect.WithClientOptions(opts...),
+		),
 		deleteProfile: connect.NewClient[v1.DeleteProfileRequest, v1.DeleteProfileResponse](
 			httpClient,
 			baseURL+MiniMatchServiceDeleteProfileProcedure,
@@ -150,15 +170,17 @@ func NewMiniMatchServiceClient(httpClient connect.HTTPClient, baseURL string, op
 
 // miniMatchServiceClient implements MiniMatchServiceClient.
 type miniMatchServiceClient struct {
-	createTable   *connect.Client[v1.CreateTableRequest, v1.CreateTableResponse]
-	joinTable     *connect.Client[v1.JoinTableRequest, v1.JoinTableResponse]
-	leaveTable    *connect.Client[v1.LeaveTableRequest, v1.LeaveTableResponse]
-	lockPick      *connect.Client[v1.LockPickRequest, v1.LockPickResponse]
-	startRound    *connect.Client[v1.StartRoundRequest, v1.StartRoundResponse]
-	beginRound    *connect.Client[v1.BeginRoundRequest, v1.BeginRoundResponse]
-	revealRound   *connect.Client[v1.RevealRoundRequest, v1.RevealRoundResponse]
-	getTable      *connect.Client[v1.GetTableRequest, v1.GetTableResponse]
-	deleteProfile *connect.Client[v1.DeleteProfileRequest, v1.DeleteProfileResponse]
+	createTable         *connect.Client[v1.CreateTableRequest, v1.CreateTableResponse]
+	joinTable           *connect.Client[v1.JoinTableRequest, v1.JoinTableResponse]
+	leaveTable          *connect.Client[v1.LeaveTableRequest, v1.LeaveTableResponse]
+	lockPick            *connect.Client[v1.LockPickRequest, v1.LockPickResponse]
+	startRound          *connect.Client[v1.StartRoundRequest, v1.StartRoundResponse]
+	beginRound          *connect.Client[v1.BeginRoundRequest, v1.BeginRoundResponse]
+	revealRound         *connect.Client[v1.RevealRoundRequest, v1.RevealRoundResponse]
+	getTable            *connect.Client[v1.GetTableRequest, v1.GetTableResponse]
+	getDailyGlobalTable *connect.Client[v1.GetDailyGlobalTableRequest, v1.GetDailyGlobalTableResponse]
+	lockDailyGlobalPick *connect.Client[v1.LockDailyGlobalPickRequest, v1.LockDailyGlobalPickResponse]
+	deleteProfile       *connect.Client[v1.DeleteProfileRequest, v1.DeleteProfileResponse]
 }
 
 // CreateTable calls minimatch.v1.MiniMatchService.CreateTable.
@@ -203,6 +225,16 @@ func (c *miniMatchServiceClient) GetTable(ctx context.Context, req *connect.Requ
 	return c.getTable.CallUnary(ctx, req)
 }
 
+// GetDailyGlobalTable calls minimatch.v1.MiniMatchService.GetDailyGlobalTable.
+func (c *miniMatchServiceClient) GetDailyGlobalTable(ctx context.Context, req *connect.Request[v1.GetDailyGlobalTableRequest]) (*connect.Response[v1.GetDailyGlobalTableResponse], error) {
+	return c.getDailyGlobalTable.CallUnary(ctx, req)
+}
+
+// LockDailyGlobalPick calls minimatch.v1.MiniMatchService.LockDailyGlobalPick.
+func (c *miniMatchServiceClient) LockDailyGlobalPick(ctx context.Context, req *connect.Request[v1.LockDailyGlobalPickRequest]) (*connect.Response[v1.LockDailyGlobalPickResponse], error) {
+	return c.lockDailyGlobalPick.CallUnary(ctx, req)
+}
+
 // DeleteProfile calls minimatch.v1.MiniMatchService.DeleteProfile.
 func (c *miniMatchServiceClient) DeleteProfile(ctx context.Context, req *connect.Request[v1.DeleteProfileRequest]) (*connect.Response[v1.DeleteProfileResponse], error) {
 	return c.deleteProfile.CallUnary(ctx, req)
@@ -223,6 +255,8 @@ type MiniMatchServiceHandler interface {
 	// Reveals the named round and returns the table to the lobby.
 	RevealRound(context.Context, *connect.Request[v1.RevealRoundRequest]) (*connect.Response[v1.RevealRoundResponse], error)
 	GetTable(context.Context, *connect.Request[v1.GetTableRequest]) (*connect.Response[v1.GetTableResponse], error)
+	GetDailyGlobalTable(context.Context, *connect.Request[v1.GetDailyGlobalTableRequest]) (*connect.Response[v1.GetDailyGlobalTableResponse], error)
+	LockDailyGlobalPick(context.Context, *connect.Request[v1.LockDailyGlobalPickRequest]) (*connect.Response[v1.LockDailyGlobalPickResponse], error)
 	DeleteProfile(context.Context, *connect.Request[v1.DeleteProfileRequest]) (*connect.Response[v1.DeleteProfileResponse], error)
 }
 
@@ -281,6 +315,18 @@ func NewMiniMatchServiceHandler(svc MiniMatchServiceHandler, opts ...connect.Han
 		connect.WithSchema(miniMatchServiceMethods.ByName("GetTable")),
 		connect.WithHandlerOptions(opts...),
 	)
+	miniMatchServiceGetDailyGlobalTableHandler := connect.NewUnaryHandler(
+		MiniMatchServiceGetDailyGlobalTableProcedure,
+		svc.GetDailyGlobalTable,
+		connect.WithSchema(miniMatchServiceMethods.ByName("GetDailyGlobalTable")),
+		connect.WithHandlerOptions(opts...),
+	)
+	miniMatchServiceLockDailyGlobalPickHandler := connect.NewUnaryHandler(
+		MiniMatchServiceLockDailyGlobalPickProcedure,
+		svc.LockDailyGlobalPick,
+		connect.WithSchema(miniMatchServiceMethods.ByName("LockDailyGlobalPick")),
+		connect.WithHandlerOptions(opts...),
+	)
 	miniMatchServiceDeleteProfileHandler := connect.NewUnaryHandler(
 		MiniMatchServiceDeleteProfileProcedure,
 		svc.DeleteProfile,
@@ -305,6 +351,10 @@ func NewMiniMatchServiceHandler(svc MiniMatchServiceHandler, opts ...connect.Han
 			miniMatchServiceRevealRoundHandler.ServeHTTP(w, r)
 		case MiniMatchServiceGetTableProcedure:
 			miniMatchServiceGetTableHandler.ServeHTTP(w, r)
+		case MiniMatchServiceGetDailyGlobalTableProcedure:
+			miniMatchServiceGetDailyGlobalTableHandler.ServeHTTP(w, r)
+		case MiniMatchServiceLockDailyGlobalPickProcedure:
+			miniMatchServiceLockDailyGlobalPickHandler.ServeHTTP(w, r)
 		case MiniMatchServiceDeleteProfileProcedure:
 			miniMatchServiceDeleteProfileHandler.ServeHTTP(w, r)
 		default:
@@ -346,6 +396,14 @@ func (UnimplementedMiniMatchServiceHandler) RevealRound(context.Context, *connec
 
 func (UnimplementedMiniMatchServiceHandler) GetTable(context.Context, *connect.Request[v1.GetTableRequest]) (*connect.Response[v1.GetTableResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("minimatch.v1.MiniMatchService.GetTable is not implemented"))
+}
+
+func (UnimplementedMiniMatchServiceHandler) GetDailyGlobalTable(context.Context, *connect.Request[v1.GetDailyGlobalTableRequest]) (*connect.Response[v1.GetDailyGlobalTableResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("minimatch.v1.MiniMatchService.GetDailyGlobalTable is not implemented"))
+}
+
+func (UnimplementedMiniMatchServiceHandler) LockDailyGlobalPick(context.Context, *connect.Request[v1.LockDailyGlobalPickRequest]) (*connect.Response[v1.LockDailyGlobalPickResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("minimatch.v1.MiniMatchService.LockDailyGlobalPick is not implemented"))
 }
 
 func (UnimplementedMiniMatchServiceHandler) DeleteProfile(context.Context, *connect.Request[v1.DeleteProfileRequest]) (*connect.Response[v1.DeleteProfileResponse], error) {

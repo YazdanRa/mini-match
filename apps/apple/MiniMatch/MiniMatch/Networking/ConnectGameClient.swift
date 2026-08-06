@@ -1,24 +1,31 @@
 import Foundation
+import FirebaseAppCheck
 import FirebaseAuth
 
 struct ConnectGameClient: GameClient {
     private let baseURL: URL
     private let authorizationToken: @Sendable () async throws -> String
+    private let appCheckToken: @Sendable () async throws -> String
     private let send: @Sendable (URLRequest) async throws -> (Data, URLResponse)
 
     init(baseURL: URL, session: URLSession = .shared) {
         self.baseURL = baseURL
         authorizationToken = Self.firebaseAuthorizationToken
+        appCheckToken = Self.firebaseAppCheckToken
         send = { try await session.data(for: $0) }
     }
 
     init(
         baseURL: URL,
         authorizationToken: @escaping @Sendable () async throws -> String,
+        appCheckToken: @escaping @Sendable () async throws -> String = {
+            throw GameClientError.unauthenticated
+        },
         send: @escaping @Sendable (URLRequest) async throws -> (Data, URLResponse)
     ) {
         self.baseURL = baseURL
         self.authorizationToken = authorizationToken
+        self.appCheckToken = appCheckToken
         self.send = send
     }
 
@@ -114,15 +121,49 @@ struct ConnectGameClient: GameClient {
         return try response.table.model()
     }
 
+    func getDailyGlobalTable(
+        gameCenterIdentity: GameCenterIdentityDTO
+    ) async throws -> DailyGlobalTable {
+        let response: DailyGlobalTableResponseDTO = try await call(
+            "GetDailyGlobalTable",
+            body: GetDailyGlobalTableRequest(gameCenterIdentity: gameCenterIdentity),
+            requiresAppCheck: true
+        )
+        return try response.model()
+    }
+
+    func lockDailyGlobalPick(
+        roundDate: String,
+        pick: UInt64,
+        gameCenterIdentity: GameCenterIdentityDTO
+    ) async throws -> DailyGlobalTable {
+        let response: DailyGlobalTableResponseDTO = try await call(
+            "LockDailyGlobalPick",
+            body: LockDailyGlobalPickRequest(
+                roundDate: roundDate,
+                pick: PickDTO(value: String(pick)),
+                gameCenterIdentity: gameCenterIdentity
+            ),
+            requiresAppCheck: true
+        )
+        return try response.model()
+    }
+
     func deleteProfile() async throws {
         let _: EmptyResponse = try await call("DeleteProfile", body: EmptyRequest())
     }
 
     private func call<Request: Encodable, Response: Decodable>(
         _ method: String,
-        body: Request
+        body: Request,
+        requiresAppCheck: Bool = false
     ) async throws -> Response {
         let idToken = try await authorizationToken()
+        let appCheckToken: String? = if requiresAppCheck {
+            try await self.appCheckToken()
+        } else {
+            nil
+        }
         let servicePath = "minimatch.v1.MiniMatchService/\(method)"
         var request = URLRequest(url: baseURL.appending(path: servicePath))
         request.httpMethod = "POST"
@@ -131,6 +172,9 @@ struct ConnectGameClient: GameClient {
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         request.setValue("1", forHTTPHeaderField: "Connect-Protocol-Version")
         request.setValue("Bearer \(idToken)", forHTTPHeaderField: "Authorization")
+        if let appCheckToken {
+            request.setValue(appCheckToken, forHTTPHeaderField: "X-Firebase-AppCheck")
+        }
 
         let (data, response) = try await send(request)
         guard let httpResponse = response as? HTTPURLResponse else {
@@ -143,6 +187,8 @@ struct ConnectGameClient: GameClient {
                     throw GameClientError.notFound
                 case "already_exists":
                     throw GameClientError.alreadyExists
+                case "failed_precondition":
+                    throw GameClientError.failedPrecondition
                 case "permission_denied":
                     throw GameClientError.permissionDenied
                 case "unauthenticated":
@@ -164,5 +210,9 @@ struct ConnectGameClient: GameClient {
             try await Auth.auth().signInAnonymously().user
         }
         return try await user.getIDToken()
+    }
+
+    private static func firebaseAppCheckToken() async throws -> String {
+        (try await AppCheck.appCheck().token(forcingRefresh: false)).token
     }
 }
