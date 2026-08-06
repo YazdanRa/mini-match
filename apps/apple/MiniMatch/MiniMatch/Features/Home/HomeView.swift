@@ -120,7 +120,6 @@ private struct HomeActionSection: View {
     let appleSignIn: AppleSignInModel
     @Environment(\.colorScheme) private var colorScheme
     @State private var isJoiningWithCode = false
-    @State private var partyCode = ""
     private let soundEffectPlayer = SoundEffectPlayer.shared
 
     var body: some View {
@@ -155,18 +154,8 @@ private struct HomeActionSection: View {
                 .buttonStyle(.plain)
                 .disabled(multiplayerIsUnavailable)
             }
-            .alert("Join with a code", isPresented: $isJoiningWithCode) {
-                TextField("Party code", text: $partyCode)
-                    .textInputAutocapitalization(.characters)
-                Button("Join") {
-                    gameCenter.joinActivity(code: partyCode)
-                    partyCode = ""
-                }
-                Button("Cancel", role: .cancel) {
-                    partyCode = ""
-                }
-            } message: {
-                Text("Enter the party code from Game Center.")
+            .sheet(isPresented: $isJoiningWithCode) {
+                JoinCodeSheet(gameCenter: gameCenter)
             }
         } else {
             SignInWithAppleButton(
