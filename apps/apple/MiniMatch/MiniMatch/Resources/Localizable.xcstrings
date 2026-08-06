@@ -20,6 +20,12 @@
             "state" : "translated",
             "value" : "%1$@ gagne avec %2$llu"
           }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ vince con %2$llu"
+          }
         }
       }
     },
@@ -35,6 +41,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@ gagne !"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ vince!"
           }
         }
       }
@@ -54,6 +66,12 @@
           }
         },
         "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@, avatar %2$@, %3$@"
+          }
+        },
+        "it" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "%1$@, avatar %2$@, %3$@"
@@ -82,6 +100,12 @@
             "state" : "translated",
             "value" : "%1$@, photo de profil Game Center, %2$@"
           }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@, foto del profilo Game Center, %2$@"
+          }
         }
       }
     },
@@ -104,6 +128,12 @@
             "state" : "translated",
             "value" : "%1$@, a choisi %2$llu, %3$@"
           }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@, ha scelto %2$llu, %3$@"
+          }
         }
       }
     },
@@ -125,6 +155,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%1$@, nombre de victoires : %2$u, a choisi %3$llu, %4$@"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@, vittorie: %2$u, ha scelto %3$llu, %4$@"
           }
         }
       }
@@ -166,6 +202,24 @@
               }
             }
           }
+        },
+        "it" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld numero confermato"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld numeri confermati"
+                }
+              }
+            }
+          }
         }
       }
     },
@@ -178,6 +232,12 @@
           }
         },
         "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1"
+          }
+        },
+        "it" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "1"
@@ -200,6 +260,12 @@
             "state" : "translated",
             "value" : "Un joueur n’a pas pu rejoindre la partie Game Center."
           }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un giocatore non ha potuto unirsi alla partita di Game Center."
+          }
         }
       }
     },
@@ -215,6 +281,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Un joueur s’est déconnecté de la partie Game Center."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un giocatore si è disconnesso dalla partita di Game Center."
           }
         }
       }
@@ -232,6 +304,12 @@
             "state" : "translated",
             "value" : "Impossible de créer une demande de connexion sécurisée."
           }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Non è stato possibile creare una richiesta di accesso sicura."
+          }
         }
       }
     },
@@ -247,6 +325,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Apple n’a pas fourni d’identifiant de connexion valide."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple non ha restituito credenziali di accesso utilizzabili."
           }
         }
       }
@@ -264,6 +348,12 @@
             "state" : "translated",
             "value" : "Échec de la connexion avec Apple"
           }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Accesso con Apple non riuscito"
+          }
         }
       }
     },
@@ -279,6 +369,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Disponible uniquement pour l’hôte lorsque chaque joueur a verrouillé un nombre"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Disponibile solo per l’host dopo che ogni giocatore ha confermato il proprio numero"
           }
         }
       }
@@ -302,6 +398,12 @@
             "state" : "translated",
             "value" : "Disponible pour l’hôte lorsqu’au moins deux joueurs sont dans le salon"
           }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Disponibile per l’host quando nella lobby ci sono almeno due giocatori"
+          }
         }
       }
     },
@@ -317,6 +419,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Annuler"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Annulla"
           }
         }
       }
@@ -334,6 +442,12 @@
             "state" : "translated",
             "value" : "Chat"
           }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gatto"
+          }
         }
       }
     },
@@ -349,6 +463,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Modifier dans les réglages iOS"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Modifica nelle Impostazioni di iOS"
           }
         }
       }
@@ -366,6 +486,12 @@
             "state" : "translated",
             "value" : "Vérifiez les informations de la table et réessayez."
           }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Controlla i dettagli del tavolo e riprova."
+          }
         }
       }
     },
@@ -381,6 +507,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Vérification de Game Center…"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verifica di Game Center…"
           }
         }
       }
@@ -398,6 +530,12 @@
             "state" : "translated",
             "value" : "Confirmez auprès d’Apple pour révoquer l’accès et supprimer votre compte Mini Match."
           }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Conferma con Apple per revocare l’accesso ed eliminare il tuo account Mini Match."
+          }
         }
       }
     },
@@ -413,6 +551,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Impossible de continuer"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impossibile continuare"
           }
         }
       }
@@ -430,6 +574,12 @@
             "state" : "translated",
             "value" : "Impossible de créer une table. Réessayez."
           }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impossibile creare un tavolo. Riprova."
+          }
         }
       }
     },
@@ -446,22 +596,11 @@
             "state" : "translated",
             "value" : "Zone de danger"
           }
-        }
-      }
-    },
-    "Delete" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Eliminar"
-          }
         },
-        "fr" : {
+        "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Supprimer"
+            "value" : "Zona pericolosa"
           }
         }
       }
@@ -479,6 +618,12 @@
             "state" : "translated",
             "value" : "Supprimer le profil"
           }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elimina profilo"
+          }
         }
       }
     },
@@ -494,6 +639,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Supprimer définitivement le profil"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elimina definitivamente il profilo"
           }
         }
       }
@@ -511,6 +662,12 @@
             "state" : "translated",
             "value" : "Supprimer votre profil ?"
           }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vuoi eliminare il profilo?"
+          }
         }
       }
     },
@@ -526,6 +683,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Chien"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cane"
           }
         }
       }
@@ -543,6 +706,12 @@
             "state" : "translated",
             "value" : "Doublon"
           }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Duplicato"
+          }
         }
       }
     },
@@ -558,6 +727,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Saisissez un nombre entier strictement positif."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inserisci un numero intero positivo."
           }
         }
       }
@@ -575,6 +750,12 @@
             "state" : "translated",
             "value" : "Saisissez un code de table et votre nom."
           }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inserisci un codice tavolo e il tuo nome."
+          }
         }
       }
     },
@@ -590,6 +771,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Saisissez un nom de table et votre nom."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inserisci un nome per il tavolo e il tuo nome."
           }
         }
       }
@@ -607,6 +794,12 @@
             "state" : "translated",
             "value" : "Saisissez un code de groupe Game Center valide."
           }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inserisci un codice gruppo di Game Center valido."
+          }
         }
       }
     },
@@ -622,6 +815,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Saisissez le code de groupe Game Center."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inserisci il codice gruppo di Game Center."
           }
         }
       }
@@ -639,6 +838,12 @@
             "state" : "translated",
             "value" : "Entrez votre nombre"
           }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inserisci il tuo numero"
+          }
         }
       }
     },
@@ -654,6 +859,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Chaque nombre a été choisi plusieurs fois."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ogni numero è stato scelto da più giocatori."
           }
         }
       }
@@ -671,6 +882,12 @@
             "state" : "translated",
             "value" : "Tout le monde doit d’abord verrouiller son choix"
           }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tutti devono prima confermare il proprio numero"
+          }
         }
       }
     },
@@ -686,6 +903,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Renard"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Volpe"
           }
         }
       }
@@ -703,6 +926,12 @@
             "state" : "translated",
             "value" : "Grenouille"
           }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rana"
+          }
         }
       }
     },
@@ -718,6 +947,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Game Center n’a pas pu vérifier ce joueur. Réessayez."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Game Center non ha potuto verificare questo giocatore. Riprova."
           }
         }
       }
@@ -737,6 +972,12 @@
             "state" : "translated",
             "value" : "Échec de Game Center"
           }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Errore di Game Center"
+          }
         }
       }
     },
@@ -755,6 +996,12 @@
             "state" : "translated",
             "value" : "La recherche de joueurs Game Center n’est pas disponible."
           }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il matchmaking di Game Center non è disponibile."
+          }
         }
       }
     },
@@ -770,6 +1017,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Profil Game Center"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Profilo Game Center"
           }
         }
       }
@@ -787,6 +1040,12 @@
             "state" : "translated",
             "value" : "Réglages du jeu"
           }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impostazioni di gioco"
+          }
         }
       }
     },
@@ -802,6 +1061,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Hôte"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Host"
           }
         }
       }
@@ -819,6 +1084,12 @@
             "state" : "translated",
             "value" : "Inviter"
           }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Invita"
+          }
         }
       }
     },
@@ -834,6 +1105,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Rejoindre"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unisciti"
           }
         }
       }
@@ -853,6 +1130,12 @@
             "state" : "translated",
             "value" : "Rejoignez ma partie Mini Match."
           }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unisciti alla mia partita di Mini Match."
+          }
         }
       }
     },
@@ -868,6 +1151,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Rejoindre avec un code"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unisciti con un codice"
           }
         }
       }
@@ -885,6 +1174,12 @@
             "state" : "translated",
             "value" : "Présent"
           }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Presente"
+          }
         }
       }
     },
@@ -900,6 +1195,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Langue"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lingua"
           }
         }
       }
@@ -917,6 +1218,12 @@
             "state" : "translated",
             "value" : "Quitter"
           }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esci"
+          }
         }
       }
     },
@@ -932,6 +1239,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Quitter la partie"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abbandona la partita"
           }
         }
       }
@@ -949,6 +1262,12 @@
             "state" : "translated",
             "value" : "Quitter cette partie ?"
           }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vuoi abbandonare questa partita?"
+          }
         }
       }
     },
@@ -965,6 +1284,12 @@
             "state" : "translated",
             "value" : "Départ de la table"
           }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uscita dal tavolo"
+          }
         }
       }
     },
@@ -980,6 +1305,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Chargement du profil Game Center…"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Caricamento del profilo Game Center…"
           }
         }
       }
@@ -1003,6 +1334,12 @@
             "state" : "translated",
             "value" : "Salon"
           }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lobby"
+          }
         }
       }
     },
@@ -1018,6 +1355,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Verrouiller mon nombre"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Conferma il mio numero"
           }
         }
       }
@@ -1035,6 +1378,12 @@
             "state" : "translated",
             "value" : "Verrouillé"
           }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Confermato"
+          }
         }
       }
     },
@@ -1050,6 +1399,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Verrouillage…"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Conferma…"
           }
         }
       }
@@ -1067,6 +1422,12 @@
             "state" : "translated",
             "value" : "Se déconnecter de Mini Match"
           }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Disconnettiti da Mini Match"
+          }
         }
       }
     },
@@ -1082,6 +1443,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Le plus petit nombre choisi par un seul joueur gagne."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vince il numero più basso scelto da un solo giocatore."
           }
         }
       }
@@ -1099,6 +1466,12 @@
             "state" : "translated",
             "value" : "Personnalisez Mini Match à votre goût."
           }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Personalizza Mini Match come preferisci."
+          }
         }
       }
     },
@@ -1111,6 +1484,12 @@
           }
         },
         "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Match"
+          }
+        },
+        "it" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Match"
@@ -1131,6 +1510,12 @@
             "state" : "translated",
             "value" : "Mini"
           }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mini"
+          }
         }
       }
     },
@@ -1143,6 +1528,12 @@
           }
         },
         "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mini Match"
+          }
+        },
+        "it" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Mini Match"
@@ -1163,6 +1554,12 @@
             "state" : "translated",
             "value" : "Le mode multijoueur est indisponible en raison des réglages Temps d’écran."
           }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La modalità multigiocatore non è disponibile a causa delle impostazioni di Tempo di utilizzo."
+          }
         }
       }
     },
@@ -1178,6 +1575,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Aucun gagnant"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nessun vincitore"
           }
         }
       }
@@ -1195,6 +1598,12 @@
             "state" : "translated",
             "value" : "Aucun gagnant. Chaque nombre a été choisi plusieurs fois."
           }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nessun vincitore. Ogni numero è stato scelto da più giocatori."
+          }
         }
       }
     },
@@ -1211,6 +1620,12 @@
             "state" : "translated",
             "value" : "Non verrouillé"
           }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Non confermato"
+          }
         }
       }
     },
@@ -1223,6 +1638,12 @@
           }
         },
         "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OK"
+          }
+        },
+        "it" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "OK"
@@ -1243,6 +1664,12 @@
             "state" : "translated",
             "value" : "Ouvre les options du compte et du jeu"
           }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apre le opzioni dell’account e del gioco"
+          }
         }
       }
     },
@@ -1258,6 +1685,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ouvre les réglages de Mini Match, où vous pouvez changer la langue"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apre le impostazioni di Mini Match, dove puoi cambiare la lingua"
           }
         }
       }
@@ -1275,6 +1708,12 @@
             "state" : "translated",
             "value" : "Hibou"
           }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gufo"
+          }
         }
       }
     },
@@ -1290,6 +1729,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Code de groupe"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Codice gruppo"
           }
         }
       }
@@ -1307,6 +1752,12 @@
             "state" : "translated",
             "value" : "Supprime définitivement votre compte Mini Match. Cette action est irréversible."
           }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elimina definitivamente il tuo account Mini Match. Questa operazione non può essere annullata."
+          }
         }
       }
     },
@@ -1322,6 +1773,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Choisissez un nombre entier strictement positif. Le plus petit nombre choisi par un seul joueur gagne."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scegli un numero intero positivo. Vince il numero più basso scelto da un solo giocatore."
           }
         }
       }
@@ -1339,6 +1796,12 @@
             "state" : "translated",
             "value" : "Jouer ensemble"
           }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gioca insieme"
+          }
         }
       }
     },
@@ -1354,6 +1817,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Joueur"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Giocatore"
           }
         }
       }
@@ -1371,6 +1840,12 @@
             "state" : "translated",
             "value" : "Compte joueur"
           }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Account del giocatore"
+          }
         }
       }
     },
@@ -1386,6 +1861,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Joueurs (%lld)"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Giocatori (%lld)"
           }
         }
       }
@@ -1404,6 +1885,12 @@
             "state" : "translated",
             "value" : "Joueurs : %1$lld. Choix confirmés : %2$lld."
           }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Giocatori: %1$lld. Scelte confermate: %2$lld."
+          }
         }
       }
     },
@@ -1419,6 +1906,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Profil de %@"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Profilo di %@"
           }
         }
       }
@@ -1436,6 +1929,12 @@
             "state" : "translated",
             "value" : "Reconnexion à la table…"
           }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Riconnessione al tavolo…"
+          }
         }
       }
     },
@@ -1451,6 +1950,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nécessite une confirmation. Cette action est irréversible."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Richiede una conferma. Questa operazione non può essere annullata."
           }
         }
       }
@@ -1468,6 +1973,12 @@
             "state" : "translated",
             "value" : "Revenez à l’accueil pour gérer ce profil."
           }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Torna alla schermata iniziale per gestire questo profilo."
+          }
         }
       }
     },
@@ -1483,6 +1994,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Révéler la manche"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostra i risultati"
           }
         }
       }
@@ -1500,6 +2017,12 @@
             "state" : "translated",
             "value" : "Révélation…"
           }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Visualizzazione dei risultati…"
+          }
         }
       }
     },
@@ -1512,6 +2035,12 @@
           }
         },
         "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Manche %u"
+          }
+        },
+        "it" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Manche %u"
@@ -1532,6 +2061,12 @@
             "state" : "translated",
             "value" : "a choisi"
           }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ha scelto"
+          }
         }
       }
     },
@@ -1548,6 +2083,12 @@
             "state" : "translated",
             "value" : "Réglages"
           }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impostazioni"
+          }
         }
       }
     },
@@ -1563,6 +2104,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Connectez-vous et réessayez."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Accedi e riprova."
           }
         }
       }
@@ -1582,6 +2129,12 @@
             "state" : "translated",
             "value" : "Connectez-vous à Game Center pour jouer avec vos amis."
           }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Accedi a Game Center per giocare con gli amici."
+          }
         }
       }
     },
@@ -1597,6 +2150,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Connectez-vous avec votre compte Apple pour sécuriser ce compte joueur."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Accedi con il tuo Apple Account per proteggere questo account giocatore."
           }
         }
       }
@@ -1614,6 +2173,12 @@
             "state" : "translated",
             "value" : "Petit jeu. Plaisir immense."
           }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Piccolo gioco. Grande divertimento."
+          }
         }
       }
     },
@@ -1630,6 +2195,12 @@
             "state" : "translated",
             "value" : "Effets sonores"
           }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Effetti sonori"
+          }
         }
       }
     },
@@ -1645,6 +2216,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Étincelle"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scintilla"
           }
         }
       }
@@ -1668,6 +2245,12 @@
             "state" : "translated",
             "value" : "Démarrer la manche"
           }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inizia la manche"
+          }
         }
       }
     },
@@ -1690,6 +2273,12 @@
             "state" : "translated",
             "value" : "Démarrage…"
           }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avvio in corso…"
+          }
         }
       }
     },
@@ -1705,6 +2294,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Table introuvable."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tavolo non trovato."
           }
         }
       }
@@ -1722,6 +2317,12 @@
             "state" : "translated",
             "value" : "Cette manche n’est plus active."
           }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quella manche non è più attiva."
+          }
         }
       }
     },
@@ -1737,6 +2338,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Cette table existe déjà."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quel tavolo esiste già."
           }
         }
       }
@@ -1754,6 +2361,12 @@
             "state" : "translated",
             "value" : "Le compte Game Center a changé. Réessayez."
           }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’account Game Center è cambiato. Riprova."
+          }
         }
       }
     },
@@ -1769,6 +2382,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "La requête a échoué."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La richiesta non è riuscita."
           }
         }
       }
@@ -1786,6 +2405,12 @@
             "state" : "translated",
             "value" : "La manche n’est pas prête à être révélée."
           }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La manche non è ancora pronta per mostrare i risultati."
+          }
         }
       }
     },
@@ -1801,6 +2426,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Le serveur a renvoyé une réponse non valide."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il server ha restituito una risposta non valida."
           }
         }
       }
@@ -1818,6 +2449,12 @@
             "state" : "translated",
             "value" : "La table n’est pas prête."
           }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il tavolo non è pronto."
+          }
         }
       }
     },
@@ -1833,6 +2470,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Cette activité Game Center n’est pas disponible."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Questa attività di Game Center non è disponibile."
           }
         }
       }
@@ -1850,6 +2493,12 @@
             "state" : "translated",
             "value" : "Ce joueur a déjà verrouillé un nombre."
           }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Questo giocatore ha già confermato un numero."
+          }
         }
       }
     },
@@ -1865,6 +2514,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Cela supprime votre compte Mini Match et anonymise le profil de table enregistré. Les scores Game Center restent gérés par Apple."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Questa operazione elimina il tuo account Mini Match e rende anonimo il profilo del tavolo salvato. I punteggi di Game Center restano gestiti da Apple."
           }
         }
       }
@@ -1882,6 +2537,12 @@
             "state" : "translated",
             "value" : "Cette manche"
           }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Questa manche"
+          }
         }
       }
     },
@@ -1897,6 +2558,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Unique"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unico"
           }
         }
       }
@@ -1920,6 +2587,12 @@
             "state" : "translated",
             "value" : "En attente d’un autre joueur"
           }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In attesa di un altro giocatore"
+          }
         }
       }
     },
@@ -1942,6 +2615,12 @@
             "state" : "translated",
             "value" : "En attente que l’hôte démarre une manche"
           }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In attesa che l’host inizi una manche"
+          }
         }
       }
     },
@@ -1957,6 +2636,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Gagnant"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vincente"
           }
         }
       }
@@ -1974,6 +2659,12 @@
             "state" : "translated",
             "value" : "Nombre gagnant"
           }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Numero vincente"
+          }
         }
       }
     },
@@ -1989,6 +2680,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Vous"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu"
           }
         }
       }
@@ -2006,6 +2703,12 @@
             "state" : "translated",
             "value" : "Vous n’avez pas l’autorisation d’effectuer cette action."
           }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Non hai l’autorizzazione per farlo."
+          }
         }
       }
     },
@@ -2021,6 +2724,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Vous confirmerez auprès d’Apple avant que Mini Match supprime votre compte et anonymise le profil de table enregistré. Les scores Game Center restent gérés par Apple."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prima che Mini Match elimini il tuo account e renda anonimo il profilo del tavolo salvato, dovrai confermare con Apple. I punteggi di Game Center restano gestiti da Apple."
           }
         }
       }
@@ -2038,6 +2747,12 @@
             "state" : "translated",
             "value" : "Vous laisserez la table aux autres joueurs."
           }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abbandonerai il tavolo lasciando gli altri giocatori nella partita."
+          }
         }
       }
     },
@@ -2053,6 +2768,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Votre choix est verrouillé !"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Numero confermato!"
           }
         }
       }
@@ -2070,6 +2791,12 @@
             "state" : "translated",
             "value" : "Votre nombre"
           }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il tuo numero"
+          }
         }
       }
     },
@@ -2085,6 +2812,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Votre nombre reste privé jusqu’à la révélation."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il tuo numero resta privato fino alla rivelazione."
           }
         }
       }

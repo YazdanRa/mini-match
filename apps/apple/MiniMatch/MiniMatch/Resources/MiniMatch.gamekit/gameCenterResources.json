@@ -16,6 +16,10 @@
         {
           "localID" : "com.yazdanra.minimatch.achievement.eightPlayerRound-es-ES",
           "url" : "AchievementImage-com.yazdanra.minimatch.achievement.firstWin:en-US.jpeg"
+        },
+        {
+          "localID" : "com.yazdanra.minimatch.achievement.eightPlayerRound-it-IT",
+          "url" : "AchievementImage-com.yazdanra.minimatch.achievement.firstWin:en-US.jpeg"
         }
       ],
       "com.yazdanra.minimatch.achievement.eightPlayerWin" : [
@@ -29,6 +33,10 @@
         },
         {
           "localID" : "com.yazdanra.minimatch.achievement.eightPlayerWin-es-ES",
+          "url" : "AchievementImage-com.yazdanra.minimatch.achievement.firstWin:en-US.jpeg"
+        },
+        {
+          "localID" : "com.yazdanra.minimatch.achievement.eightPlayerWin-it-IT",
           "url" : "AchievementImage-com.yazdanra.minimatch.achievement.firstWin:en-US.jpeg"
         }
       ],
@@ -44,6 +52,10 @@
         {
           "localID" : "com.yazdanra.minimatch.achievement.firstWin-es-ES",
           "url" : "AchievementImage-com.yazdanra.minimatch.achievement.firstWin:es-ES.jpeg"
+        },
+        {
+          "localID" : "com.yazdanra.minimatch.achievement.firstWin-it-IT",
+          "url" : "AchievementImage-com.yazdanra.minimatch.achievement.firstWin:en-US.jpeg"
         }
       ],
       "com.yazdanra.minimatch.achievement.fourPlayerWin" : [
@@ -58,6 +70,10 @@
         {
           "localID" : "com.yazdanra.minimatch.achievement.fourPlayerWin-es-ES",
           "url" : "AchievementImage-com.yazdanra.minimatch.achievement.fourPlayerWin:es-ES.jpeg"
+        },
+        {
+          "localID" : "com.yazdanra.minimatch.achievement.fourPlayerWin-it-IT",
+          "url" : "AchievementImage-com.yazdanra.minimatch.achievement.fourPlayerWin:en-US.jpeg"
         }
       ],
       "com.yazdanra.minimatch.achievement.fourWinStreak" : [
@@ -71,6 +87,10 @@
         },
         {
           "localID" : "com.yazdanra.minimatch.achievement.fourWinStreak-es-ES",
+          "url" : "AchievementImage-com.yazdanra.minimatch.achievement.firstWin:en-US.jpeg"
+        },
+        {
+          "localID" : "com.yazdanra.minimatch.achievement.fourWinStreak-it-IT",
           "url" : "AchievementImage-com.yazdanra.minimatch.achievement.firstWin:en-US.jpeg"
         }
       ],
@@ -86,6 +106,10 @@
         {
           "localID" : "com.yazdanra.minimatch.achievement.pickEightWin-es-ES",
           "url" : "AchievementImage-com.yazdanra.minimatch.achievement.firstWin:en-US.jpeg"
+        },
+        {
+          "localID" : "com.yazdanra.minimatch.achievement.pickEightWin-it-IT",
+          "url" : "AchievementImage-com.yazdanra.minimatch.achievement.firstWin:en-US.jpeg"
         }
       ],
       "com.yazdanra.minimatch.achievement.pickFourWin" : [
@@ -99,6 +123,10 @@
         },
         {
           "localID" : "com.yazdanra.minimatch.achievement.pickFourWin-es-ES",
+          "url" : "AchievementImage-com.yazdanra.minimatch.achievement.firstWin:en-US.jpeg"
+        },
+        {
+          "localID" : "com.yazdanra.minimatch.achievement.pickFourWin-it-IT",
           "url" : "AchievementImage-com.yazdanra.minimatch.achievement.firstWin:en-US.jpeg"
         }
       ],
@@ -114,6 +142,10 @@
         {
           "localID" : "com.yazdanra.minimatch.achievement.pickSixteenWin-es-ES",
           "url" : "AchievementImage-com.yazdanra.minimatch.achievement.firstWin:en-US.jpeg"
+        },
+        {
+          "localID" : "com.yazdanra.minimatch.achievement.pickSixteenWin-it-IT",
+          "url" : "AchievementImage-com.yazdanra.minimatch.achievement.firstWin:en-US.jpeg"
         }
       ],
       "com.yazdanra.minimatch.achievement.sixteenPlayerRound" : [
@@ -127,6 +159,10 @@
         },
         {
           "localID" : "com.yazdanra.minimatch.achievement.sixteenPlayerRound-es-ES",
+          "url" : "AchievementImage-com.yazdanra.minimatch.achievement.firstWin:en-US.jpeg"
+        },
+        {
+          "localID" : "com.yazdanra.minimatch.achievement.sixteenPlayerRound-it-IT",
           "url" : "AchievementImage-com.yazdanra.minimatch.achievement.firstWin:en-US.jpeg"
         }
       ],
@@ -142,6 +178,10 @@
         {
           "localID" : "com.yazdanra.minimatch.achievement.sixteenPlayerWin-es-ES",
           "url" : "AchievementImage-com.yazdanra.minimatch.achievement.firstWin:en-US.jpeg"
+        },
+        {
+          "localID" : "com.yazdanra.minimatch.achievement.sixteenPlayerWin-it-IT",
+          "url" : "AchievementImage-com.yazdanra.minimatch.achievement.firstWin:en-US.jpeg"
         }
       ],
       "com.yazdanra.minimatch.achievement.sixteenRoundWins" : [
@@ -155,6 +195,10 @@
         },
         {
           "localID" : "com.yazdanra.minimatch.achievement.sixteenRoundWins-es-ES",
+          "url" : "AchievementImage-com.yazdanra.minimatch.achievement.firstWin:en-US.jpeg"
+        },
+        {
+          "localID" : "com.yazdanra.minimatch.achievement.sixteenRoundWins-it-IT",
           "url" : "AchievementImage-com.yazdanra.minimatch.achievement.firstWin:en-US.jpeg"
         }
       ],
@@ -170,6 +214,10 @@
         {
           "localID" : "com.yazdanra.minimatch.achievement.sixtyFourRoundWins-es-ES",
           "url" : "AchievementImage-com.yazdanra.minimatch.achievement.firstWin:en-US.jpeg"
+        },
+        {
+          "localID" : "com.yazdanra.minimatch.achievement.sixtyFourRoundWins-it-IT",
+          "url" : "AchievementImage-com.yazdanra.minimatch.achievement.firstWin:en-US.jpeg"
         }
       ],
       "com.yazdanra.minimatch.achievement.thirtyTwoRoundWins" : [
@@ -183,6 +231,10 @@
         },
         {
           "localID" : "com.yazdanra.minimatch.achievement.thirtyTwoRoundWins-es-ES",
+          "url" : "AchievementImage-com.yazdanra.minimatch.achievement.firstWin:en-US.jpeg"
+        },
+        {
+          "localID" : "com.yazdanra.minimatch.achievement.thirtyTwoRoundWins-it-IT",
           "url" : "AchievementImage-com.yazdanra.minimatch.achievement.firstWin:en-US.jpeg"
         }
       ],
@@ -198,6 +250,10 @@
         {
           "localID" : "com.yazdanra.minimatch.achievement.twoWinStreak-es-ES",
           "url" : "AchievementImage-com.yazdanra.minimatch.achievement.firstWin:en-US.jpeg"
+        },
+        {
+          "localID" : "com.yazdanra.minimatch.achievement.twoWinStreak-it-IT",
+          "url" : "AchievementImage-com.yazdanra.minimatch.achievement.firstWin:en-US.jpeg"
         }
       ],
       "com.yazdanra.minimatch.achievement.zeroWin" : [
@@ -212,6 +268,10 @@
         {
           "localID" : "com.yazdanra.minimatch.achievement.zeroWin-es-ES",
           "url" : "AchievementImage-com.yazdanra.minimatch.achievement.zeroWin:es-ES.jpeg"
+        },
+        {
+          "localID" : "com.yazdanra.minimatch.achievement.zeroWin-it-IT",
+          "url" : "AchievementImage-com.yazdanra.minimatch.achievement.zeroWin:en-US.jpeg"
         }
       ]
     },
@@ -237,6 +297,13 @@
           "locale" : "es-ES",
           "localID" : "com.yazdanra.minimatch.achievement.eightPlayerRound-es-ES",
           "name" : "Únete a la multitud"
+        },
+        {
+          "afterEarnedDescription" : "Hai giocato una manche con almeno otto giocatori.",
+          "beforeEarnedDescription" : "Gioca una manche con almeno otto giocatori.",
+          "locale" : "it-IT",
+          "localID" : "com.yazdanra.minimatch.achievement.eightPlayerRound-it-IT",
+          "name" : "Unisciti alla folla"
         }
       ],
       "com.yazdanra.minimatch.achievement.eightPlayerWin" : [
@@ -260,6 +327,13 @@
           "locale" : "es-ES",
           "localID" : "com.yazdanra.minimatch.achievement.eightPlayerWin-es-ES",
           "name" : "Campeón de la multitud"
+        },
+        {
+          "afterEarnedDescription" : "Hai vinto una manche con almeno otto giocatori.",
+          "beforeEarnedDescription" : "Vinci una manche con almeno otto giocatori.",
+          "locale" : "it-IT",
+          "localID" : "com.yazdanra.minimatch.achievement.eightPlayerWin-it-IT",
+          "name" : "Campione della folla"
         }
       ],
       "com.yazdanra.minimatch.achievement.firstWin" : [
@@ -283,6 +357,13 @@
           "locale" : "es-ES",
           "localID" : "com.yazdanra.minimatch.achievement.firstWin-es-ES",
           "name" : "Primera victoria"
+        },
+        {
+          "afterEarnedDescription" : "Hai vinto la tua prima manche di Mini Match.",
+          "beforeEarnedDescription" : "Vinci la tua prima manche di Mini Match.",
+          "locale" : "it-IT",
+          "localID" : "com.yazdanra.minimatch.achievement.firstWin-it-IT",
+          "name" : "Prima vittoria"
         }
       ],
       "com.yazdanra.minimatch.achievement.fourPlayerWin" : [
@@ -306,6 +387,13 @@
           "locale" : "es-ES",
           "localID" : "com.yazdanra.minimatch.achievement.fourPlayerWin-es-ES",
           "name" : "Mesa completa"
+        },
+        {
+          "afterEarnedDescription" : "Hai vinto una manche con almeno quattro giocatori.",
+          "beforeEarnedDescription" : "Vinci una manche con almeno quattro giocatori.",
+          "locale" : "it-IT",
+          "localID" : "com.yazdanra.minimatch.achievement.fourPlayerWin-it-IT",
+          "name" : "Campione del gruppo"
         }
       ],
       "com.yazdanra.minimatch.achievement.fourWinStreak" : [
@@ -329,6 +417,13 @@
           "locale" : "es-ES",
           "localID" : "com.yazdanra.minimatch.achievement.fourWinStreak-es-ES",
           "name" : "Cuatro seguidas"
+        },
+        {
+          "afterEarnedDescription" : "Hai vinto quattro manche consecutive a cui hai partecipato.",
+          "beforeEarnedDescription" : "Vinci quattro manche consecutive a cui partecipi.",
+          "locale" : "it-IT",
+          "localID" : "com.yazdanra.minimatch.achievement.fourWinStreak-it-IT",
+          "name" : "Quattro di fila"
         }
       ],
       "com.yazdanra.minimatch.achievement.pickEightWin" : [
@@ -352,6 +447,13 @@
           "locale" : "es-ES",
           "localID" : "com.yazdanra.minimatch.achievement.pickEightWin-es-ES",
           "name" : "Ocho magnífico"
+        },
+        {
+          "afterEarnedDescription" : "Hai vinto una manche scegliendo 8.",
+          "beforeEarnedDescription" : "Vinci una manche scegliendo 8.",
+          "locale" : "it-IT",
+          "localID" : "com.yazdanra.minimatch.achievement.pickEightWin-it-IT",
+          "name" : "Otto magnifico"
         }
       ],
       "com.yazdanra.minimatch.achievement.pickFourWin" : [
@@ -375,6 +477,13 @@
           "locale" : "es-ES",
           "localID" : "com.yazdanra.minimatch.achievement.pickFourWin-es-ES",
           "name" : "Cuatro triunfal"
+        },
+        {
+          "afterEarnedDescription" : "Hai vinto una manche scegliendo 4.",
+          "beforeEarnedDescription" : "Vinci una manche scegliendo 4.",
+          "locale" : "it-IT",
+          "localID" : "com.yazdanra.minimatch.achievement.pickFourWin-it-IT",
+          "name" : "Quattro vincente"
         }
       ],
       "com.yazdanra.minimatch.achievement.pickSixteenWin" : [
@@ -398,6 +507,13 @@
           "locale" : "es-ES",
           "localID" : "com.yazdanra.minimatch.achievement.pickSixteenWin-es-ES",
           "name" : "Dulces dieciséis"
+        },
+        {
+          "afterEarnedDescription" : "Hai vinto una manche scegliendo 16.",
+          "beforeEarnedDescription" : "Vinci una manche scegliendo 16.",
+          "locale" : "it-IT",
+          "localID" : "com.yazdanra.minimatch.achievement.pickSixteenWin-it-IT",
+          "name" : "Sedici d’oro"
         }
       ],
       "com.yazdanra.minimatch.achievement.sixteenPlayerRound" : [
@@ -421,6 +537,13 @@
           "locale" : "es-ES",
           "localID" : "com.yazdanra.minimatch.achievement.sixteenPlayerRound-es-ES",
           "name" : "Sala llena"
+        },
+        {
+          "afterEarnedDescription" : "Hai giocato una manche con almeno 16 giocatori.",
+          "beforeEarnedDescription" : "Gioca una manche con almeno 16 giocatori.",
+          "locale" : "it-IT",
+          "localID" : "com.yazdanra.minimatch.achievement.sixteenPlayerRound-it-IT",
+          "name" : "Tutto esaurito"
         }
       ],
       "com.yazdanra.minimatch.achievement.sixteenPlayerWin" : [
@@ -444,6 +567,13 @@
           "locale" : "es-ES",
           "localID" : "com.yazdanra.minimatch.achievement.sixteenPlayerWin-es-ES",
           "name" : "Campeón de la sala"
+        },
+        {
+          "afterEarnedDescription" : "Hai vinto una manche con almeno 16 giocatori.",
+          "beforeEarnedDescription" : "Vinci una manche con almeno 16 giocatori.",
+          "locale" : "it-IT",
+          "localID" : "com.yazdanra.minimatch.achievement.sixteenPlayerWin-it-IT",
+          "name" : "Campione della sala"
         }
       ],
       "com.yazdanra.minimatch.achievement.sixteenRoundWins" : [
@@ -467,6 +597,13 @@
           "locale" : "es-ES",
           "localID" : "com.yazdanra.minimatch.achievement.sixteenRoundWins-es-ES",
           "name" : "Victoria confirmada"
+        },
+        {
+          "afterEarnedDescription" : "Hai vinto 16 manche in totale.",
+          "beforeEarnedDescription" : "Vinci 16 manche in totale.",
+          "locale" : "it-IT",
+          "localID" : "com.yazdanra.minimatch.achievement.sixteenRoundWins-it-IT",
+          "name" : "Vincitore affermato"
         }
       ],
       "com.yazdanra.minimatch.achievement.sixtyFourRoundWins" : [
@@ -490,6 +627,13 @@
           "locale" : "es-ES",
           "localID" : "com.yazdanra.minimatch.achievement.sixtyFourRoundWins-es-ES",
           "name" : "Leyenda de Mini Match"
+        },
+        {
+          "afterEarnedDescription" : "Hai vinto 64 manche in totale.",
+          "beforeEarnedDescription" : "Vinci 64 manche in totale.",
+          "locale" : "it-IT",
+          "localID" : "com.yazdanra.minimatch.achievement.sixtyFourRoundWins-it-IT",
+          "name" : "Leggenda di Mini Match"
         }
       ],
       "com.yazdanra.minimatch.achievement.thirtyTwoRoundWins" : [
@@ -513,6 +657,13 @@
           "locale" : "es-ES",
           "localID" : "com.yazdanra.minimatch.achievement.thirtyTwoRoundWins-es-ES",
           "name" : "Veterano de las rondas"
+        },
+        {
+          "afterEarnedDescription" : "Hai vinto 32 manche in totale.",
+          "beforeEarnedDescription" : "Vinci 32 manche in totale.",
+          "locale" : "it-IT",
+          "localID" : "com.yazdanra.minimatch.achievement.thirtyTwoRoundWins-it-IT",
+          "name" : "Veterano delle manche"
         }
       ],
       "com.yazdanra.minimatch.achievement.twoWinStreak" : [
@@ -536,6 +687,13 @@
           "locale" : "es-ES",
           "localID" : "com.yazdanra.minimatch.achievement.twoWinStreak-es-ES",
           "name" : "Dos seguidas"
+        },
+        {
+          "afterEarnedDescription" : "Hai vinto due manche consecutive a cui hai partecipato.",
+          "beforeEarnedDescription" : "Vinci due manche consecutive a cui partecipi.",
+          "locale" : "it-IT",
+          "localID" : "com.yazdanra.minimatch.achievement.twoWinStreak-it-IT",
+          "name" : "Due di fila"
         }
       ],
       "com.yazdanra.minimatch.achievement.zeroWin" : [
@@ -559,6 +717,13 @@
           "locale" : "es-ES",
           "localID" : "com.yazdanra.minimatch.achievement.zeroWin-es-ES",
           "name" : "Cero perfecto"
+        },
+        {
+          "afterEarnedDescription" : "Hai vinto una manche scegliendo 0.",
+          "beforeEarnedDescription" : "Vinci una manche scegliendo 0.",
+          "locale" : "it-IT",
+          "localID" : "com.yazdanra.minimatch.achievement.zeroWin-it-IT",
+          "name" : "Zero perfetto"
         }
       ]
     },
@@ -790,6 +955,12 @@
           "locale" : "es-ES",
           "localID" : "com.yazdanra.minimatch.play-es-ES",
           "name" : "Jugar a Mini Match"
+        },
+        {
+          "description" : "Invita gli amici e gioca una manche in cui vince il numero unico più basso.",
+          "locale" : "it-IT",
+          "localID" : "com.yazdanra.minimatch.play-it-IT",
+          "name" : "Gioca a Mini Match"
         }
       ]
     },
@@ -802,6 +973,30 @@
           "locale" : "en-US",
           "localID" : "com.yazdanra.minimatch.wins-en-US",
           "name" : "Most Wins"
+        },
+        {
+          "formatterOverride" : "INTEGER",
+          "formatterSuffix" : "victoires",
+          "formatterSuffixSingular" : "victoire",
+          "locale" : "fr-FR",
+          "localID" : "com.yazdanra.minimatch.wins-fr-FR",
+          "name" : "Plus de victoires"
+        },
+        {
+          "formatterOverride" : "INTEGER",
+          "formatterSuffix" : "victorias",
+          "formatterSuffixSingular" : "victoria",
+          "locale" : "es-ES",
+          "localID" : "com.yazdanra.minimatch.wins-es-ES",
+          "name" : "Más victorias"
+        },
+        {
+          "formatterOverride" : "INTEGER",
+          "formatterSuffix" : "vittorie",
+          "formatterSuffixSingular" : "vittoria",
+          "locale" : "it-IT",
+          "localID" : "com.yazdanra.minimatch.wins-it-IT",
+          "name" : "Più vittorie"
         }
       ]
     },

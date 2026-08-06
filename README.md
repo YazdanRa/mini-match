@@ -25,4 +25,4 @@ For approachable discussions, see [Mathematics Stack Exchange](https://math.stac
 - Live lobby status, reconnectable sessions, and automatic host promotion
 - Game Center profiles, profile photos, and achievements
 - Sign in with Apple account linking and profile controls
-- English, French, and Spanish localization with accessible SwiftUI controls
+- English, French, Spanish, and Italian localization with accessible SwiftUI controls
