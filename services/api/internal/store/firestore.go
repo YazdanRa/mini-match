@@ -193,6 +193,19 @@ func (r *FirestoreRepository) DeleteProfile(ctx context.Context, playerID string
 				snapshots = append(snapshots, snapshot)
 			}
 		}
+		retainedMatches, err := tx.Documents(
+			r.client.Collection(privateTables).Where("retained_player_ids", "array-contains", playerID),
+		).GetAll()
+		if err != nil {
+			return err
+		}
+		for _, snapshot := range retainedMatches {
+			if _, exists := seen[snapshot.Ref.ID]; exists {
+				continue
+			}
+			seen[snapshot.Ref.ID] = struct{}{}
+			snapshots = append(snapshots, snapshot)
+		}
 		statsMatches, err := tx.Documents(
 			r.client.Collection(playerStats).Where("player_ids", "array-contains", playerID),
 		).GetAll()
@@ -275,6 +288,8 @@ type tableDocument struct {
 	JoinCode           string           `firestore:"join_code"`
 	HostID             string           `firestore:"host_player_id"`
 	Players            []playerDocument `firestore:"players"`
+	RetainedPlayerWins map[string]int64 `firestore:"retained_player_wins,omitempty"`
+	RetainedPlayerIDs  []string         `firestore:"retained_player_ids,omitempty"`
 	CurrentRound       *roundDocument   `firestore:"current_round,omitempty"`
 	LastResult         *resultDocument  `firestore:"last_result,omitempty"`
 	WinnerID           string           `firestore:"winner_player_id,omitempty"`
@@ -312,6 +327,7 @@ type selectionDocument struct {
 	PlayerID    string `firestore:"player_id"`
 	DisplayName string `firestore:"display_name,omitempty"`
 	Pick        string `firestore:"pick"`
+	Wins        *int64 `firestore:"wins,omitempty"`
 }
 
 type safeTableDocument struct {
@@ -345,18 +361,26 @@ func privateDocument(table *game.Table) tableDocument {
 		JoinCode:           table.JoinCode,
 		HostID:             table.HostID,
 		Players:            make([]playerDocument, 0, len(table.Players)),
+		RetainedPlayerWins: make(map[string]int64, len(table.RetainedPlayerWins)),
+		RetainedPlayerIDs:  make([]string, 0, len(table.RetainedPlayerWins)),
 		CurrentRound:       encodeRound(table.CurrentRound),
 		LastResult:         encodeResult(table.LastResult),
 		WinnerLifetimeWins: optionalUint64(table.WinnerLifetimeWins),
 		Version:            strconv.FormatUint(table.Version, 10),
 		EventSequence:      strconv.FormatUint(table.EventSequence, 10),
 	}
+	for playerID, wins := range table.RetainedPlayerWins {
+		document.RetainedPlayerWins[playerID] = int64(wins)
+		document.RetainedPlayerIDs = append(document.RetainedPlayerIDs, playerID)
+	}
+	sort.Strings(document.RetainedPlayerIDs)
 	for _, player := range table.Players {
 		document.Players = append(document.Players, playerDocument{
 			ID:                player.ID,
 			GameCenterID:      player.GameCenterID,
 			Name:              player.Name,
 			Avatar:            player.Avatar,
+			Score:             int64(table.PlayerWins[player.ID]),
 			Locked:            player.Locked,
 			Pick:              strconv.FormatUint(player.Pick, 10),
 			PresenceExpiresAt: player.PresenceExpiresAt,
@@ -385,6 +409,7 @@ func publicDocument(table *game.Table) safeTableDocument {
 			ID:     player.ID,
 			Name:   player.Name,
 			Avatar: player.Avatar,
+			Score:  int64(table.PlayerWins[player.ID]),
 			Locked: player.Locked,
 		})
 	}
@@ -492,10 +517,12 @@ func encodeResult(result *game.Result) *resultDocument {
 		WinnerBestWinStreak: int64(result.WinnerBestWinStreak),
 	}
 	for _, selection := range result.Selections {
+		wins := int64(selection.Wins)
 		document.Selections = append(document.Selections, selectionDocument{
 			PlayerID:    selection.PlayerID,
 			DisplayName: selection.DisplayName,
 			Pick:        strconv.FormatUint(selection.Pick, 10),
+			Wins:        &wins,
 		})
 	}
 	return document
@@ -553,18 +580,39 @@ func decodeDocument(id string, document tableDocument) (*game.Table, error) {
 			return nil, fmt.Errorf("decode winner lifetime wins: %w", err)
 		}
 	}
+	playerWins := make(map[string]uint32, len(document.Players))
+	retainedPlayerWins := make(map[string]uint32, len(document.RetainedPlayerWins))
+	for playerID, storedWins := range document.RetainedPlayerWins {
+		wins, err := uint32Value(storedWins, "retained player wins")
+		if err != nil {
+			return nil, err
+		}
+		if wins != 0 {
+			retainedPlayerWins[playerID] = wins
+		}
+	}
 	table := &game.Table{
 		ID:                 id,
 		Name:               document.Name,
 		JoinCode:           document.JoinCode,
 		HostID:             document.HostID,
 		Players:            make([]*game.Player, 0, len(document.Players)),
+		PlayerWins:         playerWins,
+		RetainedPlayerWins: retainedPlayerWins,
 		CurrentRound:       currentRound,
 		WinnerLifetimeWins: winnerLifetimeWins,
 		Version:            version,
 		EventSequence:      eventSequence,
 	}
 	for _, player := range document.Players {
+		delete(retainedPlayerWins, player.ID)
+		wins, err := uint32Value(player.Score, "player wins")
+		if err != nil {
+			return nil, err
+		}
+		if wins != 0 {
+			playerWins[player.ID] = wins
+		}
 		pick, err := strconv.ParseUint(player.Pick, 10, 64)
 		if err != nil {
 			return nil, fmt.Errorf("decode player pick: %w", err)
@@ -583,7 +631,7 @@ func decodeDocument(id string, document tableDocument) (*game.Table, error) {
 		})
 	}
 	if document.LastResult != nil {
-		result, err := decodeResult(document.LastResult)
+		result, err := decodeResult(document.LastResult, playerWins)
 		if err != nil {
 			return nil, err
 		}
@@ -601,7 +649,7 @@ func decodeDocument(id string, document tableDocument) (*game.Table, error) {
 	return table, nil
 }
 
-func decodeResult(document *resultDocument) (*game.Result, error) {
+func decodeResult(document *resultDocument, playerWins map[string]uint32) (*game.Result, error) {
 	roundNumber, err := uint32Value(document.RoundNumber, "result round number")
 	if err != nil {
 		return nil, err
@@ -624,6 +672,13 @@ func decodeResult(document *resultDocument) (*game.Result, error) {
 	result.WinnerWinStreak = uint32(document.WinnerWinStreak)
 	result.WinnerBestWinStreak = uint32(document.WinnerBestWinStreak)
 	for _, selection := range document.Selections {
+		wins := playerWins[selection.PlayerID]
+		if selection.Wins != nil {
+			wins, err = uint32Value(*selection.Wins, "result player wins")
+			if err != nil {
+				return nil, err
+			}
+		}
 		pick, err := strconv.ParseUint(selection.Pick, 10, 64)
 		if err != nil {
 			return nil, fmt.Errorf("decode result pick: %w", err)
@@ -632,6 +687,7 @@ func decodeResult(document *resultDocument) (*game.Result, error) {
 			PlayerID:    selection.PlayerID,
 			DisplayName: selection.DisplayName,
 			Pick:        pick,
+			Wins:        wins,
 		})
 	}
 	return result, nil

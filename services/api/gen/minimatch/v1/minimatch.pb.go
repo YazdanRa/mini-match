@@ -1276,9 +1276,7 @@ type Player struct {
 	state       protoimpl.MessageState `protogen:"open.v1"`
 	Id          string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	DisplayName string                 `protobuf:"bytes,2,opt,name=display_name,json=displayName,proto3" json:"display_name,omitempty"`
-	// Deprecated: rounds do not accumulate a per-table score.
-	//
-	// Deprecated: Marked as deprecated in minimatch/v1/minimatch.proto.
+	// Rounds won by this player at this table.
 	Wins          uint32 `protobuf:"varint,3,opt,name=wins,proto3" json:"wins,omitempty"`
 	Locked        bool   `protobuf:"varint,4,opt,name=locked,proto3" json:"locked,omitempty"`
 	Avatar        string `protobuf:"bytes,5,opt,name=avatar,proto3" json:"avatar,omitempty"`
@@ -1330,7 +1328,6 @@ func (x *Player) GetDisplayName() string {
 	return ""
 }
 
-// Deprecated: Marked as deprecated in minimatch/v1/minimatch.proto.
 func (x *Player) GetWins() uint32 {
 	if x != nil {
 		return x.Wins
@@ -1519,7 +1516,9 @@ type Selection struct {
 	PlayerId string                 `protobuf:"bytes,1,opt,name=player_id,json=playerId,proto3" json:"player_id,omitempty"`
 	Pick     *Pick                  `protobuf:"bytes,2,opt,name=pick,proto3" json:"pick,omitempty"`
 	// Snapshot captured at reveal so completed results survive player departure.
-	DisplayName   string `protobuf:"bytes,3,opt,name=display_name,json=displayName,proto3" json:"display_name,omitempty"`
+	DisplayName string `protobuf:"bytes,3,opt,name=display_name,json=displayName,proto3" json:"display_name,omitempty"`
+	// Table win count captured at reveal for the same reason.
+	Wins          *uint32 `protobuf:"varint,4,opt,name=wins,proto3,oneof" json:"wins,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1573,6 +1572,13 @@ func (x *Selection) GetDisplayName() string {
 		return x.DisplayName
 	}
 	return ""
+}
+
+func (x *Selection) GetWins() uint32 {
+	if x != nil && x.Wins != nil {
+		return *x.Wins
+	}
+	return 0
 }
 
 // Picks must be positive; the server rejects zero.
@@ -1701,11 +1707,11 @@ const file_minimatch_v1_minimatch_proto_rawDesc = "" +
 	"\x10winner_player_id\x18\f \x01(\tB\x02\x18\x01H\x00R\x0ewinnerPlayerId\x88\x01\x01\x129\n" +
 	"\x14winner_lifetime_wins\x18\r \x01(\x04B\x02\x18\x01H\x01R\x12winnerLifetimeWins\x88\x01\x01B\x13\n" +
 	"\x11_winner_player_idB\x17\n" +
-	"\x15_winner_lifetime_wins\"\x83\x01\n" +
+	"\x15_winner_lifetime_wins\"\x7f\n" +
 	"\x06Player\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12!\n" +
-	"\fdisplay_name\x18\x02 \x01(\tR\vdisplayName\x12\x16\n" +
-	"\x04wins\x18\x03 \x01(\rB\x02\x18\x01R\x04wins\x12\x16\n" +
+	"\fdisplay_name\x18\x02 \x01(\tR\vdisplayName\x12\x12\n" +
+	"\x04wins\x18\x03 \x01(\rR\x04wins\x12\x16\n" +
 	"\x06locked\x18\x04 \x01(\bR\x06locked\x12\x16\n" +
 	"\x06avatar\x18\x05 \x01(\tR\x06avatar\"O\n" +
 	"\x05Round\x12\x16\n" +
@@ -1723,11 +1729,13 @@ const file_minimatch_v1_minimatch_proto_rawDesc = "" +
 	"\x16winner_achievement_ids\x18\a \x03(\tR\x14winnerAchievementIds\x12H\n" +
 	"\x1elocal_player_leaderboard_score\x18\b \x01(\x04H\x01R\x1blocalPlayerLeaderboardScore\x88\x01\x01B\x13\n" +
 	"\x11_winner_player_idB!\n" +
-	"\x1f_local_player_leaderboard_score\"s\n" +
+	"\x1f_local_player_leaderboard_score\"\x95\x01\n" +
 	"\tSelection\x12\x1b\n" +
 	"\tplayer_id\x18\x01 \x01(\tR\bplayerId\x12&\n" +
 	"\x04pick\x18\x02 \x01(\v2\x12.minimatch.v1.PickR\x04pick\x12!\n" +
-	"\fdisplay_name\x18\x03 \x01(\tR\vdisplayName\"\x1c\n" +
+	"\fdisplay_name\x18\x03 \x01(\tR\vdisplayName\x12\x17\n" +
+	"\x04wins\x18\x04 \x01(\rH\x00R\x04wins\x88\x01\x01B\a\n" +
+	"\x05_wins\"\x1c\n" +
 	"\x04Pick\x12\x14\n" +
 	"\x05value\x18\x01 \x01(\x04R\x05value*_\n" +
 	"\n" +
@@ -1849,6 +1857,7 @@ func file_minimatch_v1_minimatch_proto_init() {
 	}
 	file_minimatch_v1_minimatch_proto_msgTypes[19].OneofWrappers = []any{}
 	file_minimatch_v1_minimatch_proto_msgTypes[22].OneofWrappers = []any{}
+	file_minimatch_v1_minimatch_proto_msgTypes[23].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{

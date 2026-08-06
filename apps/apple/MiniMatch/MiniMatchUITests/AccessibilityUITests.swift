@@ -64,6 +64,16 @@ final class AccessibilityUITests: XCTestCase {
         try auditVoiceControlCompatibility(in: result)
     }
 
+    func testResultShowsTableWinCount() {
+        let result = launch(arguments: ["--preview-result"])
+        let row = result.descendants(matching: .any)
+            .matching(identifier: "result-row-liam")
+            .firstMatch
+
+        XCTAssertTrue(row.waitForExistence(timeout: 5))
+        XCTAssertEqual(row.label, "Liam, win count 5, selected 5, Winner")
+    }
+
     func testCommonScreensPassSufficientContrastAuditInLightAppearance() throws {
         try withAppearance(.light) {
             try auditCommonScreens(appearance: .light)

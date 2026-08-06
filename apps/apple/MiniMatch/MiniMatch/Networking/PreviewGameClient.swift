@@ -143,11 +143,15 @@ actor PreviewGameClient: GameClient {
 
         let winnerID = "liam"
         let winnerPick = localPick <= UInt64.max - 3 ? localPick + 3 : 1
+        if let winnerIndex = table.players.firstIndex(where: { $0.id == winnerID }) {
+            table.players[winnerIndex].wins += 1
+        }
         let selections = table.players.map { player in
             GameSelection(
                 playerID: player.id,
                 displayName: player.displayName,
-                pick: player.id == winnerID ? winnerPick : localPick
+                pick: player.id == winnerID ? winnerPick : localPick,
+                wins: player.wins
             )
         }
         table.lastResult = GameRoundResult(
@@ -251,15 +255,16 @@ enum PreviewFixtures {
         playerID: "liam",
         displayName: "Liam",
         pick: 5,
+        wins: 5,
         status: .winner
     )
 
     private static let roundResult = GameRoundResult(
         roundNumber: 1,
         selections: [
-            GameSelection(playerID: currentPlayerID, displayName: "Maya", pick: 2),
-            GameSelection(playerID: "zoe", displayName: "Zoe", pick: 2),
-            GameSelection(playerID: "liam", displayName: "Liam", pick: 5),
+            GameSelection(playerID: currentPlayerID, displayName: "Maya", pick: 2, wins: 2),
+            GameSelection(playerID: "zoe", displayName: "Zoe", pick: 2, wins: 1),
+            GameSelection(playerID: "liam", displayName: "Liam", pick: 5, wins: 5),
         ],
         winnerPlayerID: "liam"
     )
@@ -290,10 +295,11 @@ enum PreviewFixtures {
                     id: hostID,
                     displayName: hostName,
                     avatarID: hostAvatarID,
-                    isLocked: false
+                    isLocked: false,
+                    wins: 2
                 ),
-                GamePlayer(id: "zoe", displayName: "Zoe", avatarID: "owl", isLocked: false),
-                GamePlayer(id: "liam", displayName: "Liam", avatarID: "frog", isLocked: false),
+                GamePlayer(id: "zoe", displayName: "Zoe", avatarID: "owl", isLocked: false, wins: 1),
+                GamePlayer(id: "liam", displayName: "Liam", avatarID: "frog", isLocked: false, wins: 4),
             ],
             currentRound: nil,
             lastResult: nil,

@@ -51,7 +51,7 @@ struct GameTableTests {
         let result = GameRoundResult(
             roundNumber: 1,
             selections: [
-                GameSelection(playerID: "liam", displayName: "Liam", pick: 5),
+                GameSelection(playerID: "liam", displayName: "Liam", pick: 5, wins: 5),
             ],
             winnerPlayerID: "liam"
         )
@@ -67,7 +67,9 @@ struct GameTableTests {
             eventSequence: 1
         )
 
-        #expect(ResultPresentation(table: table, result: result).winnerName == "Liam")
+        let presentation = ResultPresentation(table: table, result: result)
+        #expect(presentation.winnerName == "Liam")
+        #expect(presentation.rows.first?.wins == 5)
     }
 
     @Test
@@ -95,4 +97,5 @@ struct GameTableTests {
         #expect(presentation.winnerName == String(localized: "Player"))
         #expect(presentation.winningPick == 5)
     }
+
 }

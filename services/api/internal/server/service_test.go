@@ -296,12 +296,18 @@ func TestConnectAndGRPCKeepPicksPrivateUntilReveal(t *testing.T) {
 	if got := revealed.Msg.Table.LastResult.GetWinnerPlayerId(); got != created.Msg.PlayerId {
 		t.Fatalf("winner = %q, want host", got)
 	}
+	for _, selection := range revealed.Msg.Table.LastResult.Selections {
+		if selection.Wins == nil {
+			t.Fatalf("selection %q omitted its table win count", selection.PlayerId)
+		}
+	}
 	if revealed.Msg.Table.CurrentRound != nil ||
 		revealed.Msg.Table.State != minimatchv1.TableState_TABLE_STATE_ACTIVE ||
 		revealed.Msg.Table.WinsToFinish != 0 ||
 		revealed.Msg.Table.WinnerPlayerId != nil ||
-		revealed.Msg.Table.Players[0].Wins != 0 {
-		t.Fatal("reveal did not return a scoreless active lobby")
+		revealed.Msg.Table.Players[0].Wins != 1 ||
+		revealed.Msg.Table.Players[1].Wins != 0 {
+		t.Fatal("reveal did not return the active lobby with table wins")
 	}
 	if repository.reveals != 1 {
 		t.Fatalf("RevealRound repository calls = %d, want 1", repository.reveals)
@@ -347,6 +353,9 @@ func TestConnectAndGRPCKeepPicksPrivateUntilReveal(t *testing.T) {
 	}
 	if got := guestPoll.Msg.Table.LastResult.GetLocalPlayerLeaderboardScore(); got != 1 {
 		t.Fatalf("guest winner leaderboard score = %d, want 1", got)
+	}
+	if guestPoll.Msg.Table.Players[0].Wins != 1 || guestPoll.Msg.Table.Players[1].Wins != 1 {
+		t.Fatal("guest poll did not include both table win counts")
 	}
 	hostPoll, err := connectClient.GetTable(ctx, authenticated(
 		&minimatchv1.GetTableRequest{TableId: tableID},
@@ -402,7 +411,8 @@ func TestToProtoReturnsLeaderboardScoreOnlyToWinner(t *testing.T) {
 
 func TestPollingExpiresStaleMemberAndAllowsRejoin(t *testing.T) {
 	now := time.Date(2026, time.August, 3, 12, 0, 0, 0, time.UTC)
-	service := New(game.NewMemoryRepository())
+	repository := game.NewMemoryRepository()
+	service := New(repository)
 	service.now = func() time.Time { return now }
 	path, handler := minimatchv1connect.NewMiniMatchServiceHandler(
 		service,
@@ -438,6 +448,12 @@ func TestPollingExpiresStaleMemberAndAllowsRejoin(t *testing.T) {
 		}
 	}
 	tableID := created.Msg.Table.Id
+	if _, err := repository.Update(ctx, tableID, func(table *game.Table) error {
+		table.PlayerWins["liam"] = 5
+		return nil
+	}); err != nil {
+		t.Fatal(err)
+	}
 	if _, err := client.BeginRound(ctx, authenticated(&minimatchv1.BeginRoundRequest{
 		TableId: tableID, HostPlayerId: "maya",
 	}, "host-token")); err != nil {
@@ -491,8 +507,8 @@ func TestPollingExpiresStaleMemberAndAllowsRejoin(t *testing.T) {
 	if err != nil {
 		t.Fatalf("evicted member rejoin: %v", err)
 	}
-	if len(rejoined.Msg.Table.Players) != 3 {
-		t.Fatalf("rejoined players = %d, want 3", len(rejoined.Msg.Table.Players))
+	if len(rejoined.Msg.Table.Players) != 3 || rejoined.Msg.Table.Players[2].Wins != 5 {
+		t.Fatalf("rejoined table = %#v, want three players and five retained wins", rejoined.Msg.Table)
 	}
 }
 
