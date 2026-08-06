@@ -114,6 +114,26 @@ struct DailyGlobalModelTests {
 
     @Test
     @MainActor
+    func calculatingResultRefreshesUntilItSettles() async {
+        let client = DailyGlobalTestClient(calculatingResponses: 2)
+        let model = DailyGlobalModel(
+            client: client,
+            identityProvider: { dailyIdentity(teamPlayerID: "team-player") },
+            now: { Date(timeIntervalSince1970: 1_786_017_600) },
+            sleeper: { _ in }
+        )
+        await model.refresh()
+        #expect(model.table?.previousResult?.status == .calculating)
+        await client.failNextRefresh()
+
+        await model.refreshUntilPreviousResultSettles()
+
+        #expect(model.table?.previousResult?.status == .winner)
+        #expect(await client.requestCount() == 3)
+    }
+
+    @Test
+    @MainActor
     func authenticationLossClearsActorPrivateDailyData() async {
         let identityState = DailyIdentityState(identity: dailyIdentity(teamPlayerID: "team-player"))
         let model = DailyGlobalModel(
@@ -221,21 +241,43 @@ private actor DailyGlobalTestClient: DailyGlobalClient {
         localPlayerDailyWins: 4
     )
     private let lockBehavior: LockBehavior
+    private let calculatingResponses: Int
     private var refreshesFail = false
+    private var nextRefreshFails = false
+    private var dailyRequestCount = 0
 
-    init(lockBehavior: LockBehavior = .succeed) {
+    init(lockBehavior: LockBehavior = .succeed, calculatingResponses: Int = 0) {
         self.lockBehavior = lockBehavior
+        self.calculatingResponses = calculatingResponses
     }
 
     func failFutureRefreshes() {
         refreshesFail = true
     }
 
+    func failNextRefresh() {
+        nextRefreshFails = true
+    }
+
     func getDailyGlobalTable(
         gameCenterIdentity _: GameCenterIdentityDTO
     ) async throws -> DailyGlobalTable {
+        dailyRequestCount += 1
         if refreshesFail { throw GameClientError.server("offline") }
+        if nextRefreshFails {
+            nextRefreshFails = false
+            throw GameClientError.server("offline")
+        }
+        if calculatingResponses > 0 {
+            return withPreviousResult(
+                status: dailyRequestCount <= calculatingResponses ? .calculating : .winner
+            )
+        }
         return table
+    }
+
+    func requestCount() -> Int {
+        dailyRequestCount
     }
 
     func lockDailyGlobalPick(
@@ -273,6 +315,21 @@ private actor DailyGlobalTestClient: DailyGlobalClient {
                 localPick: pick
             ),
             previousResult: table.previousResult,
+            localPlayerDailyWins: table.localPlayerDailyWins
+        )
+    }
+
+    private func withPreviousResult(status: DailyGlobalResult.Status) -> DailyGlobalTable {
+        DailyGlobalTable(
+            serverTime: table.serverTime,
+            currentRound: table.currentRound,
+            previousResult: DailyGlobalResult(
+                roundDate: "2026-08-05",
+                status: status,
+                participantCount: 2,
+                winningPick: status == .winner ? 3 : nil,
+                localPick: 3
+            ),
             localPlayerDailyWins: table.localPlayerDailyWins
         )
     }

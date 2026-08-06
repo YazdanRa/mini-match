@@ -178,6 +178,7 @@ func (r *FirestoreRepository) processDailyRounds(ctx context.Context, now time.T
 			return err
 		}
 		if !now.Before(document.ClosesAt) {
+			// ponytail: v1 settles lazily here; move this scan to scheduled work when cutoff latency approaches the request timeout.
 			if err := r.finalizeDailyRound(ctx, snapshot.Ref.ID, now); err != nil {
 				return err
 			}

@@ -39,11 +39,13 @@ struct DailyGlobalResult: Equatable, Sendable {
 final class DailyGlobalModel {
     typealias IdentityProvider = @MainActor @Sendable () async throws -> GameCenterIdentityDTO?
     typealias WinsReporter = @MainActor @Sendable (UInt64, GameCenterIdentityDTO) -> Void
+    typealias Sleeper = @Sendable (Duration) async throws -> Void
 
     @ObservationIgnored private let client: any DailyGlobalClient
     @ObservationIgnored private let identityProvider: IdentityProvider
     @ObservationIgnored private let winsReporter: WinsReporter
     @ObservationIgnored private let now: @MainActor @Sendable () -> Date
+    @ObservationIgnored private let sleeper: Sleeper
     @ObservationIgnored private var serverTimeOffset: TimeInterval = 0
     @ObservationIgnored private var generation = 0
     @ObservationIgnored private var pendingRoundDate: String?
@@ -67,12 +69,14 @@ final class DailyGlobalModel {
         client: any DailyGlobalClient,
         identityProvider: @escaping IdentityProvider,
         winsReporter: @escaping WinsReporter = { _, _ in },
-        now: @escaping @MainActor @Sendable () -> Date = { Date() }
+        now: @escaping @MainActor @Sendable () -> Date = { Date() },
+        sleeper: @escaping Sleeper = { try await Task.sleep(for: $0) }
     ) {
         self.client = client
         self.identityProvider = identityProvider
         self.winsReporter = winsReporter
         self.now = now
+        self.sleeper = sleeper
     }
 
     var canSubmit: Bool {
@@ -125,6 +129,18 @@ final class DailyGlobalModel {
             } else {
                 errorMessage = error.localizedDescription
             }
+        }
+    }
+
+    func refreshUntilPreviousResultSettles() async {
+        while table?.previousResult?.status == .calculating {
+            do {
+                try await sleeper(.seconds(3))
+            } catch {
+                return
+            }
+            guard !Task.isCancelled else { return }
+            await refresh()
         }
     }
 

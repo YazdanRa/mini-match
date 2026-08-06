@@ -71,6 +71,9 @@ struct DailyGlobalView: View {
             guard !Task.isCancelled else { return }
             await model.refresh()
         }
+        .task(id: model.table?.previousResult?.status) {
+            await model.refreshUntilPreviousResultSettles()
+        }
         .onChange(of: scenePhase) { _, phase in
             guard phase == .active else { return }
             Task { await model.refresh() }
