@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.0](https://github.com/YazdanRa/mini-match/compare/server-v0.1.1...server-v0.2.0) (2026-08-06)
+
+
+### Features
+
+* **game:** show per-table round win counts ([#28](https://github.com/YazdanRa/mini-match/issues/28)) ([62553f2](https://github.com/YazdanRa/mini-match/commit/62553f2a8d4771cbc0ba50c950a4156b2f4c7d07))
+
 ## [0.1.1](https://github.com/YazdanRa/mini-match/compare/server-v0.1.0...server-v0.1.1) (2026-08-05)
 
 
