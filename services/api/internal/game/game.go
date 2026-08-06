@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"maps"
 	"math"
 	"strings"
 	"sync"
@@ -42,6 +43,7 @@ type Table struct {
 	JoinCode           string
 	HostID             string
 	Players            []*Player
+	PlayerWins         map[string]uint32
 	CurrentRound       *Round
 	LastResult         *Result
 	WinnerLifetimeWins uint64
@@ -77,6 +79,7 @@ type Selection struct {
 	PlayerID    string
 	DisplayName string
 	Pick        uint64
+	Wins        uint32
 }
 
 type PlayerStats struct {
@@ -105,6 +108,7 @@ func NewTable(id, name, joinCode, hostID, hostName, hostAvatar string) (*Table, 
 		JoinCode:      joinCode,
 		HostID:        hostID,
 		Players:       []*Player{{ID: hostID, Name: hostName, Avatar: avatar}},
+		PlayerWins:    make(map[string]uint32),
 		Version:       1,
 		EventSequence: 1,
 	}, nil
@@ -171,6 +175,7 @@ func (t *Table) Leave(playerID string) error {
 			t.CurrentRound = nil
 			t.LastResult = nil
 			t.WinnerLifetimeWins = 0
+			clear(t.PlayerWins)
 		}
 		t.changed()
 		return nil
@@ -312,10 +317,20 @@ func (t *Table) RevealRound(actorID string, roundNumber uint32) error {
 	if found {
 		for _, player := range t.Players {
 			if player.Pick == lowest {
+				if t.PlayerWins[player.ID] == math.MaxUint32 {
+					return ErrStatsExhausted
+				}
+				if t.PlayerWins == nil {
+					t.PlayerWins = make(map[string]uint32)
+				}
+				t.PlayerWins[player.ID]++
 				result.WinnerID = player.ID
 				break
 			}
 		}
+	}
+	for index := range result.Selections {
+		result.Selections[index].Wins = t.PlayerWins[result.Selections[index].PlayerID]
 	}
 	t.LastResult = result
 	t.WinnerLifetimeWins = 0
@@ -405,6 +420,7 @@ func (t *Table) SetGameCenterID(playerID, gameCenterID string) error {
 }
 
 func (t *Table) DeletePlayerProfile(playerID, replacementID string) error {
+	_, winsExist := t.PlayerWins[playerID]
 	playerIsPresent := t.player(playerID) != nil
 	resultChanged := false
 	if t.LastResult != nil {
@@ -424,11 +440,13 @@ func (t *Table) DeletePlayerProfile(playerID, replacementID string) error {
 		}
 	}
 	if playerIsPresent {
+		delete(t.PlayerWins, playerID)
 		return t.Leave(playerID)
 	}
-	if !resultChanged {
+	if !resultChanged && !winsExist {
 		return ErrNotFound
 	}
+	delete(t.PlayerWins, playerID)
 	t.changed()
 	return nil
 }
@@ -601,6 +619,7 @@ func cloneStats(stats map[string]PlayerStats) map[string]PlayerStats {
 
 func clone(table *Table) *Table {
 	copy := *table
+	copy.PlayerWins = maps.Clone(table.PlayerWins)
 	if table.CurrentRound != nil {
 		round := *table.CurrentRound
 		copy.CurrentRound = &round

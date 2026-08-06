@@ -25,13 +25,23 @@ struct ResultRow: View {
         .padding(12)
         .background(row.status == .winner ? MiniMatchColors.blue.opacity(0.08) : .clear)
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("\(row.displayName), selected \(row.pick), \(statusText)")
+        .accessibilityIdentifier("result-row-\(row.playerID)")
+        .accessibilityLabel(Text(accessibilityText))
     }
 
     private var identity: some View {
         VStack(alignment: .leading) {
-            Text(row.displayName)
-                .font(.headline)
+            HStack(spacing: 8) {
+                Text(row.displayName)
+                    .font(.headline)
+                if let wins = row.wins {
+                    Text(wins.formatted())
+                        .font(.subheadline.bold())
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 2)
+                        .background(MiniMatchColors.blue.opacity(0.12), in: Capsule())
+                }
+            }
             Text("selected")
                 .font(.subheadline)
                 .foregroundStyle(MiniMatchColors.ink)
@@ -63,6 +73,14 @@ struct ResultRow: View {
             "Duplicate"
         case .unique:
             "Unique"
+        }
+    }
+
+    private var accessibilityText: LocalizedStringResource {
+        if let wins = row.wins {
+            "\(row.displayName), win count \(wins), selected \(row.pick), \(statusText)"
+        } else {
+            "\(row.displayName), selected \(row.pick), \(statusText)"
         }
     }
 }

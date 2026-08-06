@@ -26,6 +26,8 @@ func TestFirestoreDocumentsKeepPicksPrivateAndPreserveUint64(t *testing.T) {
 	table.Version = math.MaxUint64
 	table.EventSequence = math.MaxUint64
 	table.WinnerLifetimeWins = math.MaxUint64
+	table.PlayerWins["maya"] = 5
+	table.PlayerWins["departed"] = 3
 	table.Players[0].GameCenterID = "game-center-maya"
 	table.Players[0].PresenceExpiresAt = time.Date(2026, time.August, 3, 12, 2, 0, 0, time.UTC)
 
@@ -46,6 +48,16 @@ func TestFirestoreDocumentsKeepPicksPrivateAndPreserveUint64(t *testing.T) {
 		decoded.WinnerLifetimeWins != math.MaxUint64 {
 		t.Fatal("private document did not round-trip uint64 values")
 	}
+	if private.Players[0].Score != 5 || decoded.PlayerWins["maya"] != 5 ||
+		decoded.PlayerWins["departed"] != 3 {
+		t.Fatal("private document did not round-trip table wins")
+	}
+	if _, retained := decoded.PlayerWins["liam"]; retained {
+		t.Fatal("zero-win player was retained in private win history")
+	}
+	if got := private.HistoricalPlayerIDs; !reflect.DeepEqual(got, []string{"departed", "maya"}) {
+		t.Fatalf("historical player IDs = %#v", got)
+	}
 	if decoded.Players[0].Name != "Maya" || decoded.Players[0].Avatar != "fox" ||
 		decoded.Players[0].GameCenterID != "game-center-maya" ||
 		!decoded.Players[0].PresenceExpiresAt.Equal(table.Players[0].PresenceExpiresAt) ||
@@ -55,6 +67,9 @@ func TestFirestoreDocumentsKeepPicksPrivateAndPreserveUint64(t *testing.T) {
 	public := publicDocument(table)
 	if _, exposed := reflect.TypeOf(public).FieldByName("WinnerLifetimeWins"); exposed {
 		t.Fatal("safe table document exposes deprecated winner totals")
+	}
+	if _, exposed := reflect.TypeOf(public).FieldByName("PlayerWins"); exposed {
+		t.Fatal("safe table document exposes departed player win history")
 	}
 	if private.Players[0].Name != "Maya" || private.Players[0].Avatar != "fox" ||
 		private.Players[1].Name != "Liam" || private.Players[1].Avatar != "owl" ||
@@ -67,6 +82,9 @@ func TestFirestoreDocumentsKeepPicksPrivateAndPreserveUint64(t *testing.T) {
 	}
 	if _, exposed := reflect.TypeOf(public.Players[0]).FieldByName("PresenceExpiresAt"); exposed {
 		t.Fatal("safe player document exposes a private presence lease")
+	}
+	if public.Players[0].Score != 5 {
+		t.Fatal("safe document did not project table wins")
 	}
 	if public.LastResult != nil {
 		t.Fatal("safe document published a result before reveal")
@@ -93,6 +111,9 @@ func TestFirestoreDocumentsKeepPicksPrivateAndPreserveUint64(t *testing.T) {
 	}
 	if got := public.LastResult.Selections[0].Pick; got != "18446744073709551615" {
 		t.Fatalf("revealed pick = %q", got)
+	}
+	if got := public.LastResult.Selections[1].Wins; got == nil || *got != 1 {
+		t.Fatalf("revealed winner table wins = %v, want 1", got)
 	}
 	if public.LastResult.WinnerTotalWins != "" || public.LastResult.WinnerWinStreak != 0 ||
 		public.LastResult.WinnerBestWinStreak != 0 {
@@ -168,17 +189,43 @@ func TestRoundStatsDocumentsPreserveNewCountersAndIgnoreLegacyWins(t *testing.T)
 
 	result := &game.Result{
 		RoundNumber:         7,
-		Selections:          []game.Selection{},
+		Selections:          []game.Selection{{PlayerID: "liam", Pick: 1}},
 		WinnerID:            "maya",
 		WinnerTotalWins:     math.MaxUint64,
 		WinnerWinStreak:     math.MaxUint32,
 		WinnerBestWinStreak: math.MaxUint32,
 	}
-	decodedResult, err := decodeResult(encodeResult(result))
+	encodedResult := encodeResult(result)
+	if wins := encodedResult.Selections[0].Wins; wins == nil || *wins != 0 {
+		t.Fatalf("zero-win result snapshot = %v, want explicit 0", wins)
+	}
+	decodedResult, err := decodeResult(encodedResult, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if !reflect.DeepEqual(decodedResult, result) {
 		t.Fatalf("round result = %#v, want %#v", decodedResult, result)
+	}
+}
+
+func TestLegacyResultUsesRecoveredPlayerWins(t *testing.T) {
+	table, err := decodeDocument("table", tableDocument{
+		Name:     "Friday",
+		JoinCode: "ABC123",
+		HostID:   "maya",
+		Players:  []playerDocument{{ID: "maya", Name: "Maya", Score: 5, Pick: "0"}},
+		LastResult: &resultDocument{
+			RoundNumber: 1,
+			Selections:  []selectionDocument{{PlayerID: "maya", Pick: "2"}},
+			WinnerID:    "maya",
+		},
+		Version:       "1",
+		EventSequence: "1",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := table.LastResult.Selections[0].Wins; got != 5 {
+		t.Fatalf("legacy result table wins = %d, want 5", got)
 	}
 }

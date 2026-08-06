@@ -351,6 +351,7 @@ func toProto(table *game.Table, actor string) *minimatchv1.Table {
 			Id:          player.ID,
 			DisplayName: player.Name,
 			Avatar:      player.Avatar,
+			Wins:        table.PlayerWins[player.ID],
 			Locked:      player.Locked,
 		})
 	}
@@ -378,10 +379,12 @@ func toProto(table *game.Table, actor string) *minimatchv1.Table {
 			response.LastResult.LocalPlayerLeaderboardScore = &score
 		}
 		for _, selection := range table.LastResult.Selections {
+			wins := selection.Wins
 			response.LastResult.Selections = append(response.LastResult.Selections, &minimatchv1.Selection{
 				PlayerId:    selection.PlayerID,
 				Pick:        &minimatchv1.Pick{Value: selection.Pick},
 				DisplayName: selection.DisplayName,
+				Wins:        &wins,
 			})
 		}
 	}

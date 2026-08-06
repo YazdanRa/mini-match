@@ -124,13 +124,15 @@ struct PlayerDTO: Decodable {
     let displayName: String
     let avatar: String?
     let locked: Bool?
+    let wins: UInt32?
 
     var model: GamePlayer {
         GamePlayer(
             id: id,
             displayName: displayName,
             avatarID: avatar ?? PlayerAvatar.spark.rawValue,
-            isLocked: locked ?? false
+            isLocked: locked ?? false,
+            wins: wins ?? 0
         )
     }
 }
@@ -179,12 +181,18 @@ struct SelectionDTO: Decodable {
     let playerId: String
     let displayName: String?
     let pick: PickDTO
+    let wins: UInt32?
 
     func model() throws -> GameSelection {
         guard let value = UInt64(pick.value ?? "0") else {
             throw GameClientError.invalidResponse
         }
-        return GameSelection(playerID: playerId, displayName: displayName ?? "", pick: value)
+        return GameSelection(
+            playerID: playerId,
+            displayName: displayName ?? "",
+            pick: value,
+            wins: wins
+        )
     }
 }
 

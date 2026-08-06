@@ -107,6 +107,28 @@
         }
       }
     },
+    "%@, win count %u, selected %llu, %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@, win count %2$u, selected %3$llu, %4$@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@, victorias: %2$u, eligió %3$llu, %4$@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@, nombre de victoires : %2$u, a choisi %3$llu, %4$@"
+          }
+        }
+      }
+    },
     "%lld locked" : {
       "localizations" : {
         "es" : {

@@ -91,8 +91,27 @@ func TestTableRules(t *testing.T) {
 	if got := table.LastResult.RoundNumber; got != 6 {
 		t.Fatalf("last result round = %d, want 6", got)
 	}
+	if got := table.PlayerWins["liam"]; got != 6 {
+		t.Fatalf("Liam table wins = %d, want 6", got)
+	}
 	if err := table.BeginRound("maya"); err != nil {
 		t.Fatalf("table did not allow an independent seventh round: %v", err)
+	}
+}
+
+func TestTableWinCountCannotWrap(t *testing.T) {
+	table, _ := NewTable("table", "Friday", "ABC123", "maya", "Maya", "")
+	_ = table.Join("zoe", "Zoe", "")
+	_ = table.BeginRound("maya")
+	_ = table.LockPick("maya", 1, 1)
+	_ = table.LockPick("zoe", 2, 1)
+	table.PlayerWins["maya"] = math.MaxUint32
+
+	if err := table.RevealRound("maya", 1); !errors.Is(err, ErrStatsExhausted) {
+		t.Fatalf("overflow reveal error = %v, want ErrStatsExhausted", err)
+	}
+	if table.LastResult != nil {
+		t.Fatal("overflowing reveal published a result")
 	}
 }
 
@@ -125,12 +144,19 @@ func TestRevealedResultKeepsPlayerNamesAfterLeave(t *testing.T) {
 	_ = table.Join("liam", "Liam", "")
 	_ = table.BeginRound("maya")
 	_ = table.LockPick("maya", 2, 1)
-	_ = table.LockPick("liam", 5, 1)
+	_ = table.LockPick("liam", 1, 1)
 	_ = table.RevealRound("maya", 1)
 	_ = table.Leave("liam")
 
 	if got := table.LastResult.Selections[1].DisplayName; got != "Liam" {
 		t.Fatalf("departed player name = %q, want Liam", got)
+	}
+	if got := table.LastResult.Selections[1].Wins; got != 1 {
+		t.Fatalf("departed player result wins = %d, want 1", got)
+	}
+	_ = table.Join("liam", "Liam", "")
+	if got := table.PlayerWins["liam"]; got != 1 {
+		t.Fatalf("rejoined player table wins = %d, want 1", got)
 	}
 }
 
@@ -393,6 +419,7 @@ func TestMemoryRepositoryUpdateIsAtomic(t *testing.T) {
 func TestDeletePlayerProfileRemovesPlayerAndAnonymizesLastResult(t *testing.T) {
 	table, _ := NewTable("table", "Friday", "ACTIVE", "maya", "Maya", "fox")
 	_ = table.Join("zoe", "Zoe", "owl")
+	table.PlayerWins["maya"] = 5
 	table.LastResult = &Result{
 		WinnerID:            "maya",
 		WinnerTotalWins:     16,
@@ -405,6 +432,9 @@ func TestDeletePlayerProfileRemovesPlayerAndAnonymizesLastResult(t *testing.T) {
 	}
 	if table.HasPlayer("maya") {
 		t.Fatal("profile was not removed")
+	}
+	if _, exists := table.PlayerWins["maya"]; exists {
+		t.Fatal("profile win history was not removed")
 	}
 	if table.LastResult.WinnerID != "deleted:table" ||
 		table.LastResult.Selections[0].PlayerID != "deleted:table" ||

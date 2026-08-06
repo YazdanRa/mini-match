@@ -296,12 +296,18 @@ func TestConnectAndGRPCKeepPicksPrivateUntilReveal(t *testing.T) {
 	if got := revealed.Msg.Table.LastResult.GetWinnerPlayerId(); got != created.Msg.PlayerId {
 		t.Fatalf("winner = %q, want host", got)
 	}
+	for _, selection := range revealed.Msg.Table.LastResult.Selections {
+		if selection.Wins == nil {
+			t.Fatalf("selection %q omitted its table win count", selection.PlayerId)
+		}
+	}
 	if revealed.Msg.Table.CurrentRound != nil ||
 		revealed.Msg.Table.State != minimatchv1.TableState_TABLE_STATE_ACTIVE ||
 		revealed.Msg.Table.WinsToFinish != 0 ||
 		revealed.Msg.Table.WinnerPlayerId != nil ||
-		revealed.Msg.Table.Players[0].Wins != 0 {
-		t.Fatal("reveal did not return a scoreless active lobby")
+		revealed.Msg.Table.Players[0].Wins != 1 ||
+		revealed.Msg.Table.Players[1].Wins != 0 {
+		t.Fatal("reveal did not return the active lobby with table wins")
 	}
 	if repository.reveals != 1 {
 		t.Fatalf("RevealRound repository calls = %d, want 1", repository.reveals)
@@ -347,6 +353,9 @@ func TestConnectAndGRPCKeepPicksPrivateUntilReveal(t *testing.T) {
 	}
 	if got := guestPoll.Msg.Table.LastResult.GetLocalPlayerLeaderboardScore(); got != 1 {
 		t.Fatalf("guest winner leaderboard score = %d, want 1", got)
+	}
+	if guestPoll.Msg.Table.Players[0].Wins != 1 || guestPoll.Msg.Table.Players[1].Wins != 1 {
+		t.Fatal("guest poll did not include both table win counts")
 	}
 	hostPoll, err := connectClient.GetTable(ctx, authenticated(
 		&minimatchv1.GetTableRequest{TableId: tableID},

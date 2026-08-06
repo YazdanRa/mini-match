@@ -12,7 +12,7 @@ struct GameClientDTOTests {
           "joinCode": "7X2G9K",
           "hostPlayerId": "maya",
           "players": [
-            {"id": "maya", "displayName": "Maya"},
+            {"id": "maya", "displayName": "Maya", "wins": 5},
             {"id": "liam", "displayName": "Liam", "avatar": "frog"}
           ],
           "currentRound": {
@@ -21,7 +21,7 @@ struct GameClientDTOTests {
           },
           "lastResult": {
             "roundNumber": 1,
-            "selections": [{"playerId": "maya", "displayName": "Maya", "pick": {}}]
+            "selections": [{"playerId": "maya", "displayName": "Maya", "pick": {}, "wins": 5}]
           }
         }
         """
@@ -33,7 +33,8 @@ struct GameClientDTOTests {
                 id: "maya",
                 displayName: "Maya",
                 avatarID: "spark",
-                isLocked: false
+                isLocked: false,
+                wins: 5
             ),
             GamePlayer(
                 id: "liam",
@@ -44,8 +45,10 @@ struct GameClientDTOTests {
         ])
         #expect(table.stateVersion == 0)
         #expect(table.eventSequence == 0)
+        #expect(table.players[1].wins == 0)
         #expect(table.lastResult?.selections.first?.pick == 0)
         #expect(table.lastResult?.selections.first?.displayName == "Maya")
+        #expect(table.lastResult?.selections.first?.wins == 5)
         #expect(table.lastResult?.winnerAchievementIDs == [])
     }
 

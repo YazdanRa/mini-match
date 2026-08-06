@@ -144,8 +144,8 @@ message Table {
 message Player {
   string id = 1;
   string display_name = 2;
-  // Deprecated: rounds do not accumulate a per-table score.
-  uint32 wins = 3 [deprecated = true];
+  // Rounds won by this player at this table.
+  uint32 wins = 3;
   bool locked = 4;
   string avatar = 5;
 }
@@ -174,6 +174,8 @@ message Selection {
   Pick pick = 2;
   // Snapshot captured at reveal so completed results survive player departure.
   string display_name = 3;
+  // Table win count captured at reveal for the same reason.
+  optional uint32 wins = 4;
 }
 
 // Picks must be positive; the server rejects zero.

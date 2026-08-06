@@ -59,6 +59,7 @@ struct GamePlayer: Identifiable, Equatable, Sendable {
     let displayName: String
     let avatarID: String
     var isLocked: Bool
+    var wins: UInt32 = 0
 
     var avatarGlyph: String {
         PlayerAvatar(rawValue: avatarID)?.glyph ?? PlayerAvatar.spark.glyph
@@ -103,6 +104,7 @@ struct GameSelection: Identifiable, Equatable, Sendable {
     let playerID: String
     let displayName: String
     let pick: UInt64
+    var wins: UInt32? = nil
 }
 
 struct ResultPresentation: Equatable, Sendable {
@@ -118,6 +120,7 @@ struct ResultPresentation: Equatable, Sendable {
         let playerID: String
         let displayName: String
         let pick: UInt64
+        let wins: UInt32?
         let status: Status
     }
 
@@ -130,6 +133,7 @@ struct ResultPresentation: Equatable, Sendable {
             $0[$1.pick, default: 0] += 1
         }
         let names = Dictionary(uniqueKeysWithValues: table.players.map { ($0.id, $0.displayName) })
+        let wins = Dictionary(uniqueKeysWithValues: table.players.map { ($0.id, $0.wins) })
 
         let resultNames = Dictionary(uniqueKeysWithValues: result.selections.compactMap {
             $0.displayName.isEmpty ? nil : ($0.playerID, $0.displayName)
@@ -154,6 +158,7 @@ struct ResultPresentation: Equatable, Sendable {
                     ? names[selection.playerID, default: String(localized: "Player")]
                     : selection.displayName,
                 pick: selection.pick,
+                wins: selection.wins ?? wins[selection.playerID],
                 status: status
             )
         }
