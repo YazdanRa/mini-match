@@ -16,12 +16,17 @@ import (
 )
 
 type Service struct {
-	tables game.Repository
-	now    func() time.Time
+	tables                   game.Repository
+	now                      func() time.Time
+	verifyGameCenterIdentity func(context.Context, *minimatchv1.GameCenterIdentity) (string, error)
 }
 
 func New(tables game.Repository) *Service {
-	return &Service{tables: tables, now: time.Now}
+	return &Service{
+		tables:                   tables,
+		now:                      time.Now,
+		verifyGameCenterIdentity: verifyGameCenterIdentity,
+	}
 }
 
 const playerPresenceDuration = 2 * time.Minute
@@ -234,6 +239,120 @@ func (s *Service) GetTable(ctx context.Context, request *connect.Request[minimat
 		}
 	}
 	return connect.NewResponse(&minimatchv1.GetTableResponse{Table: toProto(table, actor)}), nil
+}
+
+func (s *Service) GetDailyGlobalTable(
+	ctx context.Context,
+	request *connect.Request[minimatchv1.GetDailyGlobalTableRequest],
+) (*connect.Response[minimatchv1.GetDailyGlobalTableResponse], error) {
+	actor, gameCenterID, err := s.dailyActor(ctx, request.Msg.GetGameCenterIdentity())
+	if err != nil {
+		return nil, err
+	}
+	table, err := s.tables.GetDailyGlobalTable(ctx, actor, gameCenterID, s.now().UTC())
+	if err != nil {
+		return nil, rpcError(err)
+	}
+	current, previous := dailyRoundsToProto(table)
+	return connect.NewResponse(&minimatchv1.GetDailyGlobalTableResponse{
+		ServerTimeUnixSeconds: uint64(table.ServerTime.Unix()),
+		CurrentRound:          current,
+		PreviousResult:        previous,
+		LocalPlayerDailyWins:  table.TotalWins,
+	}), nil
+}
+
+func (s *Service) LockDailyGlobalPick(
+	ctx context.Context,
+	request *connect.Request[minimatchv1.LockDailyGlobalPickRequest],
+) (*connect.Response[minimatchv1.LockDailyGlobalPickResponse], error) {
+	if request.Msg.GetPick() == nil {
+		return nil, rpcError(game.ErrInvalid)
+	}
+	actor, gameCenterID, err := s.dailyActor(ctx, request.Msg.GetGameCenterIdentity())
+	if err != nil {
+		return nil, err
+	}
+	table, err := s.tables.LockDailyGlobalPick(
+		ctx,
+		actor,
+		gameCenterID,
+		request.Msg.GetRoundDate(),
+		request.Msg.GetPick().GetValue(),
+		s.now().UTC(),
+	)
+	if err != nil {
+		return nil, rpcError(err)
+	}
+	current, previous := dailyRoundsToProto(table)
+	return connect.NewResponse(&minimatchv1.LockDailyGlobalPickResponse{
+		ServerTimeUnixSeconds: uint64(table.ServerTime.Unix()),
+		CurrentRound:          current,
+		PreviousResult:        previous,
+		LocalPlayerDailyWins:  table.TotalWins,
+	}), nil
+}
+
+func (s *Service) dailyActor(
+	ctx context.Context,
+	identity *minimatchv1.GameCenterIdentity,
+) (string, string, error) {
+	actor, err := authn.RequireAppleLinked(ctx)
+	if err != nil {
+		return "", "", err
+	}
+	gameCenterID, err := s.verifyGameCenterIdentity(ctx, identity)
+	if err != nil {
+		return "", "", connect.NewError(connect.CodeUnauthenticated, err)
+	}
+	if gameCenterID == "" {
+		return "", "", connect.NewError(connect.CodeUnauthenticated, errors.New("missing Game Center identity"))
+	}
+	return actor.UID, gameCenterID, nil
+}
+
+func dailyRoundsToProto(
+	table *game.DailyGlobalTable,
+) (*minimatchv1.DailyGlobalRound, *minimatchv1.DailyGlobalResult) {
+	current := &minimatchv1.DailyGlobalRound{
+		RoundDate:           table.Today.Date,
+		ClosesAtUnixSeconds: uint64(table.Today.ClosesAt.Unix()),
+	}
+	if table.Today.Pick > 0 {
+		current.LocalPick = &minimatchv1.Pick{Value: table.Today.Pick}
+	}
+	if table.Yesterday.Date == "" {
+		return current, nil
+	}
+	previous := &minimatchv1.DailyGlobalResult{
+		RoundDate:        table.Yesterday.Date,
+		Status:           dailyStatusToProto(table.Yesterday.Status),
+		ParticipantCount: table.Yesterday.EntrantCount,
+	}
+	if table.Yesterday.Status == game.DailyRoundWinner && table.Yesterday.WinningPick > 0 {
+		previous.WinningPick = &minimatchv1.Pick{Value: table.Yesterday.WinningPick}
+	}
+	if table.Yesterday.Pick > 0 {
+		previous.LocalPick = &minimatchv1.Pick{Value: table.Yesterday.Pick}
+	}
+	return current, previous
+}
+
+func dailyStatusToProto(status game.DailyRoundStatus) minimatchv1.DailyGlobalResultStatus {
+	switch status {
+	case game.DailyRoundCalculating:
+		return minimatchv1.DailyGlobalResultStatus_DAILY_GLOBAL_RESULT_STATUS_CALCULATING
+	case game.DailyRoundEmpty:
+		return minimatchv1.DailyGlobalResultStatus_DAILY_GLOBAL_RESULT_STATUS_EMPTY
+	case game.DailyRoundInsufficient:
+		return minimatchv1.DailyGlobalResultStatus_DAILY_GLOBAL_RESULT_STATUS_INSUFFICIENT_PLAYERS
+	case game.DailyRoundNoUnique:
+		return minimatchv1.DailyGlobalResultStatus_DAILY_GLOBAL_RESULT_STATUS_NO_UNIQUE_PICK
+	case game.DailyRoundWinner:
+		return minimatchv1.DailyGlobalResultStatus_DAILY_GLOBAL_RESULT_STATUS_WINNER
+	default:
+		return minimatchv1.DailyGlobalResultStatus_DAILY_GLOBAL_RESULT_STATUS_UNSPECIFIED
+	}
 }
 
 func (s *Service) updateActiveTable(

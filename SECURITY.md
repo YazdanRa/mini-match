@@ -43,6 +43,8 @@ payloads are untrusted. The following properties must hold:
 - Every game and account RPC requires exactly one valid Firebase bearer token.
   `GET /health` is the sole intentionally unauthenticated endpoint. The verified
   Firebase UID is the authoritative actor identity.
+- Daily Table RPCs additionally require a valid Firebase App Check token and an
+  Apple-linked Firebase account.
 - Game Center identity data is trusted only after the server verifies Apple's
   certificate chain and the signature covering the team player ID, bundle
   identifier, timestamp, and salt. The verified Game Center identity is then
@@ -55,6 +57,8 @@ payloads are untrusted. The following properties must hold:
   unrelated tables.
 - Picks remain server-only until a valid host reveal after all current players
   have locked. Game rules and state transitions remain server-authoritative.
+- Daily Table picks remain server-only. After the UTC cutoff, clients receive
+  only the aggregate result and their own pick and outcome.
 - Firestore clients can read only the safe `table_views` projection for tables
   they belong to. They cannot list or write projections, access private table
   documents, or receive unrevealed picks, private presence leases, or Game
@@ -97,7 +101,7 @@ have enough evidence to explain the issue.
 
 ## Known Limitations
 
-Firebase App Check and application-level abuse limiting are planned before broad
-public release. Stored table records do not currently have a fixed retention
-period. These limitations are not blanket exclusions: report a concrete exploit
-or exposure through the private channel above.
+Application-level abuse limiting remains planned before broad public release.
+Stored social-table records do not currently have a fixed retention period.
+These limitations are not blanket exclusions: report a concrete exploit or
+exposure through the private channel above.

@@ -21,6 +21,64 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+type DailyGlobalResultStatus int32
+
+const (
+	DailyGlobalResultStatus_DAILY_GLOBAL_RESULT_STATUS_UNSPECIFIED          DailyGlobalResultStatus = 0
+	DailyGlobalResultStatus_DAILY_GLOBAL_RESULT_STATUS_CALCULATING          DailyGlobalResultStatus = 1
+	DailyGlobalResultStatus_DAILY_GLOBAL_RESULT_STATUS_EMPTY                DailyGlobalResultStatus = 2
+	DailyGlobalResultStatus_DAILY_GLOBAL_RESULT_STATUS_INSUFFICIENT_PLAYERS DailyGlobalResultStatus = 3
+	DailyGlobalResultStatus_DAILY_GLOBAL_RESULT_STATUS_NO_UNIQUE_PICK       DailyGlobalResultStatus = 4
+	DailyGlobalResultStatus_DAILY_GLOBAL_RESULT_STATUS_WINNER               DailyGlobalResultStatus = 5
+)
+
+// Enum value maps for DailyGlobalResultStatus.
+var (
+	DailyGlobalResultStatus_name = map[int32]string{
+		0: "DAILY_GLOBAL_RESULT_STATUS_UNSPECIFIED",
+		1: "DAILY_GLOBAL_RESULT_STATUS_CALCULATING",
+		2: "DAILY_GLOBAL_RESULT_STATUS_EMPTY",
+		3: "DAILY_GLOBAL_RESULT_STATUS_INSUFFICIENT_PLAYERS",
+		4: "DAILY_GLOBAL_RESULT_STATUS_NO_UNIQUE_PICK",
+		5: "DAILY_GLOBAL_RESULT_STATUS_WINNER",
+	}
+	DailyGlobalResultStatus_value = map[string]int32{
+		"DAILY_GLOBAL_RESULT_STATUS_UNSPECIFIED":          0,
+		"DAILY_GLOBAL_RESULT_STATUS_CALCULATING":          1,
+		"DAILY_GLOBAL_RESULT_STATUS_EMPTY":                2,
+		"DAILY_GLOBAL_RESULT_STATUS_INSUFFICIENT_PLAYERS": 3,
+		"DAILY_GLOBAL_RESULT_STATUS_NO_UNIQUE_PICK":       4,
+		"DAILY_GLOBAL_RESULT_STATUS_WINNER":               5,
+	}
+)
+
+func (x DailyGlobalResultStatus) Enum() *DailyGlobalResultStatus {
+	p := new(DailyGlobalResultStatus)
+	*p = x
+	return p
+}
+
+func (x DailyGlobalResultStatus) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (DailyGlobalResultStatus) Descriptor() protoreflect.EnumDescriptor {
+	return file_minimatch_v1_minimatch_proto_enumTypes[0].Descriptor()
+}
+
+func (DailyGlobalResultStatus) Type() protoreflect.EnumType {
+	return &file_minimatch_v1_minimatch_proto_enumTypes[0]
+}
+
+func (x DailyGlobalResultStatus) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use DailyGlobalResultStatus.Descriptor instead.
+func (DailyGlobalResultStatus) EnumDescriptor() ([]byte, []int) {
+	return file_minimatch_v1_minimatch_proto_rawDescGZIP(), []int{0}
+}
+
 type TableState int32
 
 const (
@@ -55,11 +113,11 @@ func (x TableState) String() string {
 }
 
 func (TableState) Descriptor() protoreflect.EnumDescriptor {
-	return file_minimatch_v1_minimatch_proto_enumTypes[0].Descriptor()
+	return file_minimatch_v1_minimatch_proto_enumTypes[1].Descriptor()
 }
 
 func (TableState) Type() protoreflect.EnumType {
-	return &file_minimatch_v1_minimatch_proto_enumTypes[0]
+	return &file_minimatch_v1_minimatch_proto_enumTypes[1]
 }
 
 func (x TableState) Number() protoreflect.EnumNumber {
@@ -68,7 +126,7 @@ func (x TableState) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use TableState.Descriptor instead.
 func (TableState) EnumDescriptor() ([]byte, []int) {
-	return file_minimatch_v1_minimatch_proto_rawDescGZIP(), []int{0}
+	return file_minimatch_v1_minimatch_proto_rawDescGZIP(), []int{1}
 }
 
 type RoundPhase int32
@@ -104,11 +162,11 @@ func (x RoundPhase) String() string {
 }
 
 func (RoundPhase) Descriptor() protoreflect.EnumDescriptor {
-	return file_minimatch_v1_minimatch_proto_enumTypes[1].Descriptor()
+	return file_minimatch_v1_minimatch_proto_enumTypes[2].Descriptor()
 }
 
 func (RoundPhase) Type() protoreflect.EnumType {
-	return &file_minimatch_v1_minimatch_proto_enumTypes[1]
+	return &file_minimatch_v1_minimatch_proto_enumTypes[2]
 }
 
 func (x RoundPhase) Number() protoreflect.EnumNumber {
@@ -117,7 +175,7 @@ func (x RoundPhase) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use RoundPhase.Descriptor instead.
 func (RoundPhase) EnumDescriptor() ([]byte, []int) {
-	return file_minimatch_v1_minimatch_proto_rawDescGZIP(), []int{1}
+	return file_minimatch_v1_minimatch_proto_rawDescGZIP(), []int{2}
 }
 
 type CreateTableRequest struct {
@@ -1044,6 +1102,388 @@ func (x *GetTableResponse) GetTable() *Table {
 	return nil
 }
 
+type GetDailyGlobalTableRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Required. Fresh Game Center identity proof for the authenticated player.
+	GameCenterIdentity *GameCenterIdentity `protobuf:"bytes,1,opt,name=game_center_identity,json=gameCenterIdentity,proto3" json:"game_center_identity,omitempty"`
+	unknownFields      protoimpl.UnknownFields
+	sizeCache          protoimpl.SizeCache
+}
+
+func (x *GetDailyGlobalTableRequest) Reset() {
+	*x = GetDailyGlobalTableRequest{}
+	mi := &file_minimatch_v1_minimatch_proto_msgTypes[17]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetDailyGlobalTableRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetDailyGlobalTableRequest) ProtoMessage() {}
+
+func (x *GetDailyGlobalTableRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_minimatch_v1_minimatch_proto_msgTypes[17]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetDailyGlobalTableRequest.ProtoReflect.Descriptor instead.
+func (*GetDailyGlobalTableRequest) Descriptor() ([]byte, []int) {
+	return file_minimatch_v1_minimatch_proto_rawDescGZIP(), []int{17}
+}
+
+func (x *GetDailyGlobalTableRequest) GetGameCenterIdentity() *GameCenterIdentity {
+	if x != nil {
+		return x.GameCenterIdentity
+	}
+	return nil
+}
+
+type LockDailyGlobalPickRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Server-issued UTC date used as a stale-screen concurrency token.
+	RoundDate string `protobuf:"bytes,1,opt,name=round_date,json=roundDate,proto3" json:"round_date,omitempty"`
+	Pick      *Pick  `protobuf:"bytes,2,opt,name=pick,proto3" json:"pick,omitempty"`
+	// Required. Fresh Game Center identity proof for the authenticated player.
+	GameCenterIdentity *GameCenterIdentity `protobuf:"bytes,3,opt,name=game_center_identity,json=gameCenterIdentity,proto3" json:"game_center_identity,omitempty"`
+	unknownFields      protoimpl.UnknownFields
+	sizeCache          protoimpl.SizeCache
+}
+
+func (x *LockDailyGlobalPickRequest) Reset() {
+	*x = LockDailyGlobalPickRequest{}
+	mi := &file_minimatch_v1_minimatch_proto_msgTypes[18]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *LockDailyGlobalPickRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*LockDailyGlobalPickRequest) ProtoMessage() {}
+
+func (x *LockDailyGlobalPickRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_minimatch_v1_minimatch_proto_msgTypes[18]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use LockDailyGlobalPickRequest.ProtoReflect.Descriptor instead.
+func (*LockDailyGlobalPickRequest) Descriptor() ([]byte, []int) {
+	return file_minimatch_v1_minimatch_proto_rawDescGZIP(), []int{18}
+}
+
+func (x *LockDailyGlobalPickRequest) GetRoundDate() string {
+	if x != nil {
+		return x.RoundDate
+	}
+	return ""
+}
+
+func (x *LockDailyGlobalPickRequest) GetPick() *Pick {
+	if x != nil {
+		return x.Pick
+	}
+	return nil
+}
+
+func (x *LockDailyGlobalPickRequest) GetGameCenterIdentity() *GameCenterIdentity {
+	if x != nil {
+		return x.GameCenterIdentity
+	}
+	return nil
+}
+
+type GetDailyGlobalTableResponse struct {
+	state                 protoimpl.MessageState `protogen:"open.v1"`
+	ServerTimeUnixSeconds uint64                 `protobuf:"varint,1,opt,name=server_time_unix_seconds,json=serverTimeUnixSeconds,proto3" json:"server_time_unix_seconds,omitempty"`
+	CurrentRound          *DailyGlobalRound      `protobuf:"bytes,2,opt,name=current_round,json=currentRound,proto3" json:"current_round,omitempty"`
+	PreviousResult        *DailyGlobalResult     `protobuf:"bytes,3,opt,name=previous_result,json=previousResult,proto3" json:"previous_result,omitempty"`
+	LocalPlayerDailyWins  uint64                 `protobuf:"varint,4,opt,name=local_player_daily_wins,json=localPlayerDailyWins,proto3" json:"local_player_daily_wins,omitempty"`
+	unknownFields         protoimpl.UnknownFields
+	sizeCache             protoimpl.SizeCache
+}
+
+func (x *GetDailyGlobalTableResponse) Reset() {
+	*x = GetDailyGlobalTableResponse{}
+	mi := &file_minimatch_v1_minimatch_proto_msgTypes[19]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetDailyGlobalTableResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetDailyGlobalTableResponse) ProtoMessage() {}
+
+func (x *GetDailyGlobalTableResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_minimatch_v1_minimatch_proto_msgTypes[19]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetDailyGlobalTableResponse.ProtoReflect.Descriptor instead.
+func (*GetDailyGlobalTableResponse) Descriptor() ([]byte, []int) {
+	return file_minimatch_v1_minimatch_proto_rawDescGZIP(), []int{19}
+}
+
+func (x *GetDailyGlobalTableResponse) GetServerTimeUnixSeconds() uint64 {
+	if x != nil {
+		return x.ServerTimeUnixSeconds
+	}
+	return 0
+}
+
+func (x *GetDailyGlobalTableResponse) GetCurrentRound() *DailyGlobalRound {
+	if x != nil {
+		return x.CurrentRound
+	}
+	return nil
+}
+
+func (x *GetDailyGlobalTableResponse) GetPreviousResult() *DailyGlobalResult {
+	if x != nil {
+		return x.PreviousResult
+	}
+	return nil
+}
+
+func (x *GetDailyGlobalTableResponse) GetLocalPlayerDailyWins() uint64 {
+	if x != nil {
+		return x.LocalPlayerDailyWins
+	}
+	return 0
+}
+
+type LockDailyGlobalPickResponse struct {
+	state                 protoimpl.MessageState `protogen:"open.v1"`
+	ServerTimeUnixSeconds uint64                 `protobuf:"varint,1,opt,name=server_time_unix_seconds,json=serverTimeUnixSeconds,proto3" json:"server_time_unix_seconds,omitempty"`
+	CurrentRound          *DailyGlobalRound      `protobuf:"bytes,2,opt,name=current_round,json=currentRound,proto3" json:"current_round,omitempty"`
+	PreviousResult        *DailyGlobalResult     `protobuf:"bytes,3,opt,name=previous_result,json=previousResult,proto3" json:"previous_result,omitempty"`
+	LocalPlayerDailyWins  uint64                 `protobuf:"varint,4,opt,name=local_player_daily_wins,json=localPlayerDailyWins,proto3" json:"local_player_daily_wins,omitempty"`
+	unknownFields         protoimpl.UnknownFields
+	sizeCache             protoimpl.SizeCache
+}
+
+func (x *LockDailyGlobalPickResponse) Reset() {
+	*x = LockDailyGlobalPickResponse{}
+	mi := &file_minimatch_v1_minimatch_proto_msgTypes[20]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *LockDailyGlobalPickResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*LockDailyGlobalPickResponse) ProtoMessage() {}
+
+func (x *LockDailyGlobalPickResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_minimatch_v1_minimatch_proto_msgTypes[20]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use LockDailyGlobalPickResponse.ProtoReflect.Descriptor instead.
+func (*LockDailyGlobalPickResponse) Descriptor() ([]byte, []int) {
+	return file_minimatch_v1_minimatch_proto_rawDescGZIP(), []int{20}
+}
+
+func (x *LockDailyGlobalPickResponse) GetServerTimeUnixSeconds() uint64 {
+	if x != nil {
+		return x.ServerTimeUnixSeconds
+	}
+	return 0
+}
+
+func (x *LockDailyGlobalPickResponse) GetCurrentRound() *DailyGlobalRound {
+	if x != nil {
+		return x.CurrentRound
+	}
+	return nil
+}
+
+func (x *LockDailyGlobalPickResponse) GetPreviousResult() *DailyGlobalResult {
+	if x != nil {
+		return x.PreviousResult
+	}
+	return nil
+}
+
+func (x *LockDailyGlobalPickResponse) GetLocalPlayerDailyWins() uint64 {
+	if x != nil {
+		return x.LocalPlayerDailyWins
+	}
+	return 0
+}
+
+type DailyGlobalRound struct {
+	state               protoimpl.MessageState `protogen:"open.v1"`
+	RoundDate           string                 `protobuf:"bytes,1,opt,name=round_date,json=roundDate,proto3" json:"round_date,omitempty"`
+	ClosesAtUnixSeconds uint64                 `protobuf:"varint,2,opt,name=closes_at_unix_seconds,json=closesAtUnixSeconds,proto3" json:"closes_at_unix_seconds,omitempty"`
+	// Present only when the authenticated player has locked a pick.
+	LocalPick     *Pick `protobuf:"bytes,3,opt,name=local_pick,json=localPick,proto3" json:"local_pick,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DailyGlobalRound) Reset() {
+	*x = DailyGlobalRound{}
+	mi := &file_minimatch_v1_minimatch_proto_msgTypes[21]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DailyGlobalRound) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DailyGlobalRound) ProtoMessage() {}
+
+func (x *DailyGlobalRound) ProtoReflect() protoreflect.Message {
+	mi := &file_minimatch_v1_minimatch_proto_msgTypes[21]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DailyGlobalRound.ProtoReflect.Descriptor instead.
+func (*DailyGlobalRound) Descriptor() ([]byte, []int) {
+	return file_minimatch_v1_minimatch_proto_rawDescGZIP(), []int{21}
+}
+
+func (x *DailyGlobalRound) GetRoundDate() string {
+	if x != nil {
+		return x.RoundDate
+	}
+	return ""
+}
+
+func (x *DailyGlobalRound) GetClosesAtUnixSeconds() uint64 {
+	if x != nil {
+		return x.ClosesAtUnixSeconds
+	}
+	return 0
+}
+
+func (x *DailyGlobalRound) GetLocalPick() *Pick {
+	if x != nil {
+		return x.LocalPick
+	}
+	return nil
+}
+
+type DailyGlobalResult struct {
+	state            protoimpl.MessageState  `protogen:"open.v1"`
+	RoundDate        string                  `protobuf:"bytes,1,opt,name=round_date,json=roundDate,proto3" json:"round_date,omitempty"`
+	Status           DailyGlobalResultStatus `protobuf:"varint,2,opt,name=status,proto3,enum=minimatch.v1.DailyGlobalResultStatus" json:"status,omitempty"`
+	ParticipantCount uint64                  `protobuf:"varint,3,opt,name=participant_count,json=participantCount,proto3" json:"participant_count,omitempty"`
+	// Present only when this round has a unique winner.
+	WinningPick *Pick `protobuf:"bytes,4,opt,name=winning_pick,json=winningPick,proto3" json:"winning_pick,omitempty"`
+	// Present only when the authenticated player entered this round.
+	LocalPick     *Pick `protobuf:"bytes,5,opt,name=local_pick,json=localPick,proto3" json:"local_pick,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DailyGlobalResult) Reset() {
+	*x = DailyGlobalResult{}
+	mi := &file_minimatch_v1_minimatch_proto_msgTypes[22]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DailyGlobalResult) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DailyGlobalResult) ProtoMessage() {}
+
+func (x *DailyGlobalResult) ProtoReflect() protoreflect.Message {
+	mi := &file_minimatch_v1_minimatch_proto_msgTypes[22]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DailyGlobalResult.ProtoReflect.Descriptor instead.
+func (*DailyGlobalResult) Descriptor() ([]byte, []int) {
+	return file_minimatch_v1_minimatch_proto_rawDescGZIP(), []int{22}
+}
+
+func (x *DailyGlobalResult) GetRoundDate() string {
+	if x != nil {
+		return x.RoundDate
+	}
+	return ""
+}
+
+func (x *DailyGlobalResult) GetStatus() DailyGlobalResultStatus {
+	if x != nil {
+		return x.Status
+	}
+	return DailyGlobalResultStatus_DAILY_GLOBAL_RESULT_STATUS_UNSPECIFIED
+}
+
+func (x *DailyGlobalResult) GetParticipantCount() uint64 {
+	if x != nil {
+		return x.ParticipantCount
+	}
+	return 0
+}
+
+func (x *DailyGlobalResult) GetWinningPick() *Pick {
+	if x != nil {
+		return x.WinningPick
+	}
+	return nil
+}
+
+func (x *DailyGlobalResult) GetLocalPick() *Pick {
+	if x != nil {
+		return x.LocalPick
+	}
+	return nil
+}
+
 type DeleteProfileRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
@@ -1052,7 +1492,7 @@ type DeleteProfileRequest struct {
 
 func (x *DeleteProfileRequest) Reset() {
 	*x = DeleteProfileRequest{}
-	mi := &file_minimatch_v1_minimatch_proto_msgTypes[17]
+	mi := &file_minimatch_v1_minimatch_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1064,7 +1504,7 @@ func (x *DeleteProfileRequest) String() string {
 func (*DeleteProfileRequest) ProtoMessage() {}
 
 func (x *DeleteProfileRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_minimatch_v1_minimatch_proto_msgTypes[17]
+	mi := &file_minimatch_v1_minimatch_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1077,7 +1517,7 @@ func (x *DeleteProfileRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteProfileRequest.ProtoReflect.Descriptor instead.
 func (*DeleteProfileRequest) Descriptor() ([]byte, []int) {
-	return file_minimatch_v1_minimatch_proto_rawDescGZIP(), []int{17}
+	return file_minimatch_v1_minimatch_proto_rawDescGZIP(), []int{23}
 }
 
 type DeleteProfileResponse struct {
@@ -1088,7 +1528,7 @@ type DeleteProfileResponse struct {
 
 func (x *DeleteProfileResponse) Reset() {
 	*x = DeleteProfileResponse{}
-	mi := &file_minimatch_v1_minimatch_proto_msgTypes[18]
+	mi := &file_minimatch_v1_minimatch_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1100,7 +1540,7 @@ func (x *DeleteProfileResponse) String() string {
 func (*DeleteProfileResponse) ProtoMessage() {}
 
 func (x *DeleteProfileResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_minimatch_v1_minimatch_proto_msgTypes[18]
+	mi := &file_minimatch_v1_minimatch_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1113,7 +1553,7 @@ func (x *DeleteProfileResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteProfileResponse.ProtoReflect.Descriptor instead.
 func (*DeleteProfileResponse) Descriptor() ([]byte, []int) {
-	return file_minimatch_v1_minimatch_proto_rawDescGZIP(), []int{18}
+	return file_minimatch_v1_minimatch_proto_rawDescGZIP(), []int{24}
 }
 
 type Table struct {
@@ -1150,7 +1590,7 @@ type Table struct {
 
 func (x *Table) Reset() {
 	*x = Table{}
-	mi := &file_minimatch_v1_minimatch_proto_msgTypes[19]
+	mi := &file_minimatch_v1_minimatch_proto_msgTypes[25]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1162,7 +1602,7 @@ func (x *Table) String() string {
 func (*Table) ProtoMessage() {}
 
 func (x *Table) ProtoReflect() protoreflect.Message {
-	mi := &file_minimatch_v1_minimatch_proto_msgTypes[19]
+	mi := &file_minimatch_v1_minimatch_proto_msgTypes[25]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1175,7 +1615,7 @@ func (x *Table) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Table.ProtoReflect.Descriptor instead.
 func (*Table) Descriptor() ([]byte, []int) {
-	return file_minimatch_v1_minimatch_proto_rawDescGZIP(), []int{19}
+	return file_minimatch_v1_minimatch_proto_rawDescGZIP(), []int{25}
 }
 
 func (x *Table) GetId() string {
@@ -1286,7 +1726,7 @@ type Player struct {
 
 func (x *Player) Reset() {
 	*x = Player{}
-	mi := &file_minimatch_v1_minimatch_proto_msgTypes[20]
+	mi := &file_minimatch_v1_minimatch_proto_msgTypes[26]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1298,7 +1738,7 @@ func (x *Player) String() string {
 func (*Player) ProtoMessage() {}
 
 func (x *Player) ProtoReflect() protoreflect.Message {
-	mi := &file_minimatch_v1_minimatch_proto_msgTypes[20]
+	mi := &file_minimatch_v1_minimatch_proto_msgTypes[26]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1311,7 +1751,7 @@ func (x *Player) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Player.ProtoReflect.Descriptor instead.
 func (*Player) Descriptor() ([]byte, []int) {
-	return file_minimatch_v1_minimatch_proto_rawDescGZIP(), []int{20}
+	return file_minimatch_v1_minimatch_proto_rawDescGZIP(), []int{26}
 }
 
 func (x *Player) GetId() string {
@@ -1359,7 +1799,7 @@ type Round struct {
 
 func (x *Round) Reset() {
 	*x = Round{}
-	mi := &file_minimatch_v1_minimatch_proto_msgTypes[21]
+	mi := &file_minimatch_v1_minimatch_proto_msgTypes[27]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1371,7 +1811,7 @@ func (x *Round) String() string {
 func (*Round) ProtoMessage() {}
 
 func (x *Round) ProtoReflect() protoreflect.Message {
-	mi := &file_minimatch_v1_minimatch_proto_msgTypes[21]
+	mi := &file_minimatch_v1_minimatch_proto_msgTypes[27]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1384,7 +1824,7 @@ func (x *Round) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Round.ProtoReflect.Descriptor instead.
 func (*Round) Descriptor() ([]byte, []int) {
-	return file_minimatch_v1_minimatch_proto_rawDescGZIP(), []int{21}
+	return file_minimatch_v1_minimatch_proto_rawDescGZIP(), []int{27}
 }
 
 func (x *Round) GetNumber() uint32 {
@@ -1424,7 +1864,7 @@ type RoundResult struct {
 
 func (x *RoundResult) Reset() {
 	*x = RoundResult{}
-	mi := &file_minimatch_v1_minimatch_proto_msgTypes[22]
+	mi := &file_minimatch_v1_minimatch_proto_msgTypes[28]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1436,7 +1876,7 @@ func (x *RoundResult) String() string {
 func (*RoundResult) ProtoMessage() {}
 
 func (x *RoundResult) ProtoReflect() protoreflect.Message {
-	mi := &file_minimatch_v1_minimatch_proto_msgTypes[22]
+	mi := &file_minimatch_v1_minimatch_proto_msgTypes[28]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1449,7 +1889,7 @@ func (x *RoundResult) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RoundResult.ProtoReflect.Descriptor instead.
 func (*RoundResult) Descriptor() ([]byte, []int) {
-	return file_minimatch_v1_minimatch_proto_rawDescGZIP(), []int{22}
+	return file_minimatch_v1_minimatch_proto_rawDescGZIP(), []int{28}
 }
 
 func (x *RoundResult) GetRoundNumber() uint32 {
@@ -1525,7 +1965,7 @@ type Selection struct {
 
 func (x *Selection) Reset() {
 	*x = Selection{}
-	mi := &file_minimatch_v1_minimatch_proto_msgTypes[23]
+	mi := &file_minimatch_v1_minimatch_proto_msgTypes[29]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1537,7 +1977,7 @@ func (x *Selection) String() string {
 func (*Selection) ProtoMessage() {}
 
 func (x *Selection) ProtoReflect() protoreflect.Message {
-	mi := &file_minimatch_v1_minimatch_proto_msgTypes[23]
+	mi := &file_minimatch_v1_minimatch_proto_msgTypes[29]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1550,7 +1990,7 @@ func (x *Selection) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Selection.ProtoReflect.Descriptor instead.
 func (*Selection) Descriptor() ([]byte, []int) {
-	return file_minimatch_v1_minimatch_proto_rawDescGZIP(), []int{23}
+	return file_minimatch_v1_minimatch_proto_rawDescGZIP(), []int{29}
 }
 
 func (x *Selection) GetPlayerId() string {
@@ -1591,7 +2031,7 @@ type Pick struct {
 
 func (x *Pick) Reset() {
 	*x = Pick{}
-	mi := &file_minimatch_v1_minimatch_proto_msgTypes[24]
+	mi := &file_minimatch_v1_minimatch_proto_msgTypes[30]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1603,7 +2043,7 @@ func (x *Pick) String() string {
 func (*Pick) ProtoMessage() {}
 
 func (x *Pick) ProtoReflect() protoreflect.Message {
-	mi := &file_minimatch_v1_minimatch_proto_msgTypes[24]
+	mi := &file_minimatch_v1_minimatch_proto_msgTypes[30]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1616,7 +2056,7 @@ func (x *Pick) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Pick.ProtoReflect.Descriptor instead.
 func (*Pick) Descriptor() ([]byte, []int) {
-	return file_minimatch_v1_minimatch_proto_rawDescGZIP(), []int{24}
+	return file_minimatch_v1_minimatch_proto_rawDescGZIP(), []int{30}
 }
 
 func (x *Pick) GetValue() uint64 {
@@ -1687,7 +2127,38 @@ const file_minimatch_v1_minimatch_proto_rawDesc = "" +
 	"\x0fGetTableRequest\x12\x19\n" +
 	"\btable_id\x18\x01 \x01(\tR\atableId\"=\n" +
 	"\x10GetTableResponse\x12)\n" +
-	"\x05table\x18\x01 \x01(\v2\x13.minimatch.v1.TableR\x05table\"\x16\n" +
+	"\x05table\x18\x01 \x01(\v2\x13.minimatch.v1.TableR\x05table\"p\n" +
+	"\x1aGetDailyGlobalTableRequest\x12R\n" +
+	"\x14game_center_identity\x18\x01 \x01(\v2 .minimatch.v1.GameCenterIdentityR\x12gameCenterIdentity\"\xb7\x01\n" +
+	"\x1aLockDailyGlobalPickRequest\x12\x1d\n" +
+	"\n" +
+	"round_date\x18\x01 \x01(\tR\troundDate\x12&\n" +
+	"\x04pick\x18\x02 \x01(\v2\x12.minimatch.v1.PickR\x04pick\x12R\n" +
+	"\x14game_center_identity\x18\x03 \x01(\v2 .minimatch.v1.GameCenterIdentityR\x12gameCenterIdentity\"\x9c\x02\n" +
+	"\x1bGetDailyGlobalTableResponse\x127\n" +
+	"\x18server_time_unix_seconds\x18\x01 \x01(\x04R\x15serverTimeUnixSeconds\x12C\n" +
+	"\rcurrent_round\x18\x02 \x01(\v2\x1e.minimatch.v1.DailyGlobalRoundR\fcurrentRound\x12H\n" +
+	"\x0fprevious_result\x18\x03 \x01(\v2\x1f.minimatch.v1.DailyGlobalResultR\x0epreviousResult\x125\n" +
+	"\x17local_player_daily_wins\x18\x04 \x01(\x04R\x14localPlayerDailyWins\"\x9c\x02\n" +
+	"\x1bLockDailyGlobalPickResponse\x127\n" +
+	"\x18server_time_unix_seconds\x18\x01 \x01(\x04R\x15serverTimeUnixSeconds\x12C\n" +
+	"\rcurrent_round\x18\x02 \x01(\v2\x1e.minimatch.v1.DailyGlobalRoundR\fcurrentRound\x12H\n" +
+	"\x0fprevious_result\x18\x03 \x01(\v2\x1f.minimatch.v1.DailyGlobalResultR\x0epreviousResult\x125\n" +
+	"\x17local_player_daily_wins\x18\x04 \x01(\x04R\x14localPlayerDailyWins\"\x99\x01\n" +
+	"\x10DailyGlobalRound\x12\x1d\n" +
+	"\n" +
+	"round_date\x18\x01 \x01(\tR\troundDate\x123\n" +
+	"\x16closes_at_unix_seconds\x18\x02 \x01(\x04R\x13closesAtUnixSeconds\x121\n" +
+	"\n" +
+	"local_pick\x18\x03 \x01(\v2\x12.minimatch.v1.PickR\tlocalPick\"\x88\x02\n" +
+	"\x11DailyGlobalResult\x12\x1d\n" +
+	"\n" +
+	"round_date\x18\x01 \x01(\tR\troundDate\x12=\n" +
+	"\x06status\x18\x02 \x01(\x0e2%.minimatch.v1.DailyGlobalResultStatusR\x06status\x12+\n" +
+	"\x11participant_count\x18\x03 \x01(\x04R\x10participantCount\x125\n" +
+	"\fwinning_pick\x18\x04 \x01(\v2\x12.minimatch.v1.PickR\vwinningPick\x121\n" +
+	"\n" +
+	"local_pick\x18\x05 \x01(\v2\x12.minimatch.v1.PickR\tlocalPick\"\x16\n" +
 	"\x14DeleteProfileRequest\"\x17\n" +
 	"\x15DeleteProfileResponse\"\xd6\x04\n" +
 	"\x05Table\x12\x0e\n" +
@@ -1737,7 +2208,14 @@ const file_minimatch_v1_minimatch_proto_rawDesc = "" +
 	"\x04wins\x18\x04 \x01(\rH\x00R\x04wins\x88\x01\x01B\a\n" +
 	"\x05_wins\"\x1c\n" +
 	"\x04Pick\x12\x14\n" +
-	"\x05value\x18\x01 \x01(\x04R\x05value*_\n" +
+	"\x05value\x18\x01 \x01(\x04R\x05value*\xa2\x02\n" +
+	"\x17DailyGlobalResultStatus\x12*\n" +
+	"&DAILY_GLOBAL_RESULT_STATUS_UNSPECIFIED\x10\x00\x12*\n" +
+	"&DAILY_GLOBAL_RESULT_STATUS_CALCULATING\x10\x01\x12$\n" +
+	" DAILY_GLOBAL_RESULT_STATUS_EMPTY\x10\x02\x123\n" +
+	"/DAILY_GLOBAL_RESULT_STATUS_INSUFFICIENT_PLAYERS\x10\x03\x12-\n" +
+	")DAILY_GLOBAL_RESULT_STATUS_NO_UNIQUE_PICK\x10\x04\x12%\n" +
+	"!DAILY_GLOBAL_RESULT_STATUS_WINNER\x10\x05*_\n" +
 	"\n" +
 	"TableState\x12\x1b\n" +
 	"\x17TABLE_STATE_UNSPECIFIED\x10\x00\x12\x16\n" +
@@ -1747,7 +2225,7 @@ const file_minimatch_v1_minimatch_proto_rawDesc = "" +
 	"RoundPhase\x12\x1b\n" +
 	"\x17ROUND_PHASE_UNSPECIFIED\x10\x00\x12\x1f\n" +
 	"\x1bROUND_PHASE_ACCEPTING_PICKS\x10\x01\x12\x1f\n" +
-	"\x1bROUND_PHASE_READY_TO_REVEAL\x10\x022\xf0\x05\n" +
+	"\x1bROUND_PHASE_READY_TO_REVEAL\x10\x022\xc8\a\n" +
 	"\x10MiniMatchService\x12R\n" +
 	"\vCreateTable\x12 .minimatch.v1.CreateTableRequest\x1a!.minimatch.v1.CreateTableResponse\x12L\n" +
 	"\tJoinTable\x12\x1e.minimatch.v1.JoinTableRequest\x1a\x1f.minimatch.v1.JoinTableResponse\x12O\n" +
@@ -1759,7 +2237,9 @@ const file_minimatch_v1_minimatch_proto_rawDesc = "" +
 	"\n" +
 	"BeginRound\x12\x1f.minimatch.v1.BeginRoundRequest\x1a .minimatch.v1.BeginRoundResponse\x12R\n" +
 	"\vRevealRound\x12 .minimatch.v1.RevealRoundRequest\x1a!.minimatch.v1.RevealRoundResponse\x12I\n" +
-	"\bGetTable\x12\x1d.minimatch.v1.GetTableRequest\x1a\x1e.minimatch.v1.GetTableResponse\x12X\n" +
+	"\bGetTable\x12\x1d.minimatch.v1.GetTableRequest\x1a\x1e.minimatch.v1.GetTableResponse\x12j\n" +
+	"\x13GetDailyGlobalTable\x12(.minimatch.v1.GetDailyGlobalTableRequest\x1a).minimatch.v1.GetDailyGlobalTableResponse\x12j\n" +
+	"\x13LockDailyGlobalPick\x12(.minimatch.v1.LockDailyGlobalPickRequest\x1a).minimatch.v1.LockDailyGlobalPickResponse\x12X\n" +
 	"\rDeleteProfile\x12\".minimatch.v1.DeleteProfileRequest\x1a#.minimatch.v1.DeleteProfileResponseBg\n" +
 	"\x14app.minimatch.api.v1P\x01ZHgithub.com/YazdanRa/mini-match/services/api/gen/minimatch/v1;minimatchv1\xba\x02\x02MMb\x06proto3"
 
@@ -1775,79 +2255,101 @@ func file_minimatch_v1_minimatch_proto_rawDescGZIP() []byte {
 	return file_minimatch_v1_minimatch_proto_rawDescData
 }
 
-var file_minimatch_v1_minimatch_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
-var file_minimatch_v1_minimatch_proto_msgTypes = make([]protoimpl.MessageInfo, 25)
+var file_minimatch_v1_minimatch_proto_enumTypes = make([]protoimpl.EnumInfo, 3)
+var file_minimatch_v1_minimatch_proto_msgTypes = make([]protoimpl.MessageInfo, 31)
 var file_minimatch_v1_minimatch_proto_goTypes = []any{
-	(TableState)(0),               // 0: minimatch.v1.TableState
-	(RoundPhase)(0),               // 1: minimatch.v1.RoundPhase
-	(*CreateTableRequest)(nil),    // 2: minimatch.v1.CreateTableRequest
-	(*CreateTableResponse)(nil),   // 3: minimatch.v1.CreateTableResponse
-	(*JoinTableRequest)(nil),      // 4: minimatch.v1.JoinTableRequest
-	(*GameCenterIdentity)(nil),    // 5: minimatch.v1.GameCenterIdentity
-	(*JoinTableResponse)(nil),     // 6: minimatch.v1.JoinTableResponse
-	(*LeaveTableRequest)(nil),     // 7: minimatch.v1.LeaveTableRequest
-	(*LeaveTableResponse)(nil),    // 8: minimatch.v1.LeaveTableResponse
-	(*LockPickRequest)(nil),       // 9: minimatch.v1.LockPickRequest
-	(*LockPickResponse)(nil),      // 10: minimatch.v1.LockPickResponse
-	(*StartRoundRequest)(nil),     // 11: minimatch.v1.StartRoundRequest
-	(*StartRoundResponse)(nil),    // 12: minimatch.v1.StartRoundResponse
-	(*BeginRoundRequest)(nil),     // 13: minimatch.v1.BeginRoundRequest
-	(*BeginRoundResponse)(nil),    // 14: minimatch.v1.BeginRoundResponse
-	(*RevealRoundRequest)(nil),    // 15: minimatch.v1.RevealRoundRequest
-	(*RevealRoundResponse)(nil),   // 16: minimatch.v1.RevealRoundResponse
-	(*GetTableRequest)(nil),       // 17: minimatch.v1.GetTableRequest
-	(*GetTableResponse)(nil),      // 18: minimatch.v1.GetTableResponse
-	(*DeleteProfileRequest)(nil),  // 19: minimatch.v1.DeleteProfileRequest
-	(*DeleteProfileResponse)(nil), // 20: minimatch.v1.DeleteProfileResponse
-	(*Table)(nil),                 // 21: minimatch.v1.Table
-	(*Player)(nil),                // 22: minimatch.v1.Player
-	(*Round)(nil),                 // 23: minimatch.v1.Round
-	(*RoundResult)(nil),           // 24: minimatch.v1.RoundResult
-	(*Selection)(nil),             // 25: minimatch.v1.Selection
-	(*Pick)(nil),                  // 26: minimatch.v1.Pick
+	(DailyGlobalResultStatus)(0),        // 0: minimatch.v1.DailyGlobalResultStatus
+	(TableState)(0),                     // 1: minimatch.v1.TableState
+	(RoundPhase)(0),                     // 2: minimatch.v1.RoundPhase
+	(*CreateTableRequest)(nil),          // 3: minimatch.v1.CreateTableRequest
+	(*CreateTableResponse)(nil),         // 4: minimatch.v1.CreateTableResponse
+	(*JoinTableRequest)(nil),            // 5: minimatch.v1.JoinTableRequest
+	(*GameCenterIdentity)(nil),          // 6: minimatch.v1.GameCenterIdentity
+	(*JoinTableResponse)(nil),           // 7: minimatch.v1.JoinTableResponse
+	(*LeaveTableRequest)(nil),           // 8: minimatch.v1.LeaveTableRequest
+	(*LeaveTableResponse)(nil),          // 9: minimatch.v1.LeaveTableResponse
+	(*LockPickRequest)(nil),             // 10: minimatch.v1.LockPickRequest
+	(*LockPickResponse)(nil),            // 11: minimatch.v1.LockPickResponse
+	(*StartRoundRequest)(nil),           // 12: minimatch.v1.StartRoundRequest
+	(*StartRoundResponse)(nil),          // 13: minimatch.v1.StartRoundResponse
+	(*BeginRoundRequest)(nil),           // 14: minimatch.v1.BeginRoundRequest
+	(*BeginRoundResponse)(nil),          // 15: minimatch.v1.BeginRoundResponse
+	(*RevealRoundRequest)(nil),          // 16: minimatch.v1.RevealRoundRequest
+	(*RevealRoundResponse)(nil),         // 17: minimatch.v1.RevealRoundResponse
+	(*GetTableRequest)(nil),             // 18: minimatch.v1.GetTableRequest
+	(*GetTableResponse)(nil),            // 19: minimatch.v1.GetTableResponse
+	(*GetDailyGlobalTableRequest)(nil),  // 20: minimatch.v1.GetDailyGlobalTableRequest
+	(*LockDailyGlobalPickRequest)(nil),  // 21: minimatch.v1.LockDailyGlobalPickRequest
+	(*GetDailyGlobalTableResponse)(nil), // 22: minimatch.v1.GetDailyGlobalTableResponse
+	(*LockDailyGlobalPickResponse)(nil), // 23: minimatch.v1.LockDailyGlobalPickResponse
+	(*DailyGlobalRound)(nil),            // 24: minimatch.v1.DailyGlobalRound
+	(*DailyGlobalResult)(nil),           // 25: minimatch.v1.DailyGlobalResult
+	(*DeleteProfileRequest)(nil),        // 26: minimatch.v1.DeleteProfileRequest
+	(*DeleteProfileResponse)(nil),       // 27: minimatch.v1.DeleteProfileResponse
+	(*Table)(nil),                       // 28: minimatch.v1.Table
+	(*Player)(nil),                      // 29: minimatch.v1.Player
+	(*Round)(nil),                       // 30: minimatch.v1.Round
+	(*RoundResult)(nil),                 // 31: minimatch.v1.RoundResult
+	(*Selection)(nil),                   // 32: minimatch.v1.Selection
+	(*Pick)(nil),                        // 33: minimatch.v1.Pick
 }
 var file_minimatch_v1_minimatch_proto_depIdxs = []int32{
-	5,  // 0: minimatch.v1.CreateTableRequest.game_center_identity:type_name -> minimatch.v1.GameCenterIdentity
-	21, // 1: minimatch.v1.CreateTableResponse.table:type_name -> minimatch.v1.Table
-	5,  // 2: minimatch.v1.JoinTableRequest.game_center_identity:type_name -> minimatch.v1.GameCenterIdentity
-	21, // 3: minimatch.v1.JoinTableResponse.table:type_name -> minimatch.v1.Table
-	21, // 4: minimatch.v1.LeaveTableResponse.table:type_name -> minimatch.v1.Table
-	26, // 5: minimatch.v1.LockPickRequest.pick:type_name -> minimatch.v1.Pick
-	21, // 6: minimatch.v1.LockPickResponse.table:type_name -> minimatch.v1.Table
-	21, // 7: minimatch.v1.StartRoundResponse.table:type_name -> minimatch.v1.Table
-	21, // 8: minimatch.v1.BeginRoundResponse.table:type_name -> minimatch.v1.Table
-	21, // 9: minimatch.v1.RevealRoundResponse.table:type_name -> minimatch.v1.Table
-	21, // 10: minimatch.v1.GetTableResponse.table:type_name -> minimatch.v1.Table
-	22, // 11: minimatch.v1.Table.players:type_name -> minimatch.v1.Player
-	0,  // 12: minimatch.v1.Table.state:type_name -> minimatch.v1.TableState
-	23, // 13: minimatch.v1.Table.current_round:type_name -> minimatch.v1.Round
-	24, // 14: minimatch.v1.Table.last_result:type_name -> minimatch.v1.RoundResult
-	1,  // 15: minimatch.v1.Round.phase:type_name -> minimatch.v1.RoundPhase
-	25, // 16: minimatch.v1.RoundResult.selections:type_name -> minimatch.v1.Selection
-	26, // 17: minimatch.v1.Selection.pick:type_name -> minimatch.v1.Pick
-	2,  // 18: minimatch.v1.MiniMatchService.CreateTable:input_type -> minimatch.v1.CreateTableRequest
-	4,  // 19: minimatch.v1.MiniMatchService.JoinTable:input_type -> minimatch.v1.JoinTableRequest
-	7,  // 20: minimatch.v1.MiniMatchService.LeaveTable:input_type -> minimatch.v1.LeaveTableRequest
-	9,  // 21: minimatch.v1.MiniMatchService.LockPick:input_type -> minimatch.v1.LockPickRequest
-	11, // 22: minimatch.v1.MiniMatchService.StartRound:input_type -> minimatch.v1.StartRoundRequest
-	13, // 23: minimatch.v1.MiniMatchService.BeginRound:input_type -> minimatch.v1.BeginRoundRequest
-	15, // 24: minimatch.v1.MiniMatchService.RevealRound:input_type -> minimatch.v1.RevealRoundRequest
-	17, // 25: minimatch.v1.MiniMatchService.GetTable:input_type -> minimatch.v1.GetTableRequest
-	19, // 26: minimatch.v1.MiniMatchService.DeleteProfile:input_type -> minimatch.v1.DeleteProfileRequest
-	3,  // 27: minimatch.v1.MiniMatchService.CreateTable:output_type -> minimatch.v1.CreateTableResponse
-	6,  // 28: minimatch.v1.MiniMatchService.JoinTable:output_type -> minimatch.v1.JoinTableResponse
-	8,  // 29: minimatch.v1.MiniMatchService.LeaveTable:output_type -> minimatch.v1.LeaveTableResponse
-	10, // 30: minimatch.v1.MiniMatchService.LockPick:output_type -> minimatch.v1.LockPickResponse
-	12, // 31: minimatch.v1.MiniMatchService.StartRound:output_type -> minimatch.v1.StartRoundResponse
-	14, // 32: minimatch.v1.MiniMatchService.BeginRound:output_type -> minimatch.v1.BeginRoundResponse
-	16, // 33: minimatch.v1.MiniMatchService.RevealRound:output_type -> minimatch.v1.RevealRoundResponse
-	18, // 34: minimatch.v1.MiniMatchService.GetTable:output_type -> minimatch.v1.GetTableResponse
-	20, // 35: minimatch.v1.MiniMatchService.DeleteProfile:output_type -> minimatch.v1.DeleteProfileResponse
-	27, // [27:36] is the sub-list for method output_type
-	18, // [18:27] is the sub-list for method input_type
-	18, // [18:18] is the sub-list for extension type_name
-	18, // [18:18] is the sub-list for extension extendee
-	0,  // [0:18] is the sub-list for field type_name
+	6,  // 0: minimatch.v1.CreateTableRequest.game_center_identity:type_name -> minimatch.v1.GameCenterIdentity
+	28, // 1: minimatch.v1.CreateTableResponse.table:type_name -> minimatch.v1.Table
+	6,  // 2: minimatch.v1.JoinTableRequest.game_center_identity:type_name -> minimatch.v1.GameCenterIdentity
+	28, // 3: minimatch.v1.JoinTableResponse.table:type_name -> minimatch.v1.Table
+	28, // 4: minimatch.v1.LeaveTableResponse.table:type_name -> minimatch.v1.Table
+	33, // 5: minimatch.v1.LockPickRequest.pick:type_name -> minimatch.v1.Pick
+	28, // 6: minimatch.v1.LockPickResponse.table:type_name -> minimatch.v1.Table
+	28, // 7: minimatch.v1.StartRoundResponse.table:type_name -> minimatch.v1.Table
+	28, // 8: minimatch.v1.BeginRoundResponse.table:type_name -> minimatch.v1.Table
+	28, // 9: minimatch.v1.RevealRoundResponse.table:type_name -> minimatch.v1.Table
+	28, // 10: minimatch.v1.GetTableResponse.table:type_name -> minimatch.v1.Table
+	6,  // 11: minimatch.v1.GetDailyGlobalTableRequest.game_center_identity:type_name -> minimatch.v1.GameCenterIdentity
+	33, // 12: minimatch.v1.LockDailyGlobalPickRequest.pick:type_name -> minimatch.v1.Pick
+	6,  // 13: minimatch.v1.LockDailyGlobalPickRequest.game_center_identity:type_name -> minimatch.v1.GameCenterIdentity
+	24, // 14: minimatch.v1.GetDailyGlobalTableResponse.current_round:type_name -> minimatch.v1.DailyGlobalRound
+	25, // 15: minimatch.v1.GetDailyGlobalTableResponse.previous_result:type_name -> minimatch.v1.DailyGlobalResult
+	24, // 16: minimatch.v1.LockDailyGlobalPickResponse.current_round:type_name -> minimatch.v1.DailyGlobalRound
+	25, // 17: minimatch.v1.LockDailyGlobalPickResponse.previous_result:type_name -> minimatch.v1.DailyGlobalResult
+	33, // 18: minimatch.v1.DailyGlobalRound.local_pick:type_name -> minimatch.v1.Pick
+	0,  // 19: minimatch.v1.DailyGlobalResult.status:type_name -> minimatch.v1.DailyGlobalResultStatus
+	33, // 20: minimatch.v1.DailyGlobalResult.winning_pick:type_name -> minimatch.v1.Pick
+	33, // 21: minimatch.v1.DailyGlobalResult.local_pick:type_name -> minimatch.v1.Pick
+	29, // 22: minimatch.v1.Table.players:type_name -> minimatch.v1.Player
+	1,  // 23: minimatch.v1.Table.state:type_name -> minimatch.v1.TableState
+	30, // 24: minimatch.v1.Table.current_round:type_name -> minimatch.v1.Round
+	31, // 25: minimatch.v1.Table.last_result:type_name -> minimatch.v1.RoundResult
+	2,  // 26: minimatch.v1.Round.phase:type_name -> minimatch.v1.RoundPhase
+	32, // 27: minimatch.v1.RoundResult.selections:type_name -> minimatch.v1.Selection
+	33, // 28: minimatch.v1.Selection.pick:type_name -> minimatch.v1.Pick
+	3,  // 29: minimatch.v1.MiniMatchService.CreateTable:input_type -> minimatch.v1.CreateTableRequest
+	5,  // 30: minimatch.v1.MiniMatchService.JoinTable:input_type -> minimatch.v1.JoinTableRequest
+	8,  // 31: minimatch.v1.MiniMatchService.LeaveTable:input_type -> minimatch.v1.LeaveTableRequest
+	10, // 32: minimatch.v1.MiniMatchService.LockPick:input_type -> minimatch.v1.LockPickRequest
+	12, // 33: minimatch.v1.MiniMatchService.StartRound:input_type -> minimatch.v1.StartRoundRequest
+	14, // 34: minimatch.v1.MiniMatchService.BeginRound:input_type -> minimatch.v1.BeginRoundRequest
+	16, // 35: minimatch.v1.MiniMatchService.RevealRound:input_type -> minimatch.v1.RevealRoundRequest
+	18, // 36: minimatch.v1.MiniMatchService.GetTable:input_type -> minimatch.v1.GetTableRequest
+	20, // 37: minimatch.v1.MiniMatchService.GetDailyGlobalTable:input_type -> minimatch.v1.GetDailyGlobalTableRequest
+	21, // 38: minimatch.v1.MiniMatchService.LockDailyGlobalPick:input_type -> minimatch.v1.LockDailyGlobalPickRequest
+	26, // 39: minimatch.v1.MiniMatchService.DeleteProfile:input_type -> minimatch.v1.DeleteProfileRequest
+	4,  // 40: minimatch.v1.MiniMatchService.CreateTable:output_type -> minimatch.v1.CreateTableResponse
+	7,  // 41: minimatch.v1.MiniMatchService.JoinTable:output_type -> minimatch.v1.JoinTableResponse
+	9,  // 42: minimatch.v1.MiniMatchService.LeaveTable:output_type -> minimatch.v1.LeaveTableResponse
+	11, // 43: minimatch.v1.MiniMatchService.LockPick:output_type -> minimatch.v1.LockPickResponse
+	13, // 44: minimatch.v1.MiniMatchService.StartRound:output_type -> minimatch.v1.StartRoundResponse
+	15, // 45: minimatch.v1.MiniMatchService.BeginRound:output_type -> minimatch.v1.BeginRoundResponse
+	17, // 46: minimatch.v1.MiniMatchService.RevealRound:output_type -> minimatch.v1.RevealRoundResponse
+	19, // 47: minimatch.v1.MiniMatchService.GetTable:output_type -> minimatch.v1.GetTableResponse
+	22, // 48: minimatch.v1.MiniMatchService.GetDailyGlobalTable:output_type -> minimatch.v1.GetDailyGlobalTableResponse
+	23, // 49: minimatch.v1.MiniMatchService.LockDailyGlobalPick:output_type -> minimatch.v1.LockDailyGlobalPickResponse
+	27, // 50: minimatch.v1.MiniMatchService.DeleteProfile:output_type -> minimatch.v1.DeleteProfileResponse
+	40, // [40:51] is the sub-list for method output_type
+	29, // [29:40] is the sub-list for method input_type
+	29, // [29:29] is the sub-list for extension type_name
+	29, // [29:29] is the sub-list for extension extendee
+	0,  // [0:29] is the sub-list for field type_name
 }
 
 func init() { file_minimatch_v1_minimatch_proto_init() }
@@ -1855,16 +2357,16 @@ func file_minimatch_v1_minimatch_proto_init() {
 	if File_minimatch_v1_minimatch_proto != nil {
 		return
 	}
-	file_minimatch_v1_minimatch_proto_msgTypes[19].OneofWrappers = []any{}
-	file_minimatch_v1_minimatch_proto_msgTypes[22].OneofWrappers = []any{}
-	file_minimatch_v1_minimatch_proto_msgTypes[23].OneofWrappers = []any{}
+	file_minimatch_v1_minimatch_proto_msgTypes[25].OneofWrappers = []any{}
+	file_minimatch_v1_minimatch_proto_msgTypes[28].OneofWrappers = []any{}
+	file_minimatch_v1_minimatch_proto_msgTypes[29].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_minimatch_v1_minimatch_proto_rawDesc), len(file_minimatch_v1_minimatch_proto_rawDesc)),
-			NumEnums:      2,
-			NumMessages:   25,
+			NumEnums:      3,
+			NumMessages:   31,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

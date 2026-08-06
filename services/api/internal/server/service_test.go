@@ -27,6 +27,30 @@ func (v testVerifier) VerifyIDToken(_ context.Context, token string) (string, er
 	return uid, nil
 }
 
+type testActorVerifier map[string]authn.Actor
+
+func (v testActorVerifier) VerifyIDToken(_ context.Context, token string) (string, error) {
+	actor, err := v.VerifyActor(context.Background(), token)
+	return actor.UID, err
+}
+
+func (v testActorVerifier) VerifyActor(_ context.Context, token string) (authn.Actor, error) {
+	actor, ok := v[token]
+	if !ok {
+		return authn.Actor{}, errors.New("invalid token")
+	}
+	return actor, nil
+}
+
+type testAppCheckVerifier struct{}
+
+func (testAppCheckVerifier) VerifyToken(token string) error {
+	if token != "app-check-token" {
+		return errors.New("invalid App Check token")
+	}
+	return nil
+}
+
 type revealTrackingRepository struct {
 	game.Repository
 	reveals int
@@ -512,8 +536,191 @@ func TestPollingExpiresStaleMemberAndAllowsRejoin(t *testing.T) {
 	}
 }
 
+func TestDailyGlobalRPCsRequireEligibleIdentityAndReturnActorState(t *testing.T) {
+	now := time.Date(2026, time.August, 6, 12, 0, 0, 0, time.UTC)
+	service := New(game.NewMemoryRepository())
+	service.now = func() time.Time { return now }
+	service.verifyGameCenterIdentity = func(
+		_ context.Context,
+		identity *minimatchv1.GameCenterIdentity,
+	) (string, error) {
+		if identity == nil || identity.GetTeamPlayerId() == "" {
+			return "", nil
+		}
+		return identity.GetTeamPlayerId(), nil
+	}
+	path, handler := minimatchv1connect.NewMiniMatchServiceHandler(
+		service,
+		connect.WithInterceptors(authn.NewDailyProtectedInterceptor(
+			testActorVerifier{
+				"apple-token": {UID: "maya", AppleLinked: true},
+				"anon-token":  {UID: "guest"},
+			},
+			testAppCheckVerifier{},
+		)),
+	)
+	mux := http.NewServeMux()
+	mux.Handle(path, handler)
+	server := httptest.NewServer(mux)
+	t.Cleanup(server.Close)
+	client := minimatchv1connect.NewMiniMatchServiceClient(server.Client(), server.URL)
+	identity := &minimatchv1.GameCenterIdentity{TeamPlayerId: "game-center-maya"}
+	if _, err := client.GetDailyGlobalTable(context.Background(), authenticated(
+		&minimatchv1.GetDailyGlobalTableRequest{GameCenterIdentity: identity},
+		"apple-token",
+	)); connect.CodeOf(err) != connect.CodeUnauthenticated {
+		t.Fatalf("missing App Check code = %v, want unauthenticated", connect.CodeOf(err))
+	}
+
+	loaded, err := client.GetDailyGlobalTable(context.Background(), dailyAuthenticated(
+		&minimatchv1.GetDailyGlobalTableRequest{GameCenterIdentity: identity},
+		"apple-token",
+	))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if loaded.Msg.GetServerTimeUnixSeconds() != uint64(now.Unix()) ||
+		loaded.Msg.GetCurrentRound().GetRoundDate() != "2026-08-06" ||
+		loaded.Msg.GetCurrentRound().GetClosesAtUnixSeconds() != uint64(time.Date(2026, time.August, 7, 0, 0, 0, 0, time.UTC).Unix()) ||
+		loaded.Msg.GetCurrentRound().GetLocalPick() != nil ||
+		loaded.Msg.GetPreviousResult().GetStatus() != minimatchv1.DailyGlobalResultStatus_DAILY_GLOBAL_RESULT_STATUS_EMPTY {
+		t.Fatalf("initial daily response = %#v", loaded.Msg)
+	}
+
+	locked, err := client.LockDailyGlobalPick(context.Background(), dailyAuthenticated(
+		&minimatchv1.LockDailyGlobalPickRequest{
+			RoundDate:          "2026-08-06",
+			Pick:               &minimatchv1.Pick{Value: 7},
+			GameCenterIdentity: identity,
+		},
+		"apple-token",
+	))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if locked.Msg.GetCurrentRound().GetLocalPick().GetValue() != 7 ||
+		locked.Msg.GetLocalPlayerDailyWins() != 0 {
+		t.Fatalf("locked daily response = %#v", locked.Msg)
+	}
+	if _, err := client.LockDailyGlobalPick(context.Background(), dailyAuthenticated(
+		&minimatchv1.LockDailyGlobalPickRequest{
+			RoundDate:          "2026-08-06",
+			Pick:               &minimatchv1.Pick{Value: 7},
+			GameCenterIdentity: identity,
+		},
+		"apple-token",
+	)); err != nil {
+		t.Fatalf("identical retry: %v", err)
+	}
+
+	if _, err := client.LockDailyGlobalPick(context.Background(), dailyAuthenticated(
+		&minimatchv1.LockDailyGlobalPickRequest{
+			RoundDate:          "2026-08-06",
+			Pick:               &minimatchv1.Pick{Value: 8},
+			GameCenterIdentity: identity,
+		},
+		"apple-token",
+	)); connect.CodeOf(err) != connect.CodeFailedPrecondition {
+		t.Fatalf("changed retry code = %v, want failed precondition", connect.CodeOf(err))
+	}
+	for name, request := range map[string]*minimatchv1.LockDailyGlobalPickRequest{
+		"nil": {
+			RoundDate:          "2026-08-06",
+			GameCenterIdentity: identity,
+		},
+		"zero": {
+			RoundDate:          "2026-08-06",
+			Pick:               &minimatchv1.Pick{},
+			GameCenterIdentity: &minimatchv1.GameCenterIdentity{TeamPlayerId: "another-player"},
+		},
+	} {
+		if _, err := client.LockDailyGlobalPick(context.Background(), dailyAuthenticated(
+			request,
+			"apple-token",
+		)); connect.CodeOf(err) != connect.CodeInvalidArgument {
+			t.Errorf("%s pick code = %v, want invalid argument", name, connect.CodeOf(err))
+		}
+	}
+	if _, err := client.LockDailyGlobalPick(context.Background(), dailyAuthenticated(
+		&minimatchv1.LockDailyGlobalPickRequest{
+			RoundDate:          "2026-08-05",
+			Pick:               &minimatchv1.Pick{Value: 7},
+			GameCenterIdentity: &minimatchv1.GameCenterIdentity{TeamPlayerId: "another-player"},
+		},
+		"apple-token",
+	)); connect.CodeOf(err) != connect.CodeFailedPrecondition {
+		t.Fatalf("stale round code = %v, want failed precondition", connect.CodeOf(err))
+	}
+	if _, err := client.GetDailyGlobalTable(context.Background(), dailyAuthenticated(
+		&minimatchv1.GetDailyGlobalTableRequest{GameCenterIdentity: identity},
+		"anon-token",
+	)); connect.CodeOf(err) != connect.CodeUnauthenticated {
+		t.Fatalf("unlinked account code = %v, want unauthenticated", connect.CodeOf(err))
+	}
+	if _, err := client.GetDailyGlobalTable(context.Background(), dailyAuthenticated(
+		&minimatchv1.GetDailyGlobalTableRequest{},
+		"apple-token",
+	)); connect.CodeOf(err) != connect.CodeUnauthenticated {
+		t.Fatalf("missing Game Center identity code = %v, want unauthenticated", connect.CodeOf(err))
+	}
+}
+
+func TestDailyResultStatusMappingAndPrivacy(t *testing.T) {
+	statuses := []struct {
+		domain game.DailyRoundStatus
+		api    minimatchv1.DailyGlobalResultStatus
+	}{
+		{game.DailyRoundCalculating, minimatchv1.DailyGlobalResultStatus_DAILY_GLOBAL_RESULT_STATUS_CALCULATING},
+		{game.DailyRoundEmpty, minimatchv1.DailyGlobalResultStatus_DAILY_GLOBAL_RESULT_STATUS_EMPTY},
+		{game.DailyRoundInsufficient, minimatchv1.DailyGlobalResultStatus_DAILY_GLOBAL_RESULT_STATUS_INSUFFICIENT_PLAYERS},
+		{game.DailyRoundNoUnique, minimatchv1.DailyGlobalResultStatus_DAILY_GLOBAL_RESULT_STATUS_NO_UNIQUE_PICK},
+		{game.DailyRoundWinner, minimatchv1.DailyGlobalResultStatus_DAILY_GLOBAL_RESULT_STATUS_WINNER},
+	}
+	for _, status := range statuses {
+		if got := dailyStatusToProto(status.domain); got != status.api {
+			t.Errorf("status %q = %v, want %v", status.domain, got, status.api)
+		}
+		_, result := dailyRoundsToProto(&game.DailyGlobalTable{
+			Today: game.DailyRoundView{
+				Date:     "2026-08-06",
+				ClosesAt: time.Date(2026, time.August, 7, 0, 0, 0, 0, time.UTC),
+			},
+			Yesterday: game.DailyRoundView{
+				Date:        "2026-08-05",
+				Status:      status.domain,
+				WinningPick: 9,
+			},
+		})
+		if (result.GetWinningPick() != nil) != (status.domain == game.DailyRoundWinner) {
+			t.Errorf("status %q winner presence = %v", status.domain, result.GetWinningPick() != nil)
+		}
+	}
+
+	_, previous := dailyRoundsToProto(&game.DailyGlobalTable{
+		Today: game.DailyRoundView{
+			Date:     "2026-08-06",
+			ClosesAt: time.Date(2026, time.August, 7, 0, 0, 0, 0, time.UTC),
+		},
+		Yesterday: game.DailyRoundView{
+			Date:        "2026-08-05",
+			Status:      game.DailyRoundCalculating,
+			WinningPick: 9,
+			Pick:        12,
+		},
+	})
+	if previous.GetWinningPick() != nil || previous.GetLocalPick().GetValue() != 12 {
+		t.Fatalf("calculating result leaked winner or omitted actor pick: %#v", previous)
+	}
+}
+
 func authenticated[T any](message *T, token string) *connect.Request[T] {
 	request := connect.NewRequest(message)
 	request.Header().Set("Authorization", "Bearer "+token)
+	return request
+}
+
+func dailyAuthenticated[T any](message *T, token string) *connect.Request[T] {
+	request := authenticated(message, token)
+	request.Header().Set("X-Firebase-AppCheck", "app-check-token")
 	return request
 }

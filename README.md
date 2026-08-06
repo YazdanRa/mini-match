@@ -21,6 +21,8 @@ For approachable discussions, see [Mathematics Stack Exchange](https://math.stac
 
 - Private simultaneous picks; only each player's lock status is shared before the reveal
 - Host-controlled rounds with a full result reveal after every player locks
+- A hostless Daily Table with one private pick per UTC day and an aggregate result the next day
+- A separate all-time Game Center leaderboard for Daily Table wins
 - Invite-only Game Center multiplayer and shareable party codes
 - Live lobby status, reconnectable sessions, and automatic host promotion
 - Game Center profiles, profile photos, and achievements

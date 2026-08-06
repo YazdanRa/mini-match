@@ -8,6 +8,7 @@ enum GameClientFactory {
             || arguments.contains("--preview-signed-out")
             || arguments.contains("--preview-lobby")
             || arguments.contains("--preview-result")
+            || arguments.contains("--preview-daily")
         {
             return PreviewGameClient()
         }

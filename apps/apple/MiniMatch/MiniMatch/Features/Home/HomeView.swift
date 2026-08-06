@@ -4,6 +4,7 @@ import SwiftUI
 struct HomeView: View {
     let gameCenter: GameCenterModel
     let appleSignIn: AppleSignInModel
+    let openDailyTable: () -> Void
     @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
@@ -27,6 +28,8 @@ struct HomeView: View {
                     .foregroundStyle(MiniMatchColors.ink)
                     .multilineTextAlignment(.center)
                     .background(MiniMatchColors.background)
+
+                HomeDailyTableCard(openDailyTable: openDailyTable)
 
                 HomeRoundPreview()
                     .padding(.top, 12)
@@ -55,6 +58,50 @@ struct HomeView: View {
             .frame(maxWidth: .infinity)
         }
         .background(MiniMatchColors.background)
+    }
+}
+
+private struct HomeDailyTableCard: View {
+    let openDailyTable: () -> Void
+
+    var body: some View {
+        Button(action: openDailyTable) {
+            VStack(alignment: .leading, spacing: 12) {
+                HStack(spacing: 16) {
+                    Image(systemName: "globe.americas.fill")
+                        .font(.title2.bold())
+                        .foregroundStyle(.white)
+                        .frame(width: 48, height: 48)
+                        .background(MiniMatchColors.coralBrand, in: .rect(cornerRadius: 15))
+
+                    Text("Daily Table")
+                        .font(.headline)
+                        .foregroundStyle(MiniMatchColors.ink)
+
+                    Spacer(minLength: 0)
+
+                    Image(systemName: "chevron.forward")
+                        .font(.headline)
+                        .foregroundStyle(MiniMatchColors.blueText)
+                }
+
+                Text("One number. One global winner every day.")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(MiniMatchColors.ink)
+                    .multilineTextAlignment(.leading)
+            }
+            .padding(18)
+            .frame(maxWidth: .infinity, minHeight: 84)
+            .background(MiniMatchColors.surface, in: .rect(cornerRadius: 22))
+            .overlay {
+                RoundedRectangle(cornerRadius: 22)
+                    .stroke(MiniMatchColors.coralBrand.opacity(0.25), lineWidth: 2)
+            }
+            .shadow(color: .black.opacity(0.06), radius: 10, y: 5)
+        }
+        .buttonStyle(.plain)
+        .accessibilityHint("Opens today’s global number game")
+        .accessibilityIdentifier("daily-table-card")
     }
 }
 
@@ -313,13 +360,15 @@ private struct HomeNumberToken: View {
 #Preview("Signed in") {
     HomeView(
         gameCenter: GameCenterModel.preview(),
-        appleSignIn: AppleSignInModel()
+        appleSignIn: AppleSignInModel(),
+        openDailyTable: {}
     )
 }
 
 #Preview("Signed out") {
     HomeView(
         gameCenter: GameCenterModel.preview(),
-        appleSignIn: AppleSignInModel(previewIsSignedIn: false)
+        appleSignIn: AppleSignInModel(previewIsSignedIn: false),
+        openDailyTable: {}
     )
 }

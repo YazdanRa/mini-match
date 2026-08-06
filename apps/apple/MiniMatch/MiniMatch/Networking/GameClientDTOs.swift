@@ -50,6 +50,16 @@ struct GetTableRequest: Encodable {
     let tableId: String
 }
 
+struct GetDailyGlobalTableRequest: Encodable {
+    let gameCenterIdentity: GameCenterIdentityDTO
+}
+
+struct LockDailyGlobalPickRequest: Encodable {
+    let roundDate: String
+    let pick: PickDTO
+    let gameCenterIdentity: GameCenterIdentityDTO
+}
+
 struct EmptyRequest: Encodable {}
 
 struct EmptyResponse: Decodable {}
@@ -61,6 +71,89 @@ struct SessionResponse: Decodable {
 
 struct TableResponse: Decodable {
     let table: TableDTO
+}
+
+struct DailyGlobalTableResponseDTO: Decodable {
+    let serverTimeUnixSeconds: String
+    let currentRound: DailyGlobalRoundDTO
+    let previousResult: DailyGlobalResultDTO?
+    let localPlayerDailyWins: String?
+
+    func model() throws -> DailyGlobalTable {
+        guard let serverTime = UInt64(serverTimeUnixSeconds), serverTime > 0,
+              let wins = UInt64(localPlayerDailyWins ?? "0")
+        else {
+            throw GameClientError.invalidResponse
+        }
+        return DailyGlobalTable(
+            serverTime: Date(timeIntervalSince1970: TimeInterval(serverTime)),
+            currentRound: try currentRound.model(),
+            previousResult: try previousResult?.model(),
+            localPlayerDailyWins: wins
+        )
+    }
+}
+
+struct DailyGlobalRoundDTO: Decodable {
+    let roundDate: String
+    let closesAtUnixSeconds: String
+    let localPick: PickDTO?
+
+    func model() throws -> DailyGlobalRound {
+        guard !roundDate.isEmpty,
+              let closesAt = UInt64(closesAtUnixSeconds),
+              closesAt > 0
+        else {
+            throw GameClientError.invalidResponse
+        }
+        return DailyGlobalRound(
+            roundDate: roundDate,
+            closesAt: Date(timeIntervalSince1970: TimeInterval(closesAt)),
+            localPick: try localPick.positiveValue()
+        )
+    }
+}
+
+struct DailyGlobalResultDTO: Decodable {
+    let roundDate: String
+    let status: String
+    let participantCount: String?
+    let winningPick: PickDTO?
+    let localPick: PickDTO?
+
+    func model() throws -> DailyGlobalResult {
+        let resultStatus: DailyGlobalResult.Status
+        switch status {
+        case "DAILY_GLOBAL_RESULT_STATUS_CALCULATING":
+            resultStatus = .calculating
+        case "DAILY_GLOBAL_RESULT_STATUS_EMPTY":
+            resultStatus = .empty
+        case "DAILY_GLOBAL_RESULT_STATUS_INSUFFICIENT_PLAYERS":
+            resultStatus = .insufficientPlayers
+        case "DAILY_GLOBAL_RESULT_STATUS_NO_UNIQUE_PICK":
+            resultStatus = .noUniquePick
+        case "DAILY_GLOBAL_RESULT_STATUS_WINNER":
+            resultStatus = .winner
+        default:
+            throw GameClientError.invalidResponse
+        }
+        guard !roundDate.isEmpty,
+              let participantCount = UInt64(participantCount ?? "0")
+        else {
+            throw GameClientError.invalidResponse
+        }
+        let winningPick = try winningPick.positiveValue()
+        guard (resultStatus == .winner) == (winningPick != nil) else {
+            throw GameClientError.invalidResponse
+        }
+        return DailyGlobalResult(
+            roundDate: roundDate,
+            status: resultStatus,
+            participantCount: participantCount,
+            winningPick: winningPick,
+            localPick: try localPick.positiveValue()
+        )
+    }
 }
 
 struct ErrorResponse: Decodable {
@@ -201,5 +294,15 @@ struct PickDTO: Codable {
 
     init(value: String) {
         self.value = value
+    }
+}
+
+private extension Optional where Wrapped == PickDTO {
+    func positiveValue() throws -> UInt64? {
+        guard let pick = self else { return nil }
+        guard let value = pick.value.flatMap(UInt64.init), value > 0 else {
+            throw GameClientError.invalidResponse
+        }
+        return value
     }
 }

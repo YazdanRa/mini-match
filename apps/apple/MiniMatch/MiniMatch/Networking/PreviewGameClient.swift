@@ -4,14 +4,17 @@ actor PreviewGameClient: GameClient {
     private var table: GameTable?
     private var currentPlayerID: String
     private var localPick: UInt64?
+    private var dailyTable: DailyGlobalTable
 
     init(
         table: GameTable? = nil,
-        localPick: UInt64? = nil
+        localPick: UInt64? = nil,
+        dailyTable: DailyGlobalTable = PreviewFixtures.dailyGlobalTable
     ) {
         self.table = table
         currentPlayerID = PreviewFixtures.currentPlayerID
         self.localPick = localPick
+        self.dailyTable = dailyTable
     }
 
     func createTable(
@@ -179,6 +182,40 @@ actor PreviewGameClient: GameClient {
         return table
     }
 
+    func getDailyGlobalTable(
+        gameCenterIdentity _: GameCenterIdentityDTO
+    ) async throws -> DailyGlobalTable {
+        dailyTable
+    }
+
+    func lockDailyGlobalPick(
+        roundDate: String,
+        pick: UInt64,
+        gameCenterIdentity _: GameCenterIdentityDTO
+    ) async throws -> DailyGlobalTable {
+        guard roundDate == dailyTable.currentRound.roundDate else {
+            throw GameClientError.failedPrecondition
+        }
+        guard pick > 0 else {
+            throw GameClientError.server(String(localized: "Enter a positive whole number."))
+        }
+        if let lockedPick = dailyTable.currentRound.localPick {
+            guard lockedPick == pick else { throw GameClientError.alreadyExists }
+            return dailyTable
+        }
+        dailyTable = DailyGlobalTable(
+            serverTime: dailyTable.serverTime,
+            currentRound: DailyGlobalRound(
+                roundDate: dailyTable.currentRound.roundDate,
+                closesAt: dailyTable.currentRound.closesAt,
+                localPick: pick
+            ),
+            previousResult: dailyTable.previousResult,
+            localPlayerDailyWins: dailyTable.localPlayerDailyWins
+        )
+        return dailyTable
+    }
+
     func deleteProfile() async throws {}
 
     private func withPlayer(_ player: GamePlayer, addedTo table: GameTable) -> GameTable {
@@ -218,6 +255,23 @@ actor PreviewGameClient: GameClient {
 
 enum PreviewFixtures {
     static let currentPlayerID = "local-player"
+
+    static let dailyGlobalTable = DailyGlobalTable(
+        serverTime: Date(timeIntervalSince1970: 1_786_017_600),
+        currentRound: DailyGlobalRound(
+            roundDate: "2026-08-06",
+            closesAt: Date(timeIntervalSince1970: 1_786_060_800),
+            localPick: 7
+        ),
+        previousResult: DailyGlobalResult(
+            roundDate: "2026-08-05",
+            status: .winner,
+            participantCount: 12_345,
+            winningPick: 3,
+            localPick: 3
+        ),
+        localPlayerDailyWins: 12
+    )
 
     static var lobbyTable: GameTable {
         table(

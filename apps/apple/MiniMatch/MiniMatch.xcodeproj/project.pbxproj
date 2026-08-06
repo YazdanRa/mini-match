@@ -50,6 +50,10 @@
 		B20000000000000000000001 /* AccessibilityUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B20000000000000000000003 /* AccessibilityUITests.swift */; };
 		B8DB8FBADF4702F86057C478 /* MiniMatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BAA5639A2A8BF42643E6AF3 /* MiniMatchApp.swift */; };
 		D0E416549451497B8A9A1272 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = F380CD1A9FEF4AA9A86B8B45 /* FirebaseAuth */; };
+		D30000000000000000000001 /* DailyGlobalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D30000000000000000000002 /* DailyGlobalView.swift */; };
+		D30000000000000000000003 /* DailyGlobalModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D30000000000000000000004 /* DailyGlobalModel.swift */; };
+		D30000000000000000000005 /* DailyGlobalModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D30000000000000000000006 /* DailyGlobalModelTests.swift */; };
+		D30000000000000000000007 /* FirebaseAppCheck in Frameworks */ = {isa = PBXBuildFile; productRef = D30000000000000000000008 /* FirebaseAppCheck */; };
 		E75225F9301C7DE5006B1B4C /* MiniMatch.gamekit in Resources */ = {isa = PBXBuildFile; fileRef = E75225F8301C7DE5006B1B4C /* MiniMatch.gamekit */; };
 		EE5CC43F3F21467F9D07A4E8 /* GameModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8A4EB400AA14E00A31C19EC /* GameModel.swift */; };
 /* End PBXBuildFile section */
@@ -115,6 +119,9 @@
 		B20000000000000000000004 /* MiniMatchUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MiniMatchUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		C395C0D8211F4A7BBA1F0065 /* GameModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameModels.swift; sourceTree = "<group>"; };
 		C8A4EB400AA14E00A31C19EC /* GameModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameModel.swift; sourceTree = "<group>"; };
+		D30000000000000000000002 /* DailyGlobalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyGlobalView.swift; sourceTree = "<group>"; };
+		D30000000000000000000004 /* DailyGlobalModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyGlobalModel.swift; sourceTree = "<group>"; };
+		D30000000000000000000006 /* DailyGlobalModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyGlobalModelTests.swift; sourceTree = "<group>"; };
 		E5988938016346E98E3996BC /* AppleSignInModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleSignInModel.swift; sourceTree = "<group>"; };
 		E75225F8301C7DE5006B1B4C /* MiniMatch.gamekit */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = MiniMatch.gamekit; path = MiniMatch/Resources/MiniMatch.gamekit; sourceTree = SOURCE_ROOT; };
 		EDED65F93ED79B532488F42F /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -126,6 +133,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D30000000000000000000007 /* FirebaseAppCheck in Frameworks */,
 				D0E416549451497B8A9A1272 /* FirebaseAuth in Frameworks */,
 				4C4F5454494553504D000003 /* Lottie in Frameworks */,
 			);
@@ -154,6 +162,7 @@
 			isa = PBXGroup;
 			children = (
 				000000000000000000003003 /* Account */,
+				D30000000000000000000009 /* Daily */,
 				000000000000000000003004 /* Home */,
 				000000000000000000003005 /* Lobby */,
 				000000000000000000003006 /* Results */,
@@ -202,6 +211,14 @@
 			path = Results;
 			sourceTree = "<group>";
 		};
+		D30000000000000000000009 /* Daily */ = {
+			isa = PBXGroup;
+			children = (
+				D30000000000000000000002 /* DailyGlobalView.swift */,
+			);
+			path = Daily;
+			sourceTree = "<group>";
+		};
 		000000000000000000003007 /* Integrations */ = {
 			isa = PBXGroup;
 			children = (
@@ -231,6 +248,7 @@
 		00000000000000000000300A /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				D30000000000000000000004 /* DailyGlobalModel.swift */,
 				C8A4EB400AA14E00A31C19EC /* GameModel.swift */,
 				C395C0D8211F4A7BBA1F0065 /* GameModels.swift */,
 			);
@@ -287,6 +305,7 @@
 		000000000000000000003010 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				D30000000000000000000006 /* DailyGlobalModelTests.swift */,
 				000000000000000000001017 /* GameModelTests.swift */,
 				000000000000000000001018 /* GameTableTests.swift */,
 			);
@@ -411,6 +430,7 @@
 			);
 			name = MiniMatch;
 			packageProductDependencies = (
+				D30000000000000000000008 /* FirebaseAppCheck */,
 				F380CD1A9FEF4AA9A86B8B45 /* FirebaseAuth */,
 				4C4F5454494553504D000002 /* Lottie */,
 			);
@@ -535,6 +555,8 @@
 			files = (
 				518A769C5EC08C1E05344660 /* ContentView.swift in Sources */,
 				B8DB8FBADF4702F86057C478 /* MiniMatchApp.swift in Sources */,
+				D30000000000000000000001 /* DailyGlobalView.swift in Sources */,
+				D30000000000000000000003 /* DailyGlobalModel.swift in Sources */,
 				000000000000000000002001 /* DeletionAuthorizationView.swift in Sources */,
 				000000000000000000002002 /* ProfileAvatar.swift in Sources */,
 				000000000000000000002003 /* ProfileMenu.swift in Sources */,
@@ -569,6 +591,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D30000000000000000000005 /* DailyGlobalModelTests.swift in Sources */,
 				000000000000000000002016 /* AppleSignInModelTests.swift in Sources */,
 				000000000000000000002017 /* GameModelTests.swift in Sources */,
 				000000000000000000002018 /* GameTableTests.swift in Sources */,
@@ -929,6 +952,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 57F73B5C92CB472895AD919A /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseAuth;
+		};
+		D30000000000000000000008 /* FirebaseAppCheck */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 57F73B5C92CB472895AD919A /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAppCheck;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

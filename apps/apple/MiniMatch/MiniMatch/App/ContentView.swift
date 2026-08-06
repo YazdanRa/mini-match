@@ -3,11 +3,14 @@ import SwiftUI
 
 struct ContentView: View {
     let model: GameModel
+    let dailyGlobal: DailyGlobalModel
     let gameCenter: GameCenterModel
     let appleSignIn: AppleSignInModel
+    let showDailyOnLaunch: Bool
     @Environment(\.scenePhase) private var scenePhase
     @State private var isConfirmingLeave = false
     @State private var isShowingSettings = false
+    @State private var isShowingDaily = false
     private let soundEffectPlayer = SoundEffectPlayer.shared
 
     var body: some View {
@@ -30,7 +33,11 @@ struct ContentView: View {
                     case .home:
                         HomeView(
                             gameCenter: gameCenter,
-                            appleSignIn: appleSignIn
+                            appleSignIn: appleSignIn,
+                            openDailyTable: {
+                                soundEffectPlayer.play(.mainButton)
+                                isShowingDaily = true
+                            }
                         )
                     case .lobby:
                         LobbyView(
@@ -91,6 +98,13 @@ struct ContentView: View {
                     canManageAccount: model.screen == .home
                 )
             }
+            .navigationDestination(isPresented: $isShowingDaily) {
+                DailyGlobalView(
+                    model: dailyGlobal,
+                    gameCenter: gameCenter,
+                    appleSignIn: appleSignIn
+                )
+            }
         }
         .tint(MiniMatchColors.blueText)
         .confirmationDialog(
@@ -144,9 +158,13 @@ struct ContentView: View {
             }
         }
         .onChange(of: gameCenter.authenticatedTeamPlayerID) { _, playerID in
+            dailyGlobal.resetForAuthenticationChange()
             if model.handleGameCenterPlayerChange(to: playerID) {
                 gameCenter.endMatch()
             }
+        }
+        .onChange(of: appleSignIn.isSignedIn) {
+            dailyGlobal.resetForAuthenticationChange()
         }
         .onChange(of: scenePhase) { _, phase in
             if phase == .active {
@@ -175,6 +193,9 @@ struct ContentView: View {
         .task {
             gameCenter.attach(to: model)
             await appleSignIn.refreshCredentialState()
+            if showDailyOnLaunch {
+                isShowingDaily = true
+            }
             for await _ in NotificationCenter.default.notifications(
                 named: ASAuthorizationAppleIDProvider.credentialRevokedNotification
             ) {
@@ -276,8 +297,21 @@ private struct LobbyLoadingView: View {
 #Preview {
     ContentView(
         model: GameModel.preview(),
+        dailyGlobal: DailyGlobalModel(
+            client: PreviewGameClient(),
+            identityProvider: {
+                GameCenterIdentityDTO(
+                    teamPlayerId: "preview-player",
+                    publicKeyUrl: "https://example.com/key",
+                    signature: Data(),
+                    salt: Data(),
+                    timestamp: "0"
+                )
+            }
+        ),
         gameCenter: GameCenterModel.preview(),
-        appleSignIn: AppleSignInModel()
+        appleSignIn: AppleSignInModel(),
+        showDailyOnLaunch: false
     )
 }
 

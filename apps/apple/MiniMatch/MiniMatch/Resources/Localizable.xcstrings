@@ -407,6 +407,28 @@
         }
       }
     },
+    "Calculating the result…" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Calculando el resultado…"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Calcul du résultat…"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Calcolo del risultato…"
+          }
+        }
+      }
+    },
     "Cancel" : {
       "localizations" : {
         "es" : {
@@ -579,6 +601,94 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Impossibile creare un tavolo. Riprova."
+          }
+        }
+      }
+    },
+    "Daily Table" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mesa diaria"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Table quotidienne"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tavolo giornaliero"
+          }
+        }
+      }
+    },
+    "Daily Table is unavailable" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La mesa diaria no está disponible"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La table quotidienne est indisponible"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il tavolo giornaliero non è disponibile"
+          }
+        }
+      }
+    },
+    "Daily Table requires an Apple-linked Mini Match account and Game Center." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La mesa diaria requiere una cuenta de Mini Match vinculada con Apple y Game Center."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La table quotidienne nécessite un compte Mini Match lié à Apple et Game Center."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il tavolo giornaliero richiede un account Mini Match collegato ad Apple e Game Center."
+          }
+        }
+      }
+    },
+    "Daily Wins" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Victorias diarias"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Victoires quotidiennes"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vittorie giornaliere"
           }
         }
       }
@@ -1049,6 +1159,28 @@
         }
       }
     },
+    "Global top 100" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "100 mejores del mundo"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Top 100 mondial"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Top 100 mondiale"
+          }
+        }
+      }
+    },
     "Host" : {
       "localizations" : {
         "es" : {
@@ -1205,6 +1337,28 @@
         }
       }
     },
+    "Leaderboard unavailable" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clasificación no disponible"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Classement indisponible"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Classifica non disponibile"
+          }
+        }
+      }
+    },
     "Leave" : {
       "localizations" : {
         "es" : {
@@ -1315,6 +1469,50 @@
         }
       }
     },
+    "Loading leaderboard…" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cargando clasificación…"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chargement du classement…"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Caricamento classifica…"
+          }
+        }
+      }
+    },
+    "Loading today’s table…" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cargando la mesa de hoy…"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chargement de la table du jour…"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Caricamento del tavolo di oggi…"
+          }
+        }
+      }
+    },
     "Lobby" : {
       "localizations" : {
         "en" : {
@@ -1343,6 +1541,72 @@
         }
       }
     },
+    "Local close: %@" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cierre local: %1$@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fermeture locale : %1$@"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chiusura locale: %1$@"
+          }
+        }
+      }
+    },
+    "Lock %@ for today?" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Confirmar %@ para hoy?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verrouiller %@ pour aujourd’hui ?"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Confermare %@ per oggi?"
+          }
+        }
+      }
+    },
+    "Lock my daily number" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Confirmar mi número diario"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verrouiller mon nombre du jour"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Conferma il mio numero giornaliero"
+          }
+        }
+      }
+    },
     "Lock my number" : {
       "localizations" : {
         "es" : {
@@ -1365,6 +1629,28 @@
         }
       }
     },
+    "Lock this number" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Confirmar este número"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verrouiller ce nombre"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Conferma questo numero"
+          }
+        }
+      }
+    },
     "Locked" : {
       "localizations" : {
         "es" : {
@@ -1383,6 +1669,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Confermato"
+          }
+        }
+      }
+    },
+    "Locked for today" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Confirmado para hoy"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verrouillé pour aujourd’hui"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Confermato per oggi"
+          }
+        }
+      }
+    },
+    "Locked for today. Your number is %llu. It stays private until the table closes." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Confirmado para hoy. Tu número es %llu. Permanecerá privado hasta que cierre la mesa."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verrouillé pour aujourd’hui. Votre nombre est %llu. Il reste privé jusqu’à la fermeture de la table."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Confermato per oggi. Il tuo numero è %llu. Rimane privato fino alla chiusura del tavolo."
           }
         }
       }
@@ -1563,6 +1893,72 @@
         }
       }
     },
+    "No number was unique." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ningún número fue único."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucun nombre n’était unique."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nessun numero era unico."
+          }
+        }
+      }
+    },
+    "No one entered yesterday." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ayer no participó nadie."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Personne n’a participé hier."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ieri non ha partecipato nessuno."
+          }
+        }
+      }
+    },
+    "No previous result is available yet." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Todavía no hay ningún resultado anterior."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucun résultat précédent n’est encore disponible."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Non è ancora disponibile un risultato precedente."
+          }
+        }
+      }
+    },
     "No winner" : {
       "localizations" : {
         "es" : {
@@ -1603,6 +1999,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nessun vincitore. Ogni numero è stato scelto da più giocatori."
+          }
+        }
+      }
+    },
+    "Not enough players entered." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No participaron suficientes jugadores."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pas assez de joueurs ont participé."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Non hanno partecipato abbastanza giocatori."
           }
         }
       }
@@ -1651,6 +2069,50 @@
         }
       }
     },
+    "One number. One global winner every day." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un número. Un ganador mundial cada día."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un nombre. Un gagnant mondial chaque jour."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un numero. Un vincitore globale ogni giorno."
+          }
+        }
+      }
+    },
+    "One world. One number." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un mundo. Un número."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un monde. Un nombre."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un mondo. Un numero."
+          }
+        }
+      }
+    },
     "Opens account and game options" : {
       "localizations" : {
         "es" : {
@@ -1691,6 +2153,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Apre le impostazioni di Mini Match, dove puoi cambiare la lingua"
+          }
+        }
+      }
+    },
+    "Opens today’s global number game" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abre el juego mundial de números de hoy"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ouvre le jeu mondial des nombres du jour"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apre il gioco globale dei numeri di oggi"
           }
         }
       }
@@ -1779,6 +2263,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Scegli un numero intero positivo. Vince il numero più basso scelto da un solo giocatore."
+          }
+        }
+      }
+    },
+    "Pick the lowest number chosen by only one player. Results are revealed after the daily table closes." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elige el número más bajo escogido por un solo jugador. Los resultados se revelan al cerrar la mesa diaria."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choisissez le plus petit nombre sélectionné par un seul joueur. Les résultats sont révélés après la fermeture de la table quotidienne."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scegli il numero più basso selezionato da un solo giocatore. I risultati vengono rivelati alla chiusura del tavolo giornaliero."
           }
         }
       }
@@ -1894,6 +2400,28 @@
         }
       }
     },
+    "Players: %llu" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jugadores: %llu"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Joueurs : %llu"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Giocatori: %llu"
+          }
+        }
+      }
+    },
     "Profile for %@" : {
       "localizations" : {
         "es" : {
@@ -1912,6 +2440,72 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Profilo di %@"
+          }
+        }
+      }
+    },
+    "Private until the table closes." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Privado hasta que cierre la mesa."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Privé jusqu’à la fermeture de la table."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Privato fino alla chiusura del tavolo."
+          }
+        }
+      }
+    },
+    "Rank %lld, %@, %lld wins" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Puesto %1$lld, %2$@, %3$lld victorias"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rang %1$lld, %2$@, %3$lld victoires"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Posizione %1$lld, %2$@, %3$lld vittorie"
+          }
+        }
+      }
+    },
+    "Rank %lld, %@, wins: %lld" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Puesto %1$lld, %2$@, victorias: %3$lld"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rang %1$lld, %2$@, victoires : %3$lld"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Posizione %1$lld, %2$@, vittorie: %3$lld"
           }
         }
       }
@@ -1956,6 +2550,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Richiede una conferma. Questa operazione non può essere annullata."
+          }
+        }
+      }
+    },
+    "Retry" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reintentar"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Réessayer"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Riprova"
           }
         }
       }
@@ -2048,6 +2664,28 @@
         }
       }
     },
+    "Rounds close at 00:00 UTC." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Las rondas cierran a las 00:00 UTC."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les manches ferment à 00:00 UTC."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I round chiudono alle 00:00 UTC."
+          }
+        }
+      }
+    },
     "selected" : {
       "localizations" : {
         "es" : {
@@ -2114,6 +2752,50 @@
         }
       }
     },
+    "Sign in to Game Center in Settings to continue." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inicia sesión en Game Center desde Ajustes para continuar."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Connectez-vous à Game Center dans Réglages pour continuer."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Accedi a Game Center nelle Impostazioni per continuare."
+          }
+        }
+      }
+    },
+    "Sign in to Game Center to continue." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inicia sesión en Game Center para continuar."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Connectez-vous à Game Center pour continuer."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Accedi a Game Center per continuare."
+          }
+        }
+      }
+    },
     "Sign in to Game Center to play with friends." : {
       "comment" : "A description of the need to sign in to Game Center to play with friends.",
       "isCommentAutoGenerated" : true,
@@ -2134,6 +2816,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Accedi a Game Center per giocare con gli amici."
+          }
+        }
+      }
+    },
+    "Sign in to play" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inicia sesión para jugar"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Connectez-vous pour jouer"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Accedi per giocare"
           }
         }
       }
@@ -2348,6 +3052,28 @@
         }
       }
     },
+    "The Daily Wins leaderboard is unavailable." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La clasificación de victorias diarias no está disponible."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le classement des victoires quotidiennes est indisponible."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La classifica delle vittorie giornaliere non è disponibile."
+          }
+        }
+      }
+    },
     "The Game Center account changed. Try again." : {
       "localizations" : {
         "es" : {
@@ -2546,6 +3272,96 @@
         }
       }
     },
+    "Time remaining: %@" : {
+      "comment" : "A label that announces the remaining time until the daily table closes.",
+      "isCommentAutoGenerated" : true,
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tiempo restante: %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Temps restant : %@"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tempo rimanente: %@"
+          }
+        }
+      }
+    },
+    "Today" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hoy"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aujourd’hui"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oggi"
+          }
+        }
+      }
+    },
+    "Try again" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Intentar de nuevo"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Réessayer"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Riprova"
+          }
+        }
+      }
+    },
+    "Try again in a moment." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inténtalo de nuevo en unos instantes."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Réessayez dans un instant."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Riprova tra poco."
+          }
+        }
+      }
+    },
     "Unique" : {
       "localizations" : {
         "es" : {
@@ -2668,6 +3484,94 @@
         }
       }
     },
+    "Winning number: %llu" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Número ganador: %llu"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nombre gagnant : %llu"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Numero vincente: %llu"
+          }
+        }
+      }
+    },
+    "Wins: %lld" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Victorias: %lld"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Victoires : %lld"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vittorie: %lld"
+          }
+        }
+      }
+    },
+    "wins" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "victorias"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "victoires"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "vittorie"
+          }
+        }
+      }
+    },
+    "Yesterday" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ayer"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hier"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ieri"
+          }
+        }
+      }
+    },
     "You" : {
       "localizations" : {
         "es" : {
@@ -2690,6 +3594,28 @@
         }
       }
     },
+    "You cannot change this number after it is locked." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No puedes cambiar este número después de confirmarlo."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vous ne pourrez plus modifier ce nombre après l’avoir verrouillé."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Non puoi cambiare questo numero dopo averlo confermato."
+          }
+        }
+      }
+    },
     "You don’t have permission to do that." : {
       "localizations" : {
         "es" : {
@@ -2708,6 +3634,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Non hai l’autorizzazione per farlo."
+          }
+        }
+      }
+    },
+    "You won!" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¡Has ganado!"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vous avez gagné !"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hai vinto!"
           }
         }
       }
@@ -2778,6 +3726,28 @@
         }
       }
     },
+    "Your daily number" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu número diario"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Votre nombre du jour"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il tuo numero giornaliero"
+          }
+        }
+      }
+    },
     "Your number" : {
       "localizations" : {
         "es" : {
@@ -2800,6 +3770,28 @@
         }
       }
     },
+    "Your number cannot be changed after it is locked" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu número no se puede cambiar después de confirmarlo"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Votre nombre ne peut plus être modifié après son verrouillage"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il numero non può essere cambiato dopo la conferma"
+          }
+        }
+      }
+    },
     "Your number stays private until reveal." : {
       "localizations" : {
         "es" : {
@@ -2818,6 +3810,94 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Il tuo numero resta privato fino alla rivelazione."
+          }
+        }
+      }
+    },
+    "Your number stays private until the table closes." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu número permanece privado hasta que cierre la mesa."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Votre nombre reste privé jusqu’à la fermeture de la table."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il tuo numero resta privato fino alla chiusura del tavolo."
+          }
+        }
+      }
+    },
+    "Your number: %llu" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu número: %llu"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Votre nombre : %llu"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il tuo numero: %llu"
+          }
+        }
+      }
+    },
+    "Your rank" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu puesto"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Votre rang"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La tua posizione"
+          }
+        }
+      }
+    },
+    "Your wins: %llu" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tus victorias: %llu"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vos victoires : %llu"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le tue vittorie: %llu"
           }
         }
       }

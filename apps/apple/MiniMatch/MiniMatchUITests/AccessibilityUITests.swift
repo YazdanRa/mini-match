@@ -11,6 +11,7 @@ final class AccessibilityUITests: XCTestCase {
 
         XCTAssertTrue(home.buttons["Play together"].isHittable)
         XCTAssertTrue(home.buttons["Join with a code"].isHittable)
+        XCTAssertTrue(home.buttons["daily-table-card"].isHittable)
         try auditVoiceControlCompatibility(in: home)
 
         home.buttons["Join with a code"].tap()
@@ -74,6 +75,25 @@ final class AccessibilityUITests: XCTestCase {
         XCTAssertEqual(row.label, "Liam, win count 5, selected 5, Winner")
     }
 
+    func testDailyTableExposesPrivateSubmittedStateAndYesterdayResult() throws {
+        let daily = launch(arguments: ["--preview-daily"])
+
+        XCTAssertTrue(daily.staticTexts["Daily Table"].waitForExistence(timeout: 5))
+        XCTAssertTrue(element(identifier: "daily-previous-result", in: daily).exists)
+        XCTAssertTrue(element(identifier: "daily-today-card", in: daily).exists)
+        XCTAssertTrue(daily.staticTexts["Winning number: 3"].exists)
+        XCTAssertTrue(daily.staticTexts["You won!"].exists)
+        XCTAssertTrue(daily.staticTexts["Locked for today"].exists)
+        XCTAssertFalse(daily.textFields["Your daily number"].exists)
+        try auditVoiceControlCompatibility(in: daily)
+
+        let leaderboard = daily.buttons["daily-wins-link"]
+        scrollUntilHittable(leaderboard, in: daily)
+        XCTAssertTrue(leaderboard.isHittable)
+        leaderboard.tap()
+        XCTAssertTrue(daily.staticTexts["Daily Wins"].waitForExistence(timeout: 5))
+    }
+
     func testCommonScreensPassSufficientContrastAuditInLightAppearance() throws {
         try withAppearance(.light) {
             try auditCommonScreens(appearance: .light)
@@ -131,6 +151,11 @@ final class AccessibilityUITests: XCTestCase {
         XCTAssertTrue(resultHeading.waitForExistence(timeout: 5))
         scrollUntilHittable(resultHeading, in: result)
         try auditContrast(in: result, screen: "Result", appearance: appearance)
+        result.terminate()
+
+        let daily = launch(arguments: ["--preview-daily"])
+        XCTAssertTrue(daily.staticTexts["Daily Table"].waitForExistence(timeout: 5))
+        try auditContrast(in: daily, screen: "Daily-table", appearance: appearance)
     }
 
     private func launch(arguments: [String]) -> XCUIApplication {

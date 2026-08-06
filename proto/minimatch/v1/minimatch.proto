@@ -21,6 +21,8 @@ service MiniMatchService {
   // Reveals the named round and returns the table to the lobby.
   rpc RevealRound(RevealRoundRequest) returns (RevealRoundResponse);
   rpc GetTable(GetTableRequest) returns (GetTableResponse);
+  rpc GetDailyGlobalTable(GetDailyGlobalTableRequest) returns (GetDailyGlobalTableResponse);
+  rpc LockDailyGlobalPick(LockDailyGlobalPickRequest) returns (LockDailyGlobalPickResponse);
   rpc DeleteProfile(DeleteProfileRequest) returns (DeleteProfileResponse);
 }
 
@@ -112,6 +114,59 @@ message GetTableRequest {
 
 message GetTableResponse {
   Table table = 1;
+}
+
+message GetDailyGlobalTableRequest {
+  // Required. Fresh Game Center identity proof for the authenticated player.
+  GameCenterIdentity game_center_identity = 1;
+}
+
+message LockDailyGlobalPickRequest {
+  // Server-issued UTC date used as a stale-screen concurrency token.
+  string round_date = 1;
+  Pick pick = 2;
+  // Required. Fresh Game Center identity proof for the authenticated player.
+  GameCenterIdentity game_center_identity = 3;
+}
+
+message GetDailyGlobalTableResponse {
+  uint64 server_time_unix_seconds = 1;
+  DailyGlobalRound current_round = 2;
+  DailyGlobalResult previous_result = 3;
+  uint64 local_player_daily_wins = 4;
+}
+
+message LockDailyGlobalPickResponse {
+  uint64 server_time_unix_seconds = 1;
+  DailyGlobalRound current_round = 2;
+  DailyGlobalResult previous_result = 3;
+  uint64 local_player_daily_wins = 4;
+}
+
+message DailyGlobalRound {
+  string round_date = 1;
+  uint64 closes_at_unix_seconds = 2;
+  // Present only when the authenticated player has locked a pick.
+  Pick local_pick = 3;
+}
+
+message DailyGlobalResult {
+  string round_date = 1;
+  DailyGlobalResultStatus status = 2;
+  uint64 participant_count = 3;
+  // Present only when this round has a unique winner.
+  Pick winning_pick = 4;
+  // Present only when the authenticated player entered this round.
+  Pick local_pick = 5;
+}
+
+enum DailyGlobalResultStatus {
+  DAILY_GLOBAL_RESULT_STATUS_UNSPECIFIED = 0;
+  DAILY_GLOBAL_RESULT_STATUS_CALCULATING = 1;
+  DAILY_GLOBAL_RESULT_STATUS_EMPTY = 2;
+  DAILY_GLOBAL_RESULT_STATUS_INSUFFICIENT_PLAYERS = 3;
+  DAILY_GLOBAL_RESULT_STATUS_NO_UNIQUE_PICK = 4;
+  DAILY_GLOBAL_RESULT_STATUS_WINNER = 5;
 }
 
 message DeleteProfileRequest {}

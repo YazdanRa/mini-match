@@ -1,14 +1,21 @@
+import FirebaseAppCheck
 import FirebaseCore
 import SwiftUI
 
 @main
 struct MiniMatchApp: App {
     @State private var model: GameModel
+    @State private var dailyGlobal: DailyGlobalModel
     @State private var gameCenter: GameCenterModel
     @State private var appleSignIn: AppleSignInModel
     @State private var loadedLaunchPreview = false
 
     init() {
+        #if targetEnvironment(simulator)
+        AppCheck.setAppCheckProviderFactory(AppCheckDebugProviderFactory())
+        #else
+        AppCheck.setAppCheckProviderFactory(AppAttestProviderFactory())
+        #endif
         FirebaseApp.configure()
         let client = GameClientFactory.make()
         let arguments = ProcessInfo.processInfo.arguments
@@ -18,27 +25,57 @@ struct MiniMatchApp: App {
             || arguments.contains("--preview-signed-out")
             || arguments.contains("--preview-lobby")
             || arguments.contains("--preview-result")
+            || arguments.contains("--preview-daily")
         {
+            let gameCenter = GameCenterModel.preview()
             _model = State(initialValue: GameModel.preview())
             _appleSignIn = State(initialValue: AppleSignInModel(
                 previewIsSignedIn: !arguments.contains("--preview-signed-out")
             ))
-            _gameCenter = State(initialValue: GameCenterModel.preview())
+            _gameCenter = State(initialValue: gameCenter)
+            _dailyGlobal = State(initialValue: DailyGlobalModel(
+                client: client,
+                identityProvider: {
+                    GameCenterIdentityDTO(
+                        teamPlayerId: "preview-player",
+                        publicKeyUrl: "https://example.com/key",
+                        signature: Data(),
+                        salt: Data(),
+                        timestamp: "0"
+                    )
+                }
+            ))
             return
         }
         #endif
-        _model = State(initialValue: GameModel(client: client))
-        _appleSignIn = State(initialValue: AppleSignInModel(client: client))
-        _gameCenter = State(initialValue: GameCenterModel(
+        let gameCenter = GameCenterModel(
             isEnabled: !isTesting
                 && !arguments.contains("--preview-lobby")
                 && !arguments.contains("--preview-result")
+        )
+        _model = State(initialValue: GameModel(client: client))
+        _appleSignIn = State(initialValue: AppleSignInModel(client: client))
+        _gameCenter = State(initialValue: gameCenter)
+        _dailyGlobal = State(initialValue: DailyGlobalModel(
+            client: client,
+            identityProvider: {
+                try await gameCenter.requiredIdentityVerification()
+            },
+            winsReporter: { total, identity in
+                gameCenter.reportDailyWins(total, verifiedBy: identity)
+            }
         ))
     }
 
     var body: some Scene {
         WindowGroup {
-            ContentView(model: model, gameCenter: gameCenter, appleSignIn: appleSignIn)
+            ContentView(
+                model: model,
+                dailyGlobal: dailyGlobal,
+                gameCenter: gameCenter,
+                appleSignIn: appleSignIn,
+                showDailyOnLaunch: ProcessInfo.processInfo.arguments.contains("--preview-daily")
+            )
                 .task {
                     gameCenter.authenticate()
                     #if DEBUG

@@ -41,6 +41,57 @@ struct GameModelTests {
     }
 
     @Test
+    @MainActor
+    func dailyLeaderboardScoreUsesASeparatePlayerScopedStore() throws {
+        let suiteName = "MiniMatchTests.dailyLeaderboard.\(UUID().uuidString)"
+        let defaults = try #require(UserDefaults(suiteName: suiteName))
+        defer { defaults.removePersistentDomain(forName: suiteName) }
+        let social = UserDefaultsLeaderboardScorePendingStore(defaults: defaults)
+        let daily = UserDefaultsLeaderboardScorePendingStore(
+            defaults: defaults,
+            key: "pendingGameCenterDailyLeaderboardScores"
+        )
+
+        social.save(9, for: "player-a")
+        daily.save(4, for: "player-a")
+        daily.save(7, for: "player-b")
+
+        #expect(social.load(for: "player-a") == 9)
+        #expect(daily.load(for: "player-a") == 4)
+        #expect(daily.load(for: "player-b") == 7)
+        #expect(social.load(for: "player-b") == nil)
+    }
+
+    @Test
+    @MainActor
+    func pendingLeaderboardScoreKeepsTheMaximumAcrossStaleCompletions() {
+        var pending = PendingLeaderboardScore()
+
+        pending.enqueue(4, maximum: GameCenterModel.leaderboardMaximumScore)
+        pending.enqueue(7, maximum: GameCenterModel.leaderboardMaximumScore)
+        pending.complete(4)
+        #expect(pending.value == 7)
+
+        pending.enqueue(UInt64.max, maximum: GameCenterModel.leaderboardMaximumScore)
+        #expect(pending.value == 999_999_999)
+        pending.complete(999_999_999)
+        #expect(pending.value == nil)
+    }
+
+    @Test
+    func returnedAccountDoesNotMakeAnOldOperationCurrent() {
+        var session = PlayerScopedGeneration()
+        session.bind(to: "player-a")
+        let staleGeneration = session.value
+
+        session.bind(to: "player-b")
+        session.bind(to: "player-a")
+
+        #expect(!session.matches(staleGeneration, playerID: "player-a"))
+        #expect(session.matches(session.value, playerID: "player-a"))
+    }
+
+    @Test
     func serverConfirmedWinsEarnTheExpectedGameCenterAchievements() {
         var table = PreviewFixtures.lobbyTable
         table.lastResult = GameRoundResult(
@@ -912,6 +963,24 @@ private actor LifecycleTestGameClient: GameClient {
             code: code,
             displayName: displayName,
             avatarID: avatarID,
+            gameCenterIdentity: gameCenterIdentity
+        )
+    }
+
+    func getDailyGlobalTable(
+        gameCenterIdentity: GameCenterIdentityDTO
+    ) async throws -> DailyGlobalTable {
+        try await base.getDailyGlobalTable(gameCenterIdentity: gameCenterIdentity)
+    }
+
+    func lockDailyGlobalPick(
+        roundDate: String,
+        pick: UInt64,
+        gameCenterIdentity: GameCenterIdentityDTO
+    ) async throws -> DailyGlobalTable {
+        try await base.lockDailyGlobalPick(
+            roundDate: roundDate,
+            pick: pick,
             gameCenterIdentity: gameCenterIdentity
         )
     }
