@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.0](https://github.com/YazdanRa/mini-match/compare/apple-v0.3.0...apple-v0.4.0) (2026-08-06)
+
+
+### Features
+
+* **daily:** add global daily table ([#31](https://github.com/YazdanRa/mini-match/issues/31)) ([22d1790](https://github.com/YazdanRa/mini-match/commit/22d17905c07697693f1190f160921439c23d9245))
+
 ## [0.3.0](https://github.com/YazdanRa/mini-match/compare/apple-v0.2.0...apple-v0.3.0) (2026-08-06)
 
 
