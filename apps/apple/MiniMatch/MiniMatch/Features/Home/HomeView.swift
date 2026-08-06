@@ -121,11 +121,13 @@ private struct HomeActionSection: View {
     @Environment(\.colorScheme) private var colorScheme
     @State private var isJoiningWithCode = false
     @State private var partyCode = ""
+    private let soundEffectPlayer = SoundEffectPlayer.shared
 
     var body: some View {
         if appleSignIn.isSignedIn {
             VStack(spacing: 10) {
                 Button {
+                    soundEffectPlayer.play(.mainButton)
                     gameCenter.startActivity()
                 } label: {
                     if gameCenter.isStartingActivity {
@@ -138,6 +140,7 @@ private struct HomeActionSection: View {
                 .disabled(multiplayerIsUnavailable)
 
                 Button {
+                    soundEffectPlayer.play(.mainButton)
                     isJoiningWithCode = true
                 } label: {
                     Label("Join with a code", systemImage: "number")

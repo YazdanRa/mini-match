@@ -4,18 +4,18 @@ import Testing
 
 struct GameTableTests {
     @Test
-    func roundResultSoundMatchesWinnerPresence() {
+    func resultSoundEffectMatchesWinnerPresence() {
         let selections = [
             GameSelection(playerID: "maya", displayName: "Maya", pick: 1),
             GameSelection(playerID: "liam", displayName: "Liam", pick: 2),
         ]
 
-        #expect(RoundResultSound(result: GameRoundResult(
+        #expect(SoundEffect(result: GameRoundResult(
             roundNumber: 1,
             selections: selections,
             winnerPlayerID: "maya"
         )) == .winner)
-        #expect(RoundResultSound(result: GameRoundResult(
+        #expect(SoundEffect(result: GameRoundResult(
             roundNumber: 2,
             selections: selections,
             winnerPlayerID: nil

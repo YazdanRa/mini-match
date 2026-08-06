@@ -1,7 +1,9 @@
 import AVFAudio
+import Foundation
 import OSLog
 
-enum RoundResultSound: String, CaseIterable {
+enum SoundEffect: String, CaseIterable, Sendable {
+    case mainButton = "bloop"
     case winner
     case noWinner = "no_winner"
 
@@ -10,49 +12,58 @@ enum RoundResultSound: String, CaseIterable {
     }
 }
 
-actor RoundResultSoundPlayer {
-    static let shared = RoundResultSoundPlayer()
+actor SoundEffectPlayer {
+    static let shared = SoundEffectPlayer()
 
     private let logger = Logger(
         subsystem: Bundle.main.bundleIdentifier ?? "MiniMatch",
-        category: "RoundResultSound"
+        category: "SoundEffect"
     )
-    private var players: [RoundResultSound: AVAudioPlayer] = [:]
+    private var players: [SoundEffect: AVAudioPlayer] = [:]
 
     private init(bundle: Bundle = .main) {
         do {
             try AVAudioSession.sharedInstance().setCategory(.ambient, mode: .default)
         } catch {
-            logger.error("Could not configure round-result audio: \(error.localizedDescription)")
+            logger.error("Could not configure sound effects: \(error.localizedDescription)")
         }
 
-        for sound in RoundResultSound.allCases {
+        for sound in SoundEffect.allCases {
             guard let url = bundle.url(forResource: sound.rawValue, withExtension: "wav") else {
-                logger.error("Missing round-result sound: \(sound.rawValue).wav")
+                logger.error("Missing sound effect: \(sound.rawValue).wav")
                 continue
             }
 
             do {
-                let player = try AVAudioPlayer(contentsOf: url)
-                players[sound] = player
+                players[sound] = try AVAudioPlayer(contentsOf: url)
             } catch {
                 logger.error("Could not load \(sound.rawValue).wav: \(error.localizedDescription)")
             }
         }
     }
 
-    func play(for result: GameRoundResult) async {
+    nonisolated func play(_ sound: SoundEffect) {
+        guard Self.soundEffectsEnabled else { return }
+        Task {
+            await performPlayback(sound)
+        }
+    }
+
+    nonisolated func play(for result: GameRoundResult) {
+        play(SoundEffect(result: result))
+    }
+
+    private func performPlayback(_ sound: SoundEffect) async {
         do {
             guard try await Self.activateAudioSession() else {
-                logger.error("Could not activate round-result audio")
+                logger.error("Could not activate audio for \(sound.rawValue).wav")
                 return
             }
         } catch {
-            logger.error("Could not activate round-result audio: \(error.localizedDescription)")
+            logger.error("Could not activate audio for \(sound.rawValue).wav: \(error.localizedDescription)")
             return
         }
 
-        let sound = RoundResultSound(result: result)
         guard let player = players[sound] else { return }
         player.currentTime = 0
         player.play()
@@ -70,5 +81,9 @@ actor RoundResultSoundPlayer {
                 }
             }
         }
+    }
+
+    nonisolated private static var soundEffectsEnabled: Bool {
+        UserDefaults.standard.object(forKey: "soundEffectsEnabled") as? Bool ?? true
     }
 }

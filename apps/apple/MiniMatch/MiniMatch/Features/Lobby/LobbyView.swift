@@ -5,8 +5,7 @@ struct LobbyView: View {
     let model: GameModel
     let playerImages: [String: UIImage]
     @Environment(\.scenePhase) private var scenePhase
-    @AppStorage("soundEffectsEnabled") private var soundEffectsEnabled = true
-    private let roundResultSoundPlayer = RoundResultSoundPlayer.shared
+    private let soundEffectPlayer = SoundEffectPlayer.shared
 
     var body: some View {
         ScrollView {
@@ -82,11 +81,7 @@ struct LobbyView: View {
         }
         .onChange(of: model.table?.lastResult?.roundNumber) { _, roundNumber in
             guard roundNumber != nil, let roundResult = model.table?.lastResult else { return }
-            if soundEffectsEnabled {
-                Task {
-                    await roundResultSoundPlayer.play(for: roundResult)
-                }
-            }
+            soundEffectPlayer.play(for: roundResult)
 
             if let result = model.result {
                 UIAccessibility.post(notification: .announcement, argument: result.accessibilitySummary)
