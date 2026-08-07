@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.1](https://github.com/YazdanRa/mini-match/compare/apple-v0.4.0...apple-v0.4.1) (2026-08-07)
+
+
+### Bug Fixes
+
+* **ios:** keep Game Center access point on Home ([#35](https://github.com/YazdanRa/mini-match/issues/35)) ([1f058d5](https://github.com/YazdanRa/mini-match/commit/1f058d56b51148c780700dfa658c08c7752210c2))
+
 ## [0.4.0](https://github.com/YazdanRa/mini-match/compare/apple-v0.3.0...apple-v0.4.0) (2026-08-06)
 
 
