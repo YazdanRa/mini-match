@@ -4,6 +4,7 @@ import SwiftUI
 struct HomeView: View {
     let gameCenter: GameCenterModel
     let appleSignIn: AppleSignInModel
+    @Binding var isJoiningWithCode: Bool
     let openDailyTable: () -> Void
     @Environment(\.colorScheme) private var colorScheme
 
@@ -49,7 +50,8 @@ struct HomeView: View {
         .safeAreaInset(edge: .bottom, spacing: 0) {
             HomeActionSection(
                 gameCenter: gameCenter,
-                appleSignIn: appleSignIn
+                appleSignIn: appleSignIn,
+                isJoiningWithCode: $isJoiningWithCode
             )
             .frame(maxWidth: 480)
             .padding(.horizontal, 28)
@@ -165,8 +167,8 @@ private struct HomePickCard: View {
 private struct HomeActionSection: View {
     let gameCenter: GameCenterModel
     let appleSignIn: AppleSignInModel
+    @Binding var isJoiningWithCode: Bool
     @Environment(\.colorScheme) private var colorScheme
-    @State private var isJoiningWithCode = false
     private let soundEffectPlayer = SoundEffectPlayer.shared
 
     var body: some View {
@@ -361,6 +363,7 @@ private struct HomeNumberToken: View {
     HomeView(
         gameCenter: GameCenterModel.preview(),
         appleSignIn: AppleSignInModel(),
+        isJoiningWithCode: .constant(false),
         openDailyTable: {}
     )
 }
@@ -369,6 +372,7 @@ private struct HomeNumberToken: View {
     HomeView(
         gameCenter: GameCenterModel.preview(),
         appleSignIn: AppleSignInModel(previewIsSignedIn: false),
+        isJoiningWithCode: .constant(false),
         openDailyTable: {}
     )
 }
