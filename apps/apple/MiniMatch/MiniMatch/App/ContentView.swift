@@ -11,6 +11,7 @@ struct ContentView: View {
     @State private var isConfirmingLeave = false
     @State private var isShowingSettings = false
     @State private var isShowingDaily = false
+    @State private var isJoiningWithCode = false
     private let soundEffectPlayer = SoundEffectPlayer.shared
 
     var body: some View {
@@ -34,6 +35,7 @@ struct ContentView: View {
                         HomeView(
                             gameCenter: gameCenter,
                             appleSignIn: appleSignIn,
+                            isJoiningWithCode: $isJoiningWithCode,
                             openDailyTable: {
                                 soundEffectPlayer.play(.mainButton)
                                 isShowingDaily = true
@@ -128,6 +130,8 @@ struct ContentView: View {
             of: gameCenter.isAuthenticated
                 && model.screen == .home
                 && !isShowingSettings
+                && !isShowingDaily
+                && !isJoiningWithCode
                 && gameCenter.authentication?.id == nil
                 && gameCenter.matchmaking?.id == nil
                 && !gameCenter.isPreparingLobby,
