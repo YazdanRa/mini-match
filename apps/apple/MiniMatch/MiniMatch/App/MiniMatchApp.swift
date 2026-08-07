@@ -4,13 +4,18 @@ import SwiftUI
 
 @main
 struct MiniMatchApp: App {
+    @Environment(\.scenePhase) private var scenePhase
     @State private var model: GameModel
     @State private var dailyGlobal: DailyGlobalModel
     @State private var gameCenter: GameCenterModel
     @State private var appleSignIn: AppleSignInModel
+    @State private var preferences: UserPreferences
     @State private var loadedLaunchPreview = false
 
     init() {
+        _preferences = State(initialValue: ProcessInfo.processInfo.isMiniMatchPreviewLaunch
+            ? .preview()
+            : UserPreferences())
         #if targetEnvironment(simulator)
         AppCheck.setAppCheckProviderFactory(AppCheckDebugProviderFactory())
         #else
@@ -74,6 +79,7 @@ struct MiniMatchApp: App {
                 dailyGlobal: dailyGlobal,
                 gameCenter: gameCenter,
                 appleSignIn: appleSignIn,
+                preferences: preferences,
                 showDailyOnLaunch: ProcessInfo.processInfo.arguments.contains("--preview-daily")
             )
                 .task {
@@ -94,6 +100,21 @@ struct MiniMatchApp: App {
                         await model.revealRound()
                     }
                     #endif
+                }
+                .task {
+                    guard !ProcessInfo.processInfo.isMiniMatchPreviewLaunch else { return }
+                    preferences.start()
+                }
+                .onChange(of: scenePhase) { _, phase in
+                    guard phase == .active,
+                          !ProcessInfo.processInfo.isMiniMatchPreviewLaunch
+                    else { return }
+                    preferences.synchronize()
+                    Task {
+                        await DailyChallengeReminder.reconcile(
+                            isEnabled: preferences.dailyReminderEnabled
+                        )
+                    }
                 }
         }
     }

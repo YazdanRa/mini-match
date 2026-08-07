@@ -313,6 +313,28 @@
         }
       }
     },
+    "Allow on this device" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Permitir en este dispositivo"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Autoriser sur cet appareil"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Consenti su questo dispositivo"
+          }
+        }
+      }
+    },
     "Apple did not return a usable sign-in credential." : {
       "localizations" : {
         "es" : {
@@ -517,6 +539,28 @@
         }
       }
     },
+    "Check notification access in iOS Settings, then try again." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comprueba el acceso a las notificaciones en los ajustes de iOS e inténtalo de nuevo."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vérifiez l’accès aux notifications dans les réglages iOS, puis réessayez."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Controlla l’accesso alle notifiche nelle Impostazioni di iOS, quindi riprova."
+          }
+        }
+      }
+    },
     "Checking Game Center…" : {
       "localizations" : {
         "es" : {
@@ -535,6 +579,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Verifica di Game Center…"
+          }
+        }
+      }
+    },
+    "Choose your number for today’s global challenge." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elige tu número para el desafío global de hoy."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choisissez votre nombre pour le défi mondial du jour."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scegli il tuo numero per la sfida globale di oggi."
           }
         }
       }
@@ -605,6 +671,50 @@
         }
       }
     },
+    "Couldn’t turn on reminders" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se pudieron activar los recordatorios"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impossible d’activer les rappels"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impossibile attivare i promemoria"
+          }
+        }
+      }
+    },
+    "Daily challenge reminder" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recordatorio del desafío diario"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rappel du défi quotidien"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Promemoria della sfida giornaliera"
+          }
+        }
+      }
+    },
     "Daily Table" : {
       "localizations" : {
         "es" : {
@@ -623,6 +733,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tavolo giornaliero"
+          }
+        }
+      }
+    },
+    "Daily Table is ready" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La mesa diaria está lista"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La table quotidienne est prête"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il tavolo giornaliero è pronto"
           }
         }
       }
@@ -1155,6 +1287,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Impostazioni di gioco"
+          }
+        }
+      }
+    },
+    "Get a reminder every day at 4:00 PM." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recibe un recordatorio todos los días a las 16:00."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recevez un rappel tous les jours à 16 h."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ricevi un promemoria ogni giorno alle 16:00."
           }
         }
       }
@@ -2109,6 +2263,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Un mondo. Un numero."
+          }
+        }
+      }
+    },
+    "Open iOS Settings" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abrir los ajustes de iOS"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ouvrir les réglages iOS"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apri le Impostazioni di iOS"
           }
         }
       }
