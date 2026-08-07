@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.0](https://github.com/YazdanRa/mini-match/compare/apple-v0.4.1...apple-v0.5.0) (2026-08-07)
+
+
+### Features
+
+* **settings:** add daily challenge reminders ([#37](https://github.com/YazdanRa/mini-match/issues/37)) ([04795c8](https://github.com/YazdanRa/mini-match/commit/04795c8e237d925111a8ef52e5be216347bcfa8e))
+
 ## [0.4.1](https://github.com/YazdanRa/mini-match/compare/apple-v0.4.0...apple-v0.4.1) (2026-08-07)
 
 
