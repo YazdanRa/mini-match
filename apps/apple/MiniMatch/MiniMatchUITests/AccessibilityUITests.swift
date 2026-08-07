@@ -28,6 +28,7 @@ final class AccessibilityUITests: XCTestCase {
             .firstMatch
         XCTAssertTrue(languageSettings.isHittable)
         XCTAssertTrue(home.switches["sound-effects-toggle"].isHittable)
+        XCTAssertTrue(home.switches["daily-reminder-toggle"].isHittable)
         XCTAssertTrue(home.buttons["Log out of Mini Match"].isHittable)
         try auditVoiceControlCompatibility(in: home)
         home.terminate()

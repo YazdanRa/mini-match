@@ -43,6 +43,7 @@
 		6A8C86D601CF4D9698A48128 /* GameCenterModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A514B6D54DE4489B68C8EB4 /* GameCenterModel.swift */; };
 		7B4940F317DC4A22A42C3D3D /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 1C9872C6908E4474AB19E42F /* PrivacyInfo.xcprivacy */; };
 		A10000000000000000000001 /* SoundEffectPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000002 /* SoundEffectPlayer.swift */; };
+		A1000000000000000000000A /* UserPreferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000000000000000000000B /* UserPreferences.swift */; };
 		A10000000000000000000003 /* winner.wav in Resources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000004 /* winner.wav */; };
 		A10000000000000000000005 /* no_winner.wav in Resources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000006 /* no_winner.wav */; };
 		A10000000000000000000008 /* bloop.wav in Resources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000009 /* bloop.wav */; };
@@ -112,6 +113,7 @@
 		83296CFF50320284730F0D51 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		95B8263978044D02A158AE30 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		A10000000000000000000002 /* SoundEffectPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundEffectPlayer.swift; sourceTree = "<group>"; };
+		A1000000000000000000000B /* UserPreferences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserPreferences.swift; sourceTree = "<group>"; };
 		A10000000000000000000004 /* winner.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = winner.wav; sourceTree = "<group>"; };
 		A10000000000000000000006 /* no_winner.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = no_winner.wav; sourceTree = "<group>"; };
 		A10000000000000000000009 /* bloop.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = bloop.wav; sourceTree = "<group>"; };
@@ -273,6 +275,7 @@
 				00000000000000000000300D /* Brand */,
 				00000000000000000000300E /* DesignSystem */,
 				A10000000000000000000002 /* SoundEffectPlayer.swift */,
+				A1000000000000000000000B /* UserPreferences.swift */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
@@ -490,6 +493,9 @@
 							com.apple.GameCenter = {
 								enabled = 1;
 							};
+							com.apple.iCloud = {
+								enabled = 1;
+							};
 							com.apple.SignInWithApple = {
 								enabled = 1;
 							};
@@ -570,6 +576,7 @@
 				00000000000000000000200B /* ResultRow.swift in Sources */,
 				00000000000000000000200C /* RoundResultSection.swift in Sources */,
 				A10000000000000000000001 /* SoundEffectPlayer.swift in Sources */,
+				A1000000000000000000000A /* UserPreferences.swift in Sources */,
 				00000000000000000000200E /* WinnerCard.swift in Sources */,
 				1E0DF12FEFC34F8790E06E50 /* AppleSignInModel.swift in Sources */,
 				00000000000000000000201A /* GameCenterAuthenticationView.swift in Sources */,

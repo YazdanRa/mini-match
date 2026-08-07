@@ -1,15 +1,18 @@
 import SwiftUI
 import UIKit
+import UserNotifications
 
 struct SettingsView: View {
     let appleSignIn: AppleSignInModel
+    let preferences: UserPreferences
     let canManageAccount: Bool
 
     var body: some View {
         ScrollView {
             VStack(spacing: 20) {
                 SettingsHeader()
-                SoundEffectsSettingsCard()
+                SoundEffectsSettingsCard(preferences: preferences)
+                DailyReminderSettingsCard(preferences: preferences)
                 LanguageSettingsCard()
 
                 if appleSignIn.isSignedIn {
@@ -40,11 +43,14 @@ struct SettingsView: View {
 }
 
 private struct SoundEffectsSettingsCard: View {
-    @AppStorage("soundEffectsEnabled") private var isEnabled = true
+    @Bindable var preferences: UserPreferences
 
     var body: some View {
         SettingsCard(accent: MiniMatchColors.blueText) {
-            Toggle(isOn: $isEnabled) {
+            Toggle(isOn: Binding(
+                get: { preferences.soundEffectsEnabled },
+                set: { preferences.setSoundEffectsEnabled($0) }
+            )) {
                 Label("Sound effects", systemImage: "speaker.wave.2.fill")
                     .font(.headline)
                     .foregroundStyle(MiniMatchColors.ink)
@@ -52,6 +58,111 @@ private struct SoundEffectsSettingsCard: View {
             .tint(MiniMatchColors.blueText)
             .accessibilityIdentifier("sound-effects-toggle")
         }
+    }
+}
+
+private struct DailyReminderSettingsCard: View {
+    @Bindable var preferences: UserPreferences
+    @Environment(\.scenePhase) private var scenePhase
+    @State private var authorizationStatus: UNAuthorizationStatus?
+    @State private var isUpdating = false
+    @State private var isShowingError = false
+
+    var body: some View {
+        SettingsCard(accent: MiniMatchColors.coralBrand) {
+            VStack(alignment: .leading, spacing: 12) {
+                Toggle(isOn: Binding(
+                    get: { preferences.dailyReminderEnabled },
+                    set: updatePreference
+                )) {
+                    Label("Daily challenge reminder", systemImage: "bell.badge.fill")
+                        .font(.headline)
+                        .foregroundStyle(MiniMatchColors.ink)
+                }
+                .tint(MiniMatchColors.coralBrand)
+                .disabled(isUpdating)
+                .accessibilityIdentifier("daily-reminder-toggle")
+
+                Text("Get a reminder every day at 4:00 PM.")
+                    .font(.subheadline)
+                    .foregroundStyle(MiniMatchColors.ink)
+
+                if preferences.dailyReminderEnabled,
+                   let authorizationStatus,
+                   !DailyChallengeReminder.isAuthorized(authorizationStatus)
+                {
+                    if authorizationStatus == .denied {
+                        Button("Open iOS Settings", action: enableOnThisDevice)
+                            .buttonStyle(.bordered)
+                            .disabled(isUpdating)
+                    } else {
+                        Button("Allow on this device", action: enableOnThisDevice)
+                            .buttonStyle(.bordered)
+                            .disabled(isUpdating)
+                    }
+                }
+            }
+        }
+        .task {
+            await refreshAuthorizationStatus()
+        }
+        .onChange(of: scenePhase) { _, phase in
+            guard phase == .active else { return }
+            Task { await refreshAuthorizationStatus() }
+        }
+        .alert("Couldn’t turn on reminders", isPresented: $isShowingError) {
+            Button("Open iOS Settings") {
+                UIApplication.shared.open(URL(string: UIApplication.openSettingsURLString)!)
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("Check notification access in iOS Settings, then try again.")
+        }
+    }
+
+    private func updatePreference(_ isEnabled: Bool) {
+        guard !ProcessInfo.processInfo.isMiniMatchPreviewLaunch else {
+            preferences.setDailyReminderEnabled(isEnabled)
+            return
+        }
+        guard isEnabled else {
+            preferences.setDailyReminderEnabled(false)
+            DailyChallengeReminder.disableOnThisDevice()
+            return
+        }
+        preferences.setDailyReminderEnabled(true)
+        enableOnThisDevice()
+    }
+
+    private func enableOnThisDevice() {
+        if authorizationStatus == .denied {
+            UIApplication.shared.open(URL(string: UIApplication.openSettingsURLString)!)
+            return
+        }
+
+        isUpdating = true
+        Task {
+            defer { isUpdating = false }
+            do {
+                try await DailyChallengeReminder.enableOnThisDevice()
+                if !preferences.dailyReminderEnabled {
+                    DailyChallengeReminder.disableOnThisDevice()
+                }
+            } catch is CancellationError {
+                return
+            } catch {
+                isShowingError = preferences.dailyReminderEnabled
+            }
+            await refreshAuthorizationStatus()
+        }
+    }
+
+    private func refreshAuthorizationStatus() async {
+        guard !ProcessInfo.processInfo.isMiniMatchPreviewLaunch else { return }
+        authorizationStatus = await DailyChallengeReminder.authorizationStatus()
+        await DailyChallengeReminder.reconcile(
+            isEnabled: preferences.dailyReminderEnabled
+        )
     }
 }
 
@@ -267,6 +378,7 @@ private struct SettingsCard<Content: View>: View {
     NavigationStack {
         SettingsView(
             appleSignIn: AppleSignInModel(),
+            preferences: .preview(),
             canManageAccount: true
         )
     }

@@ -6,6 +6,8 @@
 	<true/>
 	<key>com.apple.developer.group-session</key>
 	<true/>
+	<key>com.apple.developer.ubiquity-kvstore-identifier</key>
+	<string>$(TeamIdentifierPrefix)com.yazdanra.minimatch</string>
 	<key>com.apple.developer.applesignin</key>
 	<array>
 		<string>Default</string>

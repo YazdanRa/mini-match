@@ -6,6 +6,7 @@ struct ContentView: View {
     let dailyGlobal: DailyGlobalModel
     let gameCenter: GameCenterModel
     let appleSignIn: AppleSignInModel
+    let preferences: UserPreferences
     let showDailyOnLaunch: Bool
     @Environment(\.scenePhase) private var scenePhase
     @State private var isConfirmingLeave = false
@@ -97,6 +98,7 @@ struct ContentView: View {
             .navigationDestination(isPresented: $isShowingSettings) {
                 SettingsView(
                     appleSignIn: appleSignIn,
+                    preferences: preferences,
                     canManageAccount: model.screen == .home
                 )
             }
@@ -192,6 +194,12 @@ struct ContentView: View {
         .onChange(of: model.screen) { _, screen in
             if screen == .home {
                 gameCenter.endMatch()
+            }
+        }
+        .onChange(of: preferences.dailyReminderEnabled, initial: true) { _, isEnabled in
+            guard !ProcessInfo.processInfo.isMiniMatchPreviewLaunch else { return }
+            Task {
+                await DailyChallengeReminder.reconcile(isEnabled: isEnabled)
             }
         }
         .task {
@@ -315,6 +323,7 @@ private struct LobbyLoadingView: View {
         ),
         gameCenter: GameCenterModel.preview(),
         appleSignIn: AppleSignInModel(),
+        preferences: .preview(),
         showDailyOnLaunch: false
     )
 }

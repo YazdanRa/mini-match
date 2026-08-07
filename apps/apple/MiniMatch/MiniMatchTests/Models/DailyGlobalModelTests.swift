@@ -1,5 +1,6 @@
 import Foundation
 import Testing
+import UserNotifications
 @testable import MiniMatch
 
 struct DailyGlobalModelTests {
@@ -343,4 +344,150 @@ private func dailyIdentity(teamPlayerID: String) -> GameCenterIdentityDTO {
         salt: Data([2]),
         timestamp: "1786017600000"
     )
+}
+
+struct UserPreferencesTests {
+    @Test
+    @MainActor
+    func iCloudOverridesLocalValuesAndReceivesExplicitChanges() {
+        let local = TestBooleanPreferenceStore([
+            UserPreference.soundEffectsEnabled.rawValue: false,
+        ])
+        let cloud = TestBooleanPreferenceStore([
+            UserPreference.dailyReminderEnabled.rawValue: true,
+        ])
+        let preferences = UserPreferences(localStore: local, cloudStore: cloud)
+
+        preferences.synchronize()
+
+        #expect(!preferences.soundEffectsEnabled)
+        #expect(preferences.dailyReminderEnabled)
+        #expect(cloud.storedBool(forKey: UserPreference.soundEffectsEnabled.rawValue) == nil)
+        #expect(local.storedBool(forKey: UserPreference.dailyReminderEnabled.rawValue) == true)
+
+        preferences.setSoundEffectsEnabled(true)
+        #expect(cloud.storedBool(forKey: UserPreference.soundEffectsEnabled.rawValue) == true)
+
+        cloud.setStoredBool(false, forKey: UserPreference.dailyReminderEnabled.rawValue)
+        preferences.applyCloudChanges(changedKeys: [UserPreference.dailyReminderEnabled.rawValue])
+        #expect(!preferences.dailyReminderEnabled)
+        #expect(local.storedBool(forKey: UserPreference.dailyReminderEnabled.rawValue) == false)
+    }
+
+    @Test
+    @MainActor
+    func dailyReminderRequestRepeatsAtFourPM() throws {
+        let request = DailyChallengeReminder.makeRequest()
+        let trigger = try #require(request.trigger as? UNCalendarNotificationTrigger)
+
+        #expect(request.identifier == DailyChallengeReminder.requestIdentifier)
+        #expect(trigger.repeats)
+        #expect(trigger.dateComponents.hour == 16)
+        #expect(trigger.dateComponents.minute == 0)
+    }
+
+    @Test
+    @MainActor
+    func initialICloudDownloadDoesNotOverwriteExistingLocalPreferences() {
+        let local = TestBooleanPreferenceStore([
+            UserPreference.soundEffectsEnabled.rawValue: false,
+        ])
+        let cloud = TestBooleanPreferenceStore()
+        let preferences = UserPreferences(localStore: local, cloudStore: cloud)
+
+        preferences.synchronize()
+
+        #expect(!preferences.soundEffectsEnabled)
+        #expect(cloud.storedBool(forKey: UserPreference.soundEffectsEnabled.rawValue) == nil)
+
+        preferences.applyCloudChanges(
+            changedKeys: [UserPreference.soundEffectsEnabled.rawValue],
+            reason: NSUbiquitousKeyValueStoreInitialSyncChange
+        )
+
+        #expect(!preferences.soundEffectsEnabled)
+        #expect(cloud.storedBool(forKey: UserPreference.soundEffectsEnabled.rawValue) == nil)
+
+        cloud.setStoredBool(true, forKey: UserPreference.soundEffectsEnabled.rawValue)
+        preferences.applyCloudChanges(
+            changedKeys: [UserPreference.soundEffectsEnabled.rawValue],
+            reason: NSUbiquitousKeyValueStoreServerChange
+        )
+
+        #expect(preferences.soundEffectsEnabled)
+        #expect(local.storedBool(forKey: UserPreference.soundEffectsEnabled.rawValue) == true)
+    }
+
+    @Test
+    @MainActor
+    func disablingWhileAuthorizationIsPendingDoesNotRestoreReminder() async {
+        var statusContinuation: CheckedContinuation<UNAuthorizationStatus, Never>?
+        var additions = 0
+        var removals = 0
+        let enabling = Task { @MainActor in
+            await DailyChallengeReminder.reconcile(
+                isEnabled: true,
+                statusProvider: {
+                    await withCheckedContinuation { statusContinuation = $0 }
+                },
+                addRequest: { _ in additions += 1 },
+                removeRequest: { removals += 1 }
+            )
+        }
+
+        while statusContinuation == nil { await Task.yield() }
+        await DailyChallengeReminder.reconcile(
+            isEnabled: false,
+            removeRequest: { removals += 1 }
+        )
+        statusContinuation?.resume(returning: .authorized)
+        await enabling.value
+
+        #expect(additions == 0)
+        #expect(removals == 1)
+    }
+
+    @Test
+    @MainActor
+    func foregroundReconciliationSchedulesAfterPermissionIsGranted() async {
+        var additions = 0
+        var removals = 0
+
+        await DailyChallengeReminder.reconcile(
+            isEnabled: true,
+            statusProvider: { .denied },
+            addRequest: { _ in additions += 1 },
+            removeRequest: { removals += 1 }
+        )
+        await DailyChallengeReminder.reconcile(
+            isEnabled: true,
+            statusProvider: { .authorized },
+            addRequest: { _ in additions += 1 },
+            removeRequest: { removals += 1 }
+        )
+
+        #expect(additions == 1)
+        #expect(removals == 1)
+    }
+}
+
+private final class TestBooleanPreferenceStore: BooleanPreferenceStoring {
+    private var values: [String: Bool]
+    init(_ values: [String: Bool] = [:]) {
+        self.values = values
+    }
+
+    func storedBool(forKey key: String) -> Bool? {
+        values[key]
+    }
+
+    func setStoredBool(_ value: Bool, forKey key: String) {
+        values[key] = value
+    }
+
+    func removeStoredValue(forKey key: String) {
+        values.removeValue(forKey: key)
+    }
+
+    func synchronizePreferences() -> Bool { true }
 }
