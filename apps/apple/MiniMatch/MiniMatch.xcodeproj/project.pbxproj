@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 77;
+	objectVersion = 110;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -43,10 +43,10 @@
 		6A8C86D601CF4D9698A48128 /* GameCenterModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A514B6D54DE4489B68C8EB4 /* GameCenterModel.swift */; };
 		7B4940F317DC4A22A42C3D3D /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 1C9872C6908E4474AB19E42F /* PrivacyInfo.xcprivacy */; };
 		A10000000000000000000001 /* SoundEffectPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000002 /* SoundEffectPlayer.swift */; };
-		A1000000000000000000000A /* UserPreferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000000000000000000000B /* UserPreferences.swift */; };
 		A10000000000000000000003 /* winner.wav in Resources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000004 /* winner.wav */; };
 		A10000000000000000000005 /* no_winner.wav in Resources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000006 /* no_winner.wav */; };
 		A10000000000000000000008 /* bloop.wav in Resources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000009 /* bloop.wav */; };
+		A1000000000000000000000A /* UserPreferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000000000000000000000B /* UserPreferences.swift */; };
 		A40B26B0B6694A4988335295 /* GameClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3447AB36E0634BEDA51A6AEF /* GameClient.swift */; };
 		B20000000000000000000001 /* AccessibilityUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B20000000000000000000003 /* AccessibilityUITests.swift */; };
 		B8DB8FBADF4702F86057C478 /* MiniMatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BAA5639A2A8BF42643E6AF3 /* MiniMatchApp.swift */; };
@@ -113,10 +113,10 @@
 		83296CFF50320284730F0D51 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		95B8263978044D02A158AE30 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		A10000000000000000000002 /* SoundEffectPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundEffectPlayer.swift; sourceTree = "<group>"; };
-		A1000000000000000000000B /* UserPreferences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserPreferences.swift; sourceTree = "<group>"; };
 		A10000000000000000000004 /* winner.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = winner.wav; sourceTree = "<group>"; };
 		A10000000000000000000006 /* no_winner.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = no_winner.wav; sourceTree = "<group>"; };
 		A10000000000000000000009 /* bloop.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = bloop.wav; sourceTree = "<group>"; };
+		A1000000000000000000000B /* UserPreferences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserPreferences.swift; sourceTree = "<group>"; };
 		B20000000000000000000003 /* AccessibilityUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessibilityUITests.swift; sourceTree = "<group>"; };
 		B20000000000000000000004 /* MiniMatchUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MiniMatchUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		C395C0D8211F4A7BBA1F0065 /* GameModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameModels.swift; sourceTree = "<group>"; };
@@ -133,20 +133,16 @@
 /* Begin PBXFrameworksBuildPhase section */
 		1FA3779FB40D441496252838 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 				D30000000000000000000007 /* FirebaseAppCheck in Frameworks */,
 				D0E416549451497B8A9A1272 /* FirebaseAuth in Frameworks */,
 				4C4F5454494553504D000003 /* Lottie in Frameworks */,
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 		B20000000000000000000005 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
@@ -211,14 +207,6 @@
 				00000000000000000000100E /* WinnerCard.swift */,
 			);
 			path = Results;
-			sourceTree = "<group>";
-		};
-		D30000000000000000000009 /* Daily */ = {
-			isa = PBXGroup;
-			children = (
-				D30000000000000000000002 /* DailyGlobalView.swift */,
-			);
-			path = Daily;
 			sourceTree = "<group>";
 		};
 		000000000000000000003007 /* Integrations */ = {
@@ -396,6 +384,14 @@
 			path = MiniMatchUITests;
 			sourceTree = "<group>";
 		};
+		D30000000000000000000009 /* Daily */ = {
+			isa = PBXGroup;
+			children = (
+				D30000000000000000000002 /* DailyGlobalView.swift */,
+			);
+			path = Daily;
+			sourceTree = "<group>";
+		};
 		DD495DF4AEC04A13FB3EB9F5 /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -429,8 +425,6 @@
 			);
 			buildRules = (
 			);
-			dependencies = (
-			);
 			name = MiniMatch;
 			packageProductDependencies = (
 				D30000000000000000000008 /* FirebaseAppCheck */,
@@ -454,8 +448,6 @@
 				B20000000000000000000009 /* PBXTargetDependency */,
 			);
 			name = MiniMatchUITests;
-			packageProductDependencies = (
-			);
 			productName = MiniMatchUITests;
 			productReference = B20000000000000000000004 /* MiniMatchUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
@@ -472,8 +464,6 @@
 				14543363B250E475E8312664 /* PBXTargetDependency */,
 			);
 			name = MiniMatchTests;
-			packageProductDependencies = (
-			);
 			productName = MiniMatchTests;
 			productReference = 559CA31BB186C9DA301F98E5 /* MiniMatchTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
@@ -493,10 +483,10 @@
 							com.apple.GameCenter = {
 								enabled = 1;
 							};
-							com.apple.iCloud = {
+							com.apple.SignInWithApple = {
 								enabled = 1;
 							};
-							com.apple.SignInWithApple = {
+							com.apple.iCloud = {
 								enabled = 1;
 							};
 						};
@@ -523,7 +513,7 @@
 				57F73B5C92CB472895AD919A /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 				4C4F5454494553504D000001 /* XCRemoteSwiftPackageReference "lottie-spm" */,
 			);
-			preferredProjectObjectVersion = 77;
+			preferredProjectObjectVersion = 110;
 			productRefGroup = DD495DF4AEC04A13FB3EB9F5 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -538,7 +528,6 @@
 /* Begin PBXResourcesBuildPhase section */
 		CA32CE626ABE7D820267A7CB /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 				28BAAFDB33A96F2F20C69D6E /* Assets.xcassets in Resources */,
 				3E7A29BE63894BB1A3D9C631 /* GoogleService-Info.plist in Resources */,
@@ -550,14 +539,12 @@
 				A10000000000000000000005 /* no_winner.wav in Resources */,
 				A10000000000000000000003 /* winner.wav in Resources */,
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		57600E9DF795F5F875CBBBBE /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 				518A769C5EC08C1E05344660 /* ContentView.swift in Sources */,
 				B8DB8FBADF4702F86057C478 /* MiniMatchApp.swift in Sources */,
@@ -592,11 +579,9 @@
 				000000000000000000002014 /* MiniMatchColors.swift in Sources */,
 				000000000000000000002015 /* PrimaryButtonStyle.swift in Sources */,
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 		8F0A9F080D1D005E663956AF /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 				D30000000000000000000005 /* DailyGlobalModelTests.swift in Sources */,
 				000000000000000000002016 /* AppleSignInModelTests.swift in Sources */,
@@ -604,15 +589,12 @@
 				000000000000000000002018 /* GameTableTests.swift in Sources */,
 				000000000000000000002019 /* GameClientDTOTests.swift in Sources */,
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 		B20000000000000000000008 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 				B20000000000000000000001 /* AccessibilityUITests.swift in Sources */,
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
@@ -630,7 +612,7 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
-		162A87097672532CB7775C9D /* Debug */ = {
+		162A87097672532CB7775C9D /* Debug configuration for PBXNativeTarget "MiniMatchTests" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
@@ -650,7 +632,7 @@
 			};
 			name = Debug;
 		};
-		3DE470C8104337FB80B2A21F /* Release */ = {
+		3DE470C8104337FB80B2A21F /* Release configuration for PBXProject "MiniMatch" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -708,7 +690,7 @@
 			};
 			name = Release;
 		};
-		912C20495F825E58F6293951 /* Debug */ = {
+		912C20495F825E58F6293951 /* Debug configuration for PBXNativeTarget "MiniMatch" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -727,7 +709,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.4.1; /* x-release-please-version */
+				MARKETING_VERSION = 0.4.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.yazdanra.minimatch;
 				SDKROOT = iphoneos;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -736,7 +718,7 @@
 			};
 			name = Debug;
 		};
-		9F76504046485507B5815983 /* Debug */ = {
+		9F76504046485507B5815983 /* Debug configuration for PBXProject "MiniMatch" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -801,7 +783,7 @@
 			};
 			name = Debug;
 		};
-		B2000000000000000000000A /* Debug */ = {
+		B2000000000000000000000A /* Debug configuration for PBXNativeTarget "MiniMatchUITests" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
@@ -821,7 +803,7 @@
 			};
 			name = Debug;
 		};
-		B2000000000000000000000B /* Release */ = {
+		B2000000000000000000000B /* Release configuration for PBXNativeTarget "MiniMatchUITests" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
@@ -841,7 +823,7 @@
 			};
 			name = Release;
 		};
-		BF554B6DE2A891D4FAB005E9 /* Release */ = {
+		BF554B6DE2A891D4FAB005E9 /* Release configuration for PBXNativeTarget "MiniMatchTests" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
@@ -861,7 +843,7 @@
 			};
 			name = Release;
 		};
-		D227A7A432C124F0A9E552DF /* Release */ = {
+		D227A7A432C124F0A9E552DF /* Release configuration for PBXNativeTarget "MiniMatch" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -880,7 +862,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.4.1; /* x-release-please-version */
+				MARKETING_VERSION = 0.4.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.yazdanra.minimatch;
 				SDKROOT = iphoneos;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -895,37 +877,33 @@
 		13D52506609846680E35A7B8 /* Build configuration list for PBXNativeTarget "MiniMatch" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				912C20495F825E58F6293951 /* Debug */,
-				D227A7A432C124F0A9E552DF /* Release */,
+				912C20495F825E58F6293951 /* Debug configuration for PBXNativeTarget "MiniMatch" */,
+				D227A7A432C124F0A9E552DF /* Release configuration for PBXNativeTarget "MiniMatch" */,
 			);
-			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
 		};
 		6EB1BB64DD01E60F8E3349CE /* Build configuration list for PBXProject "MiniMatch" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				9F76504046485507B5815983 /* Debug */,
-				3DE470C8104337FB80B2A21F /* Release */,
+				9F76504046485507B5815983 /* Debug configuration for PBXProject "MiniMatch" */,
+				3DE470C8104337FB80B2A21F /* Release configuration for PBXProject "MiniMatch" */,
 			);
-			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
 		};
 		B2000000000000000000000C /* Build configuration list for PBXNativeTarget "MiniMatchUITests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				B2000000000000000000000A /* Debug */,
-				B2000000000000000000000B /* Release */,
+				B2000000000000000000000A /* Debug configuration for PBXNativeTarget "MiniMatchUITests" */,
+				B2000000000000000000000B /* Release configuration for PBXNativeTarget "MiniMatchUITests" */,
 			);
-			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
 		};
 		B873D6F135B0E98BA18C55B7 /* Build configuration list for PBXNativeTarget "MiniMatchTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				162A87097672532CB7775C9D /* Debug */,
-				BF554B6DE2A891D4FAB005E9 /* Release */,
+				162A87097672532CB7775C9D /* Debug configuration for PBXNativeTarget "MiniMatchTests" */,
+				BF554B6DE2A891D4FAB005E9 /* Release configuration for PBXNativeTarget "MiniMatchTests" */,
 			);
-			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
 		};
 /* End XCConfigurationList section */
@@ -955,15 +933,15 @@
 			package = 4C4F5454494553504D000001 /* XCRemoteSwiftPackageReference "lottie-spm" */;
 			productName = Lottie;
 		};
-		F380CD1A9FEF4AA9A86B8B45 /* FirebaseAuth */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 57F73B5C92CB472895AD919A /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
-			productName = FirebaseAuth;
-		};
 		D30000000000000000000008 /* FirebaseAppCheck */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 57F73B5C92CB472895AD919A /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseAppCheck;
+		};
+		F380CD1A9FEF4AA9A86B8B45 /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 57F73B5C92CB472895AD919A /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
