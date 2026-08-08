@@ -6,31 +6,36 @@ struct SettingsView: View {
     let appleSignIn: AppleSignInModel
     let preferences: UserPreferences
     let canManageAccount: Bool
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
         ScrollView {
             VStack(spacing: 20) {
                 SettingsHeader()
-                SoundEffectsSettingsCard(preferences: preferences)
-                DailyReminderSettingsCard(preferences: preferences)
-                LanguageSettingsCard()
 
-                if appleSignIn.isSignedIn {
-                    AccountSettingsCard(
-                        appleSignIn: appleSignIn,
-                        canManageAccount: canManageAccount
-                    )
-                }
+                LazyVGrid(columns: columns, spacing: 20) {
+                    SoundEffectsSettingsCard(preferences: preferences)
+                    DailyReminderSettingsCard(preferences: preferences)
+                    LanguageSettingsCard()
 
-                if appleSignIn.canDeleteProfile {
-                    DeleteProfileCard(
-                        appleSignIn: appleSignIn,
-                        canManageAccount: canManageAccount
-                    )
-                    .padding(.top, 16)
+                    if appleSignIn.isSignedIn {
+                        AccountSettingsCard(
+                            appleSignIn: appleSignIn,
+                            canManageAccount: canManageAccount
+                        )
+                    }
+
+                    if appleSignIn.canDeleteProfile {
+                        DeleteProfileCard(
+                            appleSignIn: appleSignIn,
+                            canManageAccount: canManageAccount
+                        )
+                        .padding(.top, usesTwoColumns ? 0 : 16)
+                    }
                 }
             }
-            .frame(maxWidth: 520)
+            .frame(maxWidth: usesTwoColumns ? 920 : 520)
             .padding(.horizontal, 20)
             .padding(.vertical, 24)
             .frame(maxWidth: .infinity)
@@ -39,6 +44,17 @@ struct SettingsView: View {
         .navigationTitle("Settings")
         .navigationBarTitleDisplayMode(.inline)
         .accessibilityIdentifier("settings-page")
+    }
+
+    private var columns: [GridItem] {
+        Array(
+            repeating: GridItem(.flexible(), spacing: 20, alignment: .top),
+            count: usesTwoColumns ? 2 : 1
+        )
+    }
+
+    private var usesTwoColumns: Bool {
+        horizontalSizeClass == .regular && !dynamicTypeSize.isAccessibilitySize
     }
 }
 
