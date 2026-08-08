@@ -12,6 +12,7 @@ struct DailyGlobalView: View {
         ScrollView {
             VStack(spacing: 20) {
                 DailyHero()
+                    .frame(maxWidth: 520)
 
                 if model.requiresAuthentication
                     || !appleSignIn.isSignedIn
@@ -21,32 +22,36 @@ struct DailyGlobalView: View {
                         appleSignIn: appleSignIn,
                         gameCenterIsAuthenticated: gameCenter.isAuthenticated
                     )
+                    .frame(maxWidth: 520)
                 } else if let table = model.table {
                     if !model.errorMessage.isEmpty {
                         DailyRefreshError(
                             message: model.errorMessage,
                             retry: { Task { await model.refresh() } }
                         )
+                        .frame(maxWidth: 520)
                     }
 
-                    DailyPreviousResultCard(result: table.previousResult)
-                    DailyTodayCard(model: model, round: table.currentRound)
+                    DailyRoundCards(model: model, table: table)
                     DailyWinsLink(
                         wins: table.localPlayerDailyWins,
                         gameCenter: gameCenter
                     )
+                    .frame(maxWidth: 520)
                 } else if model.isLoading || model.isRefreshing {
                     ProgressView("Loading today’s table…")
                         .controlSize(.large)
                         .frame(maxWidth: .infinity, minHeight: 220)
+                        .frame(maxWidth: 520)
                 } else {
                     DailyLoadFailure(
                         message: model.errorMessage,
                         retry: { Task { await model.refresh() } }
                     )
+                    .frame(maxWidth: 520)
                 }
             }
-            .frame(maxWidth: 520)
+            .frame(maxWidth: 920)
             .padding(20)
             .frame(maxWidth: .infinity)
         }
@@ -77,6 +82,28 @@ struct DailyGlobalView: View {
         .onChange(of: scenePhase) { _, phase in
             guard phase == .active else { return }
             Task { await model.refresh() }
+        }
+    }
+}
+
+private struct DailyRoundCards: View {
+    let model: DailyGlobalModel
+    let table: DailyGlobalTable
+
+    var body: some View {
+        ViewThatFits(in: .horizontal) {
+            HStack(alignment: .top, spacing: 20) {
+                DailyPreviousResultCard(result: table.previousResult)
+                    .frame(minWidth: 320, maxWidth: .infinity)
+                DailyTodayCard(model: model, round: table.currentRound)
+                    .frame(minWidth: 320, maxWidth: .infinity)
+            }
+
+            VStack(spacing: 20) {
+                DailyPreviousResultCard(result: table.previousResult)
+                DailyTodayCard(model: model, round: table.currentRound)
+            }
+            .frame(maxWidth: 520)
         }
     }
 }
