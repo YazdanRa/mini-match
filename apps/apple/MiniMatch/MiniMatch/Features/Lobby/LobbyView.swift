@@ -63,6 +63,8 @@ struct LobbyView: View {
                 }
             }
             .padding(20)
+            .frame(maxWidth: 760)
+            .frame(maxWidth: .infinity)
         }
         .scrollDismissesKeyboard(.interactively)
         .task(id: scenePhase) {

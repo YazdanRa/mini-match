@@ -645,7 +645,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.yazdanra.minimatch.tests;
 				SDKROOT = iphoneos;
 				SWIFT_VERSION = 6.0;
-				TARGETED_DEVICE_FAMILY = 1;
+				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MiniMatch.app/MiniMatch";
 			};
 			name = Debug;
@@ -732,7 +732,7 @@
 				SDKROOT = iphoneos;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 6.0;
-				TARGETED_DEVICE_FAMILY = 1;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
 		};
@@ -816,7 +816,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.yazdanra.minimatch.uitests;
 				SDKROOT = iphoneos;
 				SWIFT_VERSION = 6.0;
-				TARGETED_DEVICE_FAMILY = 1;
+				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_TARGET_NAME = MiniMatch;
 			};
 			name = Debug;
@@ -836,7 +836,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.yazdanra.minimatch.uitests;
 				SDKROOT = iphoneos;
 				SWIFT_VERSION = 6.0;
-				TARGETED_DEVICE_FAMILY = 1;
+				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_TARGET_NAME = MiniMatch;
 			};
 			name = Release;
@@ -856,7 +856,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.yazdanra.minimatch.tests;
 				SDKROOT = iphoneos;
 				SWIFT_VERSION = 6.0;
-				TARGETED_DEVICE_FAMILY = 1;
+				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MiniMatch.app/MiniMatch";
 			};
 			name = Release;
@@ -885,7 +885,7 @@
 				SDKROOT = iphoneos;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 6.0;
-				TARGETED_DEVICE_FAMILY = 1;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
 		};

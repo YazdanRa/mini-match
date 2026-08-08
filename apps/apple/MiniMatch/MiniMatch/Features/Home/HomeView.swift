@@ -19,34 +19,22 @@ struct HomeView: View {
 
                 Spacer(minLength: 72)
 
-                Text("Small game. Big fun.")
-                    .font(.title3.bold())
-                    .foregroundStyle(MiniMatchColors.ink)
-                    .background(MiniMatchColors.background)
-
-                Text("Pick a positive whole number. Lowest number picked by only one player wins.")
-                    .font(.subheadline)
-                    .foregroundStyle(MiniMatchColors.ink)
-                    .multilineTextAlignment(.center)
-                    .background(MiniMatchColors.background)
-
-                HomeDailyTableCard(openDailyTable: openDailyTable)
-
-                HomeRoundPreview()
-                    .padding(.top, 12)
-
-                HomeStatusSection(
+                HomeResponsiveContent(
                     gameCenter: gameCenter,
-                    appleSignIn: appleSignIn
+                    appleSignIn: appleSignIn,
+                    openDailyTable: openDailyTable
                 )
             }
-            .frame(maxWidth: 480)
+            .frame(maxWidth: 880)
             .padding(.horizontal, 28)
             .padding(.top, 36)
             .padding(.bottom, 28)
             .frame(maxWidth: .infinity)
         }
-        .overlay { HomeNumberPlayground() }
+        .overlay {
+            HomeNumberPlayground()
+                .frame(maxWidth: 1_100)
+        }
         .safeAreaInset(edge: .bottom, spacing: 0) {
             HomeActionSection(
                 gameCenter: gameCenter,
@@ -60,6 +48,78 @@ struct HomeView: View {
             .frame(maxWidth: .infinity)
         }
         .background(MiniMatchColors.background)
+    }
+}
+
+private struct HomeResponsiveContent: View {
+    let gameCenter: GameCenterModel
+    let appleSignIn: AppleSignInModel
+    let openDailyTable: () -> Void
+
+    var body: some View {
+        ViewThatFits(in: .horizontal) {
+            HStack(alignment: .center, spacing: 56) {
+                VStack(spacing: 28) {
+                    HomeIntroduction()
+                    HomeRoundPreview()
+                        .padding(.top, 12)
+                }
+                .frame(minWidth: 280, maxWidth: 340)
+
+                HomeGameOverview(
+                    gameCenter: gameCenter,
+                    appleSignIn: appleSignIn,
+                    openDailyTable: openDailyTable
+                )
+                .frame(minWidth: 340, maxWidth: 420)
+            }
+
+            VStack(spacing: 28) {
+                HomeIntroduction()
+                HomeDailyTableCard(openDailyTable: openDailyTable)
+                HomeRoundPreview()
+                    .padding(.top, 12)
+                HomeStatusSection(
+                    gameCenter: gameCenter,
+                    appleSignIn: appleSignIn
+                )
+            }
+            .frame(maxWidth: 480)
+        }
+    }
+}
+
+private struct HomeIntroduction: View {
+    var body: some View {
+        VStack(spacing: 28) {
+            Text("Small game. Big fun.")
+                .font(.title3.bold())
+                .foregroundStyle(MiniMatchColors.ink)
+                .background(MiniMatchColors.background)
+
+            Text("Pick a positive whole number. Lowest number picked by only one player wins.")
+                .font(.subheadline)
+                .foregroundStyle(MiniMatchColors.ink)
+                .multilineTextAlignment(.center)
+                .background(MiniMatchColors.background)
+        }
+    }
+}
+
+private struct HomeGameOverview: View {
+    let gameCenter: GameCenterModel
+    let appleSignIn: AppleSignInModel
+    let openDailyTable: () -> Void
+
+    var body: some View {
+        VStack(spacing: 28) {
+            HomeDailyTableCard(openDailyTable: openDailyTable)
+
+            HomeStatusSection(
+                gameCenter: gameCenter,
+                appleSignIn: appleSignIn
+            )
+        }
     }
 }
 
