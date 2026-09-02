@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.5.0](https://github.com/YazdanRa/mini-match/compare/apple-v0.4.1...apple-v0.5.0) (2026-09-02)
+
+
+### Features
+
+* **iPadOS:** add adaptive iPad layouts ([#39](https://github.com/YazdanRa/mini-match/issues/39)) ([025f774](https://github.com/YazdanRa/mini-match/commit/025f77464d621f583534c446a54df4f492b0eaeb))
+* **settings:** add daily challenge reminders ([#37](https://github.com/YazdanRa/mini-match/issues/37)) ([04795c8](https://github.com/YazdanRa/mini-match/commit/04795c8e237d925111a8ef52e5be216347bcfa8e))
+
+
+### Dependencies and Build
+
+* **deps:** bump github.com/firebase/firebase-ios-sdk ([#47](https://github.com/YazdanRa/mini-match/issues/47)) ([ffe36a0](https://github.com/YazdanRa/mini-match/commit/ffe36a04e8cc69579b6b8b14c85917b13f680eb7))
+* **deps:** bump github.com/google/googleappmeasurement ([#45](https://github.com/YazdanRa/mini-match/issues/45)) ([7dd6f24](https://github.com/YazdanRa/mini-match/commit/7dd6f2479070ad2cd977e056dba3142eed6f3cc3))
+* **deps:** bump github.com/google/googleutilities ([#50](https://github.com/YazdanRa/mini-match/issues/50)) ([4eb2fdc](https://github.com/YazdanRa/mini-match/commit/4eb2fdc9c653a5437a4abb9bac9fbb5fb35973fd))
+* **deps:** bump github.com/google/gtm-session-fetcher ([#41](https://github.com/YazdanRa/mini-match/issues/41)) ([30f0c6c](https://github.com/YazdanRa/mini-match/commit/30f0c6c02d0b8a9afea994bed4a10e1884255b1d))
+
+
+### Chores
+
+* **xcode:** normalize project file format metadata ([1bf89ea](https://github.com/YazdanRa/mini-match/commit/1bf89ea4dee00cb8a3add3eda57f470f5b008a8c))
+
 ## [0.4.1](https://github.com/YazdanRa/mini-match/compare/apple-v0.4.0...apple-v0.4.1) (2026-08-07)
 
 
