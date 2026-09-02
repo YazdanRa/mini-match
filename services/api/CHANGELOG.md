@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.3.1](https://github.com/YazdanRa/mini-match/compare/server-v0.3.0...server-v0.3.1) (2026-09-02)
+
+
+### Dependencies and Build
+
+* **deps:** bump cloud.google.com/go/firestore in /services/api ([#40](https://github.com/YazdanRa/mini-match/issues/40)) ([4116535](https://github.com/YazdanRa/mini-match/commit/41165354ed0648489583d867d8d7d001a02f30f2))
+* **deps:** bump google.golang.org/api in /services/api ([#44](https://github.com/YazdanRa/mini-match/issues/44)) ([31495a9](https://github.com/YazdanRa/mini-match/commit/31495a9ecf23635e68f4c67ea825a727d0ce1d7e))
+* **deps:** bump google.golang.org/api in /services/api ([#49](https://github.com/YazdanRa/mini-match/issues/49)) ([7ad2cfd](https://github.com/YazdanRa/mini-match/commit/7ad2cfdc5a52fff00584d9c5bca90881e4db0468))
+* **deps:** bump google.golang.org/grpc in /services/api ([#46](https://github.com/YazdanRa/mini-match/issues/46)) ([d24a1ba](https://github.com/YazdanRa/mini-match/commit/d24a1ba125213f4db5c2cdeed1d53aced2583263))
+* **deps:** bump google.golang.org/grpc in /services/api ([#48](https://github.com/YazdanRa/mini-match/issues/48)) ([b75d4e4](https://github.com/YazdanRa/mini-match/commit/b75d4e4f2c4a97cfd8a35b47c25498b3c7fd66e8))
+* **deps:** bump google.golang.org/protobuf in /services/api ([#43](https://github.com/YazdanRa/mini-match/issues/43)) ([f775181](https://github.com/YazdanRa/mini-match/commit/f775181ffccad97f3e5518b3e3736b4ee3cd8d7e))
+
 ## [0.3.0](https://github.com/YazdanRa/mini-match/compare/server-v0.2.0...server-v0.3.0) (2026-08-06)
 
 
