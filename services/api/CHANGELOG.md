@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.2](https://github.com/YazdanRa/mini-match/compare/server-v0.3.1...server-v0.3.2) (2026-09-09)
+
+
+### Dependencies and Build
+
+* **deps:** bump google.golang.org/api in /services/api ([#52](https://github.com/YazdanRa/mini-match/issues/52)) ([6a9ee07](https://github.com/YazdanRa/mini-match/commit/6a9ee0784b71d3db4d752d8ffa2f347c79ace396))
+
 ## [0.3.1](https://github.com/YazdanRa/mini-match/compare/server-v0.3.0...server-v0.3.1) (2026-09-02)
 
 
