@@ -1,12 +1,12 @@
 module github.com/YazdanRa/mini-match/services/api
 
-go 1.25.0
+go 1.26.0
 
 require (
 	cloud.google.com/go/firestore v1.25.0
 	connectrpc.com/connect v1.20.0
 	firebase.google.com/go/v4 v4.21.0
-	google.golang.org/api v0.295.0
+	google.golang.org/api v0.297.0
 	google.golang.org/grpc v1.83.2
 	google.golang.org/protobuf v1.36.12
 )
