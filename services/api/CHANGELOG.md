@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.3.2](https://github.com/YazdanRa/mini-match/compare/server-v0.3.1...server-v0.3.2) (2026-09-18)
+
+
+### Dependencies and Build
+
+* **deps:** bump connectrpc.com/connect in /services/api ([#55](https://github.com/YazdanRa/mini-match/issues/55)) ([5d2111b](https://github.com/YazdanRa/mini-match/commit/5d2111b9bb0b0dcd3636a8662cd616b7696c062d))
+* **deps:** bump go.opentelemetry.io/otel/sdk ([#57](https://github.com/YazdanRa/mini-match/issues/57)) ([f6c446e](https://github.com/YazdanRa/mini-match/commit/f6c446e9449e3775409fd857c939b8a61c01b85c))
+* **deps:** bump google.golang.org/api in /services/api ([#52](https://github.com/YazdanRa/mini-match/issues/52)) ([6a9ee07](https://github.com/YazdanRa/mini-match/commit/6a9ee0784b71d3db4d752d8ffa2f347c79ace396))
+
 ## [0.3.1](https://github.com/YazdanRa/mini-match/compare/server-v0.3.0...server-v0.3.1) (2026-09-02)
 
 
