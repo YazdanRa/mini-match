@@ -1,5 +1,33 @@
 # Changelog
 
+## [0.5.0](https://github.com/YazdanRa/mini-match/compare/apple-v0.4.1...apple-v0.5.0) (2026-09-23)
+
+
+### Features
+
+* **iPadOS:** add adaptive iPad layouts ([#39](https://github.com/YazdanRa/mini-match/issues/39)) ([025f774](https://github.com/YazdanRa/mini-match/commit/025f77464d621f583534c446a54df4f492b0eaeb))
+* **settings:** add daily challenge reminders ([#37](https://github.com/YazdanRa/mini-match/issues/37)) ([04795c8](https://github.com/YazdanRa/mini-match/commit/04795c8e237d925111a8ef52e5be216347bcfa8e))
+
+
+### Dependencies and Build
+
+* **deps:** bump github.com/firebase/firebase-ios-sdk ([#47](https://github.com/YazdanRa/mini-match/issues/47)) ([ffe36a0](https://github.com/YazdanRa/mini-match/commit/ffe36a04e8cc69579b6b8b14c85917b13f680eb7))
+* **deps:** bump github.com/firebase/firebase-ios-sdk ([#56](https://github.com/YazdanRa/mini-match/issues/56)) ([9397b81](https://github.com/YazdanRa/mini-match/commit/9397b812e0942f5b8ea9369d28729ca1b390311f))
+* **deps:** bump github.com/google/abseil-cpp-binary ([#63](https://github.com/YazdanRa/mini-match/issues/63)) ([5a9e08c](https://github.com/YazdanRa/mini-match/commit/5a9e08c45a0c855754741cd51a0f7c69ac760a8a))
+* **deps:** bump github.com/google/app-check in /apps/apple/MiniMatch ([#60](https://github.com/YazdanRa/mini-match/issues/60)) ([c0c712a](https://github.com/YazdanRa/mini-match/commit/c0c712ad70a04ebfb38c3d0ea7c861317471f768))
+* **deps:** bump github.com/google/googleappmeasurement ([#45](https://github.com/YazdanRa/mini-match/issues/45)) ([7dd6f24](https://github.com/YazdanRa/mini-match/commit/7dd6f2479070ad2cd977e056dba3142eed6f3cc3))
+* **deps:** bump github.com/google/googleappmeasurement ([#53](https://github.com/YazdanRa/mini-match/issues/53)) ([24f8a4a](https://github.com/YazdanRa/mini-match/commit/24f8a4a3987103c3376d11584565b8c1530a2d24))
+* **deps:** bump github.com/google/googleappmeasurement ([#61](https://github.com/YazdanRa/mini-match/issues/61)) ([1764e64](https://github.com/YazdanRa/mini-match/commit/1764e64d31dbb44c6ee67d0cb0e0783a0fab3df8))
+* **deps:** bump github.com/google/googleutilities ([#50](https://github.com/YazdanRa/mini-match/issues/50)) ([4eb2fdc](https://github.com/YazdanRa/mini-match/commit/4eb2fdc9c653a5437a4abb9bac9fbb5fb35973fd))
+* **deps:** bump github.com/google/grpc-binary in /apps/apple/MiniMatch ([#62](https://github.com/YazdanRa/mini-match/issues/62)) ([761c1ce](https://github.com/YazdanRa/mini-match/commit/761c1ce244d8e1c055b6ba27ec717e0f798c406b))
+* **deps:** bump github.com/google/gtm-session-fetcher ([#41](https://github.com/YazdanRa/mini-match/issues/41)) ([30f0c6c](https://github.com/YazdanRa/mini-match/commit/30f0c6c02d0b8a9afea994bed4a10e1884255b1d))
+* **deps:** bump github.com/googleads/google-ads-on-device-conversion-ios-sdk ([#51](https://github.com/YazdanRa/mini-match/issues/51)) ([10da9da](https://github.com/YazdanRa/mini-match/commit/10da9da1322bf66fc13e3156fbd4048b8aa2b483))
+
+
+### Chores
+
+* **xcode:** normalize project file format metadata ([1bf89ea](https://github.com/YazdanRa/mini-match/commit/1bf89ea4dee00cb8a3add3eda57f470f5b008a8c))
+
 ## [0.4.1](https://github.com/YazdanRa/mini-match/compare/apple-v0.4.0...apple-v0.4.1) (2026-08-07)
 
 
